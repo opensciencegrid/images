@@ -109,7 +109,8 @@ for cores in "1" "8" ; do
                 and Cores=$cores
                 and EndTime >= '$year-$month-01'
                 and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-              limit $user_index,1;" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+              limit $user_index,1;
+           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
            if [ -z "$user" ] ; then
 ## emplty user name, account as "generic"
@@ -212,7 +213,8 @@ for cores in "1" "8" ; do
                                       from ProbeDetails_Meta p
                                      where m.ProbeName=p.ProbeName
                                        and p.SiteName='$resource'
-                                  ) ; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+                                  ) ;
+                           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
 ## find the max and min job end times for the jobs defining usage.
 ## This is per request from APEL and is different that John W report
