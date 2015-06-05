@@ -89,7 +89,16 @@ for cores in "1" "8" ; do
 
            now=`date`
            echo "$now : Getting user list">>/var/log/multicore.log
-     user=`echo "use gratia ; select distinct DistinguishedName from MasterSummaryData m, VONameCorrection v where m.VOcorrid=v.corrid and ReportableVOName='$vo' and Cores=$cores and Year(EndTime)=$year and Month(EndTime)=$month limit $user_index,1;" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+           user=`echo "use gratia ;
+             select distinct DistinguishedName
+               from MasterSummaryData m,
+                    VONameCorrection v
+              where m.VOcorrid=v.corrid
+                and ReportableVOName='$vo'
+                and Cores=$cores
+                and Year(EndTime)=$year
+                and Month(EndTime)=$month
+              limit $user_index,1;" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
            if [ -z "$user" ] ; then
 ## emplty user name, account as "generic"
