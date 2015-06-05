@@ -72,7 +72,15 @@ for cores in "1" "8" ; do
        echo "$now : Starting an $cores core report for $vo">>/var/log/multicore.log
 
 ## count users for this month
-       nusers=`echo "use gratia ; select count(distinct DistinguishedName) from MasterSummaryData m, VONameCorrection v where m.VOcorrid=v.corrid and ReportableVOName='$vo' and Cores=$cores and Year(EndTime)=$year and Month(EndTime)=$month;" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+       nusers=`echo "use gratia ;
+         select count(distinct DistinguishedName)
+           from MasterSummaryData m,
+                VONameCorrection v
+          where m.VOcorrid=v.corrid
+            and ReportableVOName='$vo'
+            and Cores=$cores
+            and Year(EndTime)=$year
+            and Month(EndTime)=$month;" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
        now=`date`
        echo "$now : Found $nusers users">>/var/log/multicore.log
