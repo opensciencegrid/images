@@ -89,8 +89,9 @@ for cores in "1" "8" ; do
           where m.VOcorrid=v.corrid
             and ReportableVOName='$vo'
             and Cores=$cores
-            and Year(EndTime)=$year
-            and Month(EndTime)=$month;" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+            and EndTime >= '$year-$month-01'
+            and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
+       " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
        now=`date`
        echo "$now : Found $nusers users">>/var/log/multicore.log
@@ -106,8 +107,8 @@ for cores in "1" "8" ; do
               where m.VOcorrid=v.corrid
                 and ReportableVOName='$vo'
                 and Cores=$cores
-                and Year(EndTime)=$year
-                and Month(EndTime)=$month
+                and EndTime >= '$year-$month-01'
+                and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
               limit $user_index,1;" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
            if [ -z "$user" ] ; then
@@ -126,9 +127,10 @@ for cores in "1" "8" ; do
                 and m.ProbeName=p.ProbeName
                 and ReportableVOName='$vo'
                 and Cores=$cores
-                and Year(EndTime)=$year
-                and Month(EndTime)=$month
-                and DistinguishedName='$user';" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+                and EndTime >= '$year-$month-01'
+                and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+                and DistinguishedName='$user';
+           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
 ## have a non-null resources list, find the resource groups of the resources
@@ -202,8 +204,8 @@ for cores in "1" "8" ; do
                               where m.VOcorrid=v.corrid
                                 and v.ReportableVOName='$vo'
                                 and m.Cores=$cores
-                                and Year(m.EndTime)=$year
-                                and Month(m.EndTime)=$month
+                                and m.EndTime >= '$year-$month-01'
+                                and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
                                 and m.DistinguishedName='$user'
                                 and exists
                                   ( select 1
@@ -226,10 +228,11 @@ for cores in "1" "8" ; do
                                 and m.ProbeName=p.ProbeName
                                 and ReportableVOName='$vo'
                                 and Cores=$cores
-                                and Year(EndTime)=$year
-                                and Month(EndTime)=$month
+                                and EndTime >= '$year-$month-01'
+                                and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
                                 and DistinguishedName='$user'
-                                and SiteName='$resource'; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+                                and SiteName='$resource';
+                           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
                            echo $results | grep NULL >/dev/null
 ## sum up the results for this user, there may be more than one resource in this resource group
