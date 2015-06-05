@@ -5,13 +5,23 @@ loc='/home/steige/carl'
 function res_rg() {
 nlimit=2
 rg="NULL"
-tmp=`mysql -u root oim -s <<< "select b.name from resource a, resource_group b where a.name='$1' and a.resource_group_id=b.id ;"`
+tmp=`mysql -u root oim -s <<< "
+  select b.name
+    from resource a,
+         resource_group b
+   where a.name='$1'
+     and a.resource_group_id=b.id ;"`
 size=${#tmp}
 if [ "$size" -gt "$nlimit" ] ; then
     rg=$tmp
 else
 ##  proper use of names has failed, try using FQDN rather than name
-    tmp=`mysql -u root oim -s <<< "select b.name from resource a, resource_group b where a.fqdn='$1' and a.resource_group_id=b.id ;"`
+    tmp=`mysql -u root oim -s <<< "
+      select b.name
+        from resource a,
+             resource_group b
+       where a.fqdn='$1'
+         and a.resource_group_id=b.id ;"`
     size=${#tmp}
     if [ "$size" -gt "$nlimit" ] ; then
         rg=$tmp
@@ -107,7 +117,18 @@ for cores in "1" "8" ; do
 ## find all resources used by this user
            now=`date`
            echo "$now : Getting resource list for user $user">>/var/log/multicore.log
-     resources=`echo "use gratia ; select distinct SiteName from MasterSummaryData m, VONameCorrection v, ProbeDetails_Meta p where m.VOcorrid=v.corrid and m.ProbeName=p.ProbeName and ReportableVOName='$vo' and Cores=$cores and Year(EndTime)=$year and Month(EndTime)=$month and DistinguishedName='$user';" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+           resources=`echo "use gratia ;
+             select distinct SiteName
+               from MasterSummaryData m,
+                    VONameCorrection v,
+                    ProbeDetails_Meta p
+              where m.VOcorrid=v.corrid
+                and m.ProbeName=p.ProbeName
+                and ReportableVOName='$vo'
+                and Cores=$cores
+                and Year(EndTime)=$year
+                and Month(EndTime)=$month
+                and DistinguishedName='$user';" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
 ## have a non-null resources list, find the resource groups of the resources
@@ -132,7 +153,12 @@ for cores in "1" "8" ; do
 
 ## Normalization factor
 ## attempt to get a normalization factor from oim
-                           nftest=`mysql -u root oim -s <<< "select b.apel_normal_factor from resource a , resource_wlcg b where b.resource_id=a.id and a.name='$resource';"`
+                           nftest=`mysql -u root oim -s <<< "
+                             select b.apel_normal_factor
+                               from resource a
+                                  , resource_wlcg b
+                              where b.resource_id=a.id
+                                and a.name='$resource';"`
                            if [ -z "$nftest" ] ; then
                                nftest=12
                                now=`date`
