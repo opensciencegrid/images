@@ -149,21 +149,25 @@ for cores in "1" "8" ; do
 ### (ApplicationExitCode=0 and
 
 ##                         results=`echo "use gratia ; select sum(WallDuration), sum(CpuUserDuration), sum(distinct njobs), sum(CpuSystemDuration) from MasterSummaryData m, VONameCorrection v, ProbeDetails_Meta p where m.VOcorrid=v.corrid and m.ProbeName=p.ProbeName and ReportableVOName='$vo' and Cores=$cores and Year(EndTime)=$year and Month(EndTime)=$month and DistinguishedName='$user' and SiteName='$resource' ; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
-                           results=`echo "use gratia ; select sum(WallDuration), sum(CpuUserDuration), sum(njobs), sum(CpuSystemDuration)
-from MasterSummaryData m
-     , VONameCorrection v
-      where m.VOcorrid=v.corrid
-         and v.ReportableVOName='$vo'
-            and m.Cores=$cores
-               and Year(m.EndTime)=$year
-                  and Month(m.EndTime)=$month
-                     and m.DistinguishedName='$user'
-                        and exists
-                             ( select 1
-                                 from ProbeDetails_Meta p
-                                 where m.ProbeName=p.ProbeName
-                                    and p.SiteName='$resource'
-                                    ) ; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+                           results=`echo "use gratia ;
+                             select sum(WallDuration),
+                                    sum(CpuUserDuration),
+                                    sum(njobs),
+                                    sum(CpuSystemDuration)
+                               from MasterSummaryData m
+                                  , VONameCorrection v
+                              where m.VOcorrid=v.corrid
+                                and v.ReportableVOName='$vo'
+                                and m.Cores=$cores
+                                and Year(m.EndTime)=$year
+                                and Month(m.EndTime)=$month
+                                and m.DistinguishedName='$user'
+                                and exists
+                                  ( select 1
+                                      from ProbeDetails_Meta p
+                                     where m.ProbeName=p.ProbeName
+                                       and p.SiteName='$resource'
+                                  ) ; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
 ## find the max and min job end times for the jobs defining usage.
 ## This is per request from APEL and is different that John W report
