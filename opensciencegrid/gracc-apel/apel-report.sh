@@ -1,6 +1,6 @@
 #!/bin/bash
 
-loc='/home/steige/carl'
+loc=$(dirname "$0")
 
 function res_rg() {
 nlimit=2
