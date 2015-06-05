@@ -173,7 +173,20 @@ for cores in "1" "8" ; do
 ## This is per request from APEL and is different that John W report
                            now=`date`
                            echo "$now : Getting times $resource">>/var/log/multicore.log
-                           times=`echo "use gratia ; select min(EndTime), max(EndTime) from MasterSummaryData m, VONameCorrection v, ProbeDetails_Meta p where m.VOcorrid=v.corrid and m.ProbeName=p.ProbeName and ReportableVOName='$vo' and Cores=$cores and Year(EndTime)=$year and Month(EndTime)=$month and DistinguishedName='$user' and SiteName='$resource'; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+                           times=`echo "use gratia ;
+                             select min(EndTime),
+                                    max(EndTime)
+                               from MasterSummaryData m,
+                                    VONameCorrection v,
+                                    ProbeDetails_Meta p
+                              where m.VOcorrid=v.corrid
+                                and m.ProbeName=p.ProbeName
+                                and ReportableVOName='$vo'
+                                and Cores=$cores
+                                and Year(EndTime)=$year
+                                and Month(EndTime)=$month
+                                and DistinguishedName='$user'
+                                and SiteName='$resource'; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
                            echo $results | grep NULL >/dev/null
 ## sum up the results for this user, there may be more than one resource in this resource group
