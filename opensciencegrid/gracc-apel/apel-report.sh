@@ -7,8 +7,8 @@ nlimit=2
 rg="NULL"
 tmp=`mysql -u root oim -s <<< "
   select b.name
-    from resource a,
-         resource_group b
+    from resource a
+       , resource_group b
    where a.name='$1'
      and a.resource_group_id=b.id ;"`
 size=${#tmp}
@@ -18,8 +18,8 @@ else
 ##  proper use of names has failed, try using FQDN rather than name
     tmp=`mysql -u root oim -s <<< "
       select b.name
-        from resource a,
-             resource_group b
+        from resource a
+           , resource_group b
        where a.fqdn='$1'
          and a.resource_group_id=b.id ;"`
     size=${#tmp}
@@ -84,8 +84,8 @@ for cores in "1" "8" ; do
 ## count users for this month
        nusers=`echo "use gratia ;
          select count(distinct DistinguishedName)
-           from MasterSummaryData m,
-                VONameCorrection v
+           from MasterSummaryData m
+              , VONameCorrection v
           where m.VOcorrid=v.corrid
             and ReportableVOName='$vo'
             and Cores=$cores
@@ -101,8 +101,8 @@ for cores in "1" "8" ; do
            echo "$now : Getting user list">>/var/log/multicore.log
            user=`echo "use gratia ;
              select distinct DistinguishedName
-               from MasterSummaryData m,
-                    VONameCorrection v
+               from MasterSummaryData m
+                  , VONameCorrection v
               where m.VOcorrid=v.corrid
                 and ReportableVOName='$vo'
                 and Cores=$cores
@@ -119,9 +119,9 @@ for cores in "1" "8" ; do
            echo "$now : Getting resource list for user $user">>/var/log/multicore.log
            resources=`echo "use gratia ;
              select distinct SiteName
-               from MasterSummaryData m,
-                    VONameCorrection v,
-                    ProbeDetails_Meta p
+               from MasterSummaryData m
+                  , VONameCorrection v
+                  , ProbeDetails_Meta p
               where m.VOcorrid=v.corrid
                 and m.ProbeName=p.ProbeName
                 and ReportableVOName='$vo'
@@ -193,10 +193,10 @@ for cores in "1" "8" ; do
 
 ##                         results=`echo "use gratia ; select sum(WallDuration), sum(CpuUserDuration), sum(distinct njobs), sum(CpuSystemDuration) from MasterSummaryData m, VONameCorrection v, ProbeDetails_Meta p where m.VOcorrid=v.corrid and m.ProbeName=p.ProbeName and ReportableVOName='$vo' and Cores=$cores and Year(EndTime)=$year and Month(EndTime)=$month and DistinguishedName='$user' and SiteName='$resource' ; " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
                            results=`echo "use gratia ;
-                             select sum(WallDuration),
-                                    sum(CpuUserDuration),
-                                    sum(njobs),
-                                    sum(CpuSystemDuration)
+                             select sum(WallDuration)
+                                  , sum(CpuUserDuration)
+                                  , sum(njobs)
+                                  , sum(CpuSystemDuration)
                                from MasterSummaryData m
                                   , VONameCorrection v
                               where m.VOcorrid=v.corrid
@@ -217,11 +217,11 @@ for cores in "1" "8" ; do
                            now=`date`
                            echo "$now : Getting times $resource">>/var/log/multicore.log
                            times=`echo "use gratia ;
-                             select min(EndTime),
-                                    max(EndTime)
-                               from MasterSummaryData m,
-                                    VONameCorrection v,
-                                    ProbeDetails_Meta p
+                             select min(EndTime)
+                                  , max(EndTime)
+                               from MasterSummaryData m
+                                  , VONameCorrection v
+                                  , ProbeDetails_Meta p
                               where m.VOcorrid=v.corrid
                                 and m.ProbeName=p.ProbeName
                                 and ReportableVOName='$vo'
