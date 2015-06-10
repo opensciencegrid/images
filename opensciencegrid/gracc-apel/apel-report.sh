@@ -9,8 +9,8 @@ tmp=`mysql -u root oim -s <<< "
   select b.name
     from resource a
        , resource_group b
-   where a.name='$1'
-     and a.resource_group_id=b.id ;"`
+   where a.name = '$1'
+     and a.resource_group_id = b.id ;"`
 size=${#tmp}
 if [ "$size" -gt "$nlimit" ] ; then
     rg=$tmp
@@ -20,8 +20,8 @@ else
       select b.name
         from resource a
            , resource_group b
-       where a.fqdn='$1'
-         and a.resource_group_id=b.id ;"`
+       where a.fqdn = '$1'
+         and a.resource_group_id = b.id ;"`
     size=${#tmp}
     if [ "$size" -gt "$nlimit" ] ; then
         rg=$tmp
@@ -86,9 +86,9 @@ for cores in "1" "8" ; do
          select count(distinct m.DistinguishedName)
            from MasterSummaryData m
               , VONameCorrection v
-          where m.VOcorrid=v.corrid
-            and v.ReportableVOName='$vo'
-            and m.Cores=$cores
+          where m.VOcorrid = v.corrid
+            and v.ReportableVOName = '$vo'
+            and m.Cores = $cores
             and m.EndTime >= '$year-$month-01'
             and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
        " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
@@ -104,9 +104,9 @@ for cores in "1" "8" ; do
              select distinct m.DistinguishedName
                from MasterSummaryData m
                   , VONameCorrection v
-              where m.VOcorrid=v.corrid
-                and v.ReportableVOName='$vo'
-                and m.Cores=$cores
+              where m.VOcorrid = v.corrid
+                and v.ReportableVOName = '$vo'
+                and m.Cores = $cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
               limit $user_index,1;
@@ -125,14 +125,14 @@ for cores in "1" "8" ; do
                   , VONameCorrection v
                   , Site s
                   , Probe p
-              where m.VOcorrid=v.corrid
+              where m.VOcorrid = v.corrid
                 and s.siteid = p.siteid
                 and p.probename = m.ProbeName
-                and v.ReportableVOName='$vo'
+                and v.ReportableVOName = '$vo'
                 and m.Cores=$cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                and m.DistinguishedName='$user';
+                and m.DistinguishedName = '$user';
            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
@@ -162,8 +162,8 @@ for cores in "1" "8" ; do
                              select b.apel_normal_factor
                                from resource a
                                   , resource_wlcg b
-                              where b.resource_id=a.id
-                                and a.name='$resource';"`
+                              where b.resource_id = a.id
+                                and a.name = '$resource';"`
                            if [ -z "$nftest" ] ; then
                                nftest=12
                                now=`date`
@@ -205,15 +205,15 @@ for cores in "1" "8" ; do
                                   , VONameCorrection v
                                   , Site s
                                   , Probe p
-                              where m.VOcorrid=v.corrid
+                              where m.VOcorrid = v.corrid
                                 and s.siteid = p.siteid
                                 and p.probename = m.ProbeName
-                                and s.SiteName='$resource'
-                                and v.ReportableVOName='$vo'
+                                and s.SiteName = '$resource'
+                                and v.ReportableVOName = '$vo'
                                 and m.Cores=$cores
                                 and m.EndTime >= '$year-$month-01'
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                                and m.DistinguishedName='$user' ;
+                                and m.DistinguishedName = '$user' ;
                            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
 ## find the max and min job end times for the jobs defining usage.
@@ -227,15 +227,15 @@ for cores in "1" "8" ; do
                                   , VONameCorrection v
                                   , Site s
                                   , Probe p
-                              where m.VOcorrid=v.corrid
+                              where m.VOcorrid = v.corrid
                                 and s.siteid = p.siteid
                                 and p.probename = m.ProbeName
-                                and ReportableVOName='$vo'
-                                and Cores=$cores
-                                and EndTime >= '$year-$month-01'
-                                and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                                and DistinguishedName='$user'
-                                and SiteName='$resource';
+                                and v.ReportableVOName = '$vo'
+                                and m.Cores=$cores
+                                and m.EndTime >= '$year-$month-01'
+                                and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+                                and m.DistinguishedName = '$user'
+                                and s.SiteName = '$resource';
                            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
                            echo $results | grep NULL >/dev/null
