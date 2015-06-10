@@ -83,14 +83,14 @@ for cores in "1" "8" ; do
 
 ## count users for this month
        nusers=`echo "use gratia ;
-         select count(distinct DistinguishedName)
+         select count(distinct m.DistinguishedName)
            from MasterSummaryData m
               , VONameCorrection v
           where m.VOcorrid=v.corrid
-            and ReportableVOName='$vo'
-            and Cores=$cores
-            and EndTime >= '$year-$month-01'
-            and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
+            and v.ReportableVOName='$vo'
+            and m.Cores=$cores
+            and m.EndTime >= '$year-$month-01'
+            and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
        " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
        now=`date`
@@ -101,14 +101,14 @@ for cores in "1" "8" ; do
            now=`date`
            echo "$now : Getting user list">>/var/log/multicore.log
            user=`echo "use gratia ;
-             select distinct DistinguishedName
+             select distinct m.DistinguishedName
                from MasterSummaryData m
                   , VONameCorrection v
               where m.VOcorrid=v.corrid
-                and ReportableVOName='$vo'
-                and Cores=$cores
-                and EndTime >= '$year-$month-01'
-                and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+                and v.ReportableVOName='$vo'
+                and m.Cores=$cores
+                and m.EndTime >= '$year-$month-01'
+                and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
               limit $user_index,1;
            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
@@ -120,17 +120,19 @@ for cores in "1" "8" ; do
            now=`date`
            echo "$now : Getting resource list for user $user">>/var/log/multicore.log
            resources=`echo "use gratia ;
-             select distinct SiteName
+             select distinct s.SiteName
                from MasterSummaryData m
                   , VONameCorrection v
-                  , ProbeDetails_Meta p
+                  , Site s
+                  , Probe p
               where m.VOcorrid=v.corrid
-                and m.ProbeName=p.ProbeName
-                and ReportableVOName='$vo'
-                and Cores=$cores
-                and EndTime >= '$year-$month-01'
-                and EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                and DistinguishedName='$user';
+                and s.siteid = p.siteid
+                and p.probename = m.ProbeName
+                and v.ReportableVOName='$vo'
+                and m.Cores=$cores
+                and m.EndTime >= '$year-$month-01'
+                and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+                and m.DistinguishedName='$user';
            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
@@ -195,24 +197,23 @@ for cores in "1" "8" ; do
 ### (ApplicationExitCode=0 and
 
                            results=`echo "use gratia ;
-                             select sum(WallDuration)
-                                  , sum(CpuUserDuration)
-                                  , sum(njobs)
-                                  , sum(CpuSystemDuration)
+                             select sum(m.WallDuration)
+                                  , sum(m.CpuUserDuration)
+                                  , sum(m.njobs)
+                                  , sum(m.CpuSystemDuration)
                                from MasterSummaryData m
                                   , VONameCorrection v
+                                  , Site s
+                                  , Probe p
                               where m.VOcorrid=v.corrid
+                                and s.siteid = p.siteid
+                                and p.probename = m.ProbeName
+                                and s.SiteName='$resource'
                                 and v.ReportableVOName='$vo'
                                 and m.Cores=$cores
                                 and m.EndTime >= '$year-$month-01'
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                                and m.DistinguishedName='$user'
-                                and exists
-                                  ( select 1
-                                      from ProbeDetails_Meta p
-                                     where m.ProbeName=p.ProbeName
-                                       and p.SiteName='$resource'
-                                  ) ;
+                                and m.DistinguishedName='$user' ;
                            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
 ## find the max and min job end times for the jobs defining usage.
@@ -224,9 +225,11 @@ for cores in "1" "8" ; do
                                   , max(EndTime)
                                from MasterSummaryData m
                                   , VONameCorrection v
-                                  , ProbeDetails_Meta p
+                                  , Site s
+                                  , Probe p
                               where m.VOcorrid=v.corrid
-                                and m.ProbeName=p.ProbeName
+                                and s.siteid = p.siteid
+                                and p.probename = m.ProbeName
                                 and ReportableVOName='$vo'
                                 and Cores=$cores
                                 and EndTime >= '$year-$month-01'
