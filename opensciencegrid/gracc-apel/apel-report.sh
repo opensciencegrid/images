@@ -2,6 +2,15 @@
 
 loc=$(dirname "$0")
 
+logdir=/var/log
+pubdir=/net/nas01/Public
+
+if [[ $TEST_RUN = Y ]]; then
+  logdir=.
+  pubdir=.
+  mkdir -p tmp send
+fi
+
 function res_rg() {
 nlimit=2
 rg="NULL"
@@ -35,7 +44,7 @@ else
 ##         lookup failed, default resource group to resource name
            rg=$1
            now=`date`
-           echo "$now : resource $1 defaulted to resource group">>/var/log/multicore.log
+           echo "$now : resource $1 defaulted to resource group">>$logdir/multicore.log
        fi
     fi
 fi
@@ -60,7 +69,7 @@ fi
 
 ## if there was no data newer that "cutoff" days, there is a problem, log it.
 cutoff=2.00
-rm -f /net/nas01/Public/tmp/problems_${month}_$year
+rm -f $pubdir/tmp/problems_${month}_$year
 
 ## cutoff, a username shorter than this is ignored
 limit=5
@@ -79,7 +88,7 @@ echo "APEL-summary-job-message: v0.3"
 for cores in "1" "8" ; do
    for vo in "atlas" "alice" "cms" "enmr.eu" ; do
        now=`date`
-       echo "$now : Starting an $cores core report for $vo">>/var/log/multicore.log
+       echo "$now : Starting an $cores core report for $vo">>$logdir/multicore.log
 
 ## count users for this month
        nusers=`echo "use gratia ;
@@ -94,12 +103,12 @@ for cores in "1" "8" ; do
        " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
        now=`date`
-       echo "$now : Found $nusers users">>/var/log/multicore.log
+       echo "$now : Found $nusers users">>$logdir/multicore.log
 
        for user_index in `seq 0 $nusers` ; do
 
            now=`date`
-           echo "$now : Getting user list">>/var/log/multicore.log
+           echo "$now : Getting user list">>$logdir/multicore.log
            user=`echo "use gratia ;
              select distinct m.DistinguishedName
                from MasterSummaryData m
@@ -118,7 +127,7 @@ for cores in "1" "8" ; do
            fi
 ## find all resources used by this user
            now=`date`
-           echo "$now : Getting resource list for user $user">>/var/log/multicore.log
+           echo "$now : Getting resource list for user $user">>$logdir/multicore.log
            resources=`echo "use gratia ;
              select distinct s.SiteName
                from MasterSummaryData m
@@ -138,9 +147,9 @@ for cores in "1" "8" ; do
            if [ "$size" -gt "$nlimit" ] ; then
 ## have a non-null resources list, find the resource groups of the resources
                rgs=`for res in $resources ; do res_rg $res ; done`
-               echo $rgs | wc >>/var/log/multicore.log
+               echo $rgs | wc >>$logdir/multicore.log
                unique_rgs=`sort -u <<< "${rgs// /$'\n'}"`
-               echo $unique_rgs | wc >>/var/log/multicore.log
+               echo $unique_rgs | wc >>$logdir/multicore.log
                for unique_rg in $unique_rgs ; do
 ## initialize use summations here
                    wall=0
@@ -167,7 +176,7 @@ for cores in "1" "8" ; do
                            if [ -z "$nftest" ] ; then
                                nftest=12
                                now=`date`
-                               echo "$now : Warning: Using tabular default normalization factor $nf for $resource">>/var/log/multicore.log
+                               echo "$now : Warning: Using tabular default normalization factor $nf for $resource">>$logdir/multicore.log
                            fi
 ## sanity checks on the normalization factor
                            if [ $(echo " $nftest < $nmax && $nftest > $zero" | bc) -eq 1 ] ; then
@@ -178,21 +187,21 @@ for cores in "1" "8" ; do
                                if [ "$?" -ne "$zero" ] ; then
                                    nf=12
                                    now=`date`
-                                   echo "$now : Warning: Using global default normalization factor $nf for $resource">>/var/log/multicore.log
+                                   echo "$now : Warning: Using global default normalization factor $nf for $resource">>$logdir/multicore.log
                                else
                                    now=`date`
-                                   echo "$now : Warning: Using tabular default normalization factor $nf for $resource">>/var/log/multicore.log
+                                   echo "$now : Warning: Using tabular default normalization factor $nf for $resource">>$logdir/multicore.log
                                fi
                            fi
 ## if all else has failed...
                            if [ -z "$nf" ] ; then
                                nf=12
                                now=`date`
-                               echo "$now : Warning: Using global default normalization factor $nf for $resource">>/var/log/multicore.log
+                               echo "$now : Warning: Using global default normalization factor $nf for $resource">>$logdir/multicore.log
                            fi
 ## get summed CPU and Wall time for this user on this resource
                            now=`date`
-                           echo "$now : Getting results">>/var/log/multicore.log
+                           echo "$now : Getting results">>$logdir/multicore.log
 
 ### (ApplicationExitCode=0 and
 
@@ -219,7 +228,7 @@ for cores in "1" "8" ; do
 ## find the max and min job end times for the jobs defining usage.
 ## This is per request from APEL and is different that John W report
                            now=`date`
-                           echo "$now : Getting times $resource">>/var/log/multicore.log
+                           echo "$now : Getting times $resource">>$logdir/multicore.log
                            times=`echo "use gratia ;
                              select min(EndTime)
                                   , max(EndTime)
@@ -278,7 +287,7 @@ for cores in "1" "8" ; do
                    fi
                    if [ "$kjobs" -ne "$zero" ]; then
                       now=`date`
-                      echo "$now : Writing output of $vo $unique_rg">>/var/log/multicore.log
+                      echo "$now : Writing output of $vo $unique_rg">>$logdir/multicore.log
 ## output use summation here
                       echo "Site: $unique_rg"
                       echo "VO: $vo"
@@ -314,16 +323,17 @@ for cores in "1" "8" ; do
                       if [ $(echo " $x > $cutoff " | bc) -eq 1 ] ; then
                           echo "$unique_rg reported $x days ago, problem"
                       fi
-                      }>>/net/nas01/Public/tmp/problems_${month}_$year
+                      }>>$pubdir/tmp/problems_${month}_$year
                    fi
                done
            fi
        done
-       echo "$now : Finished an $cores core report for $vo">>/var/log/multicore.log
+       echo "$now : Finished an $cores core report for $vo">>$logdir/multicore.log
    done
 done
-}>/net/nas01/Public/send/${month}_$year.apel
+}>$pubdir/send/${month}_$year.apel
 
 ## post generation section
-chmod ugoa+rw /net/nas01/Public/send/${month}_$year.apel
-cp /net/nas01/Public/send/${month}_$year.apel /net/nas01/Public/tmp/current.apel
+chmod ugoa+rw $pubdir/send/${month}_$year.apel
+cp $pubdir/send/${month}_$year.apel $pubdir/tmp/current.apel
+
