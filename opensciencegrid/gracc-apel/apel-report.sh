@@ -5,7 +5,9 @@ loc=$(dirname "$0")
 logdir=/var/log
 pubdir=/net/nas01/Public
 
-if [[ $TEST_RUN = Y ]]; then
+# test run; log under current dir
+if [[ $1 = -t ]]; then
+  shift
   logdir=.
   pubdir=.
   mkdir -p tmp send
@@ -57,7 +59,11 @@ nodes=1
 ## send a report for last month for the first 3 days of this month
 ## this allow last month to finalize and data to be generated for this month
 day=`date +%d`
-if [ "$day" -lt "03" ]; then
+if [[ $1 = 20[0-9][0-9] && $2 = [0-9][0-9] ]]; then
+    year=$1
+    month=$2
+    handle="core_final"
+elif [ "$day" -lt "03" ]; then
     year=`date --date="last-month" +%Y`
     month=`date --date="last-month" +%m`
     handle="core_final"
