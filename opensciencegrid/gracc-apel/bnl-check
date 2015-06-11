@@ -1,0 +1,11 @@
+#!/bin/bash
+
+LC_ALL=en_US.UTF-8 awk -F': ' '
+  NF>1 {f[$1]=$2}
+  $0=="%%" && f["Site"]=="BNL-ATLAS" { ncd += f[NCD]; nwd += f[NWD]; }
+  END { printf FMT, NCD, ncd, ncd/3600/24
+        printf FMT, NWD, nwd, nwd/3600/24 }
+' NCD=NormalisedCpuDuration \
+  NWD=NormalisedWallDuration \
+  FMT="%s: %'d sec (%'d days)\n" "$@"
+
