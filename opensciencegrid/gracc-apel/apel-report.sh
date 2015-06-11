@@ -125,6 +125,8 @@ for cores in "1" "8" ; do
 ## emplty user name, account as "generic"
                user="generic $vo user"
            fi
+## escape user dn, which can contain apostrophies...
+           user_esc=${user//"'"/"''"}
 ## find all resources used by this user
            now=`date`
            echo "$now : Getting resource list for user $user">>$logdir/multicore.log
@@ -141,7 +143,7 @@ for cores in "1" "8" ; do
                 and m.Cores=$cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                and m.DistinguishedName = '$user';
+                and m.DistinguishedName = '$user_esc';
            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
@@ -222,7 +224,7 @@ for cores in "1" "8" ; do
                                 and m.Cores=$cores
                                 and m.EndTime >= '$year-$month-01'
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                                and m.DistinguishedName = '$user' ;
+                                and m.DistinguishedName = '$user_esc' ;
                            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
 ## find the max and min job end times for the jobs defining usage.
@@ -243,7 +245,7 @@ for cores in "1" "8" ; do
                                 and m.Cores=$cores
                                 and m.EndTime >= '$year-$month-01'
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                                and m.DistinguishedName = '$user'
+                                and m.DistinguishedName = '$user_esc'
                                 and s.SiteName = '$resource';
                            " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
