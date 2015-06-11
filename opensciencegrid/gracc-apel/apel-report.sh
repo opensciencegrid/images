@@ -91,18 +91,21 @@ zero=0
 ## add header, once per upload
 echo "APEL-summary-job-message: v0.3"
 
+volist="atlas alice cms enmr.eu"
+volist_in=$(perl -le "print join ',', map \"'\$_'\", @ARGV" $volist)
+
 coreslist=`echo "use gratia ;
   select distinct m.Cores
     from MasterSummaryData m
        , VONameCorrection v
    where m.VOcorrid = v.corrid
-     and v.ReportableVOName in ('atlas','alice','cms','enmr.eu')
+     and v.ReportableVOName in ($volist_in)
      and m.EndTime >= '$year-$month-01'
      and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
 " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
 
 for cores in $coreslist ; do
-   for vo in "atlas" "alice" "cms" "enmr.eu" ; do
+   for vo in $volist ; do
        now=`date`
        echo "$now : Starting an $cores core report for $vo">>$logdir/multicore.log
 
