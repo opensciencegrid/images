@@ -77,6 +77,9 @@ fi
 cutoff=2.00
 rm -f $pubdir/tmp/problems_${month}_$year
 
+## get rid of any old reports
+rm -f $pubdir/send/*.apel
+
 ## cutoff, a username shorter than this is ignored
 limit=5
 limit=-10
