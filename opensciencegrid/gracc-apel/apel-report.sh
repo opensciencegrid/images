@@ -292,13 +292,13 @@ for cores in $coreslist ; do
                                kjobs=`echo "$kjobs+$x" | bc`
 
 ## convert start/end to linux time, find biggest,smallest
-                               x=`echo $times | awk '{ print $3, $4}'`
+                               x=`echo $times | awk '{ print $1, $2}'`
                                x=`date --date="$x" +%s`
 
                                if [ "$x" -lt "$min_d" ]; then
                                    min_d=$x
                                fi
-                               x=`echo $times | awk '{ print $5, $6}'`
+                               x=`echo $times | awk '{ print $3, $4}'`
                                x=`date --date="$x" +%s`
                                if [ "$x" -gt "$max_d" ]; then
                                    max_d=$x
