@@ -95,7 +95,7 @@ zero=0
 echo "APEL-summary-job-message: v0.3"
 
 volist="atlas alice cms enmr.eu"
-volist_in=$(perl -le "print join ',', map \"'\$_'\", @ARGV" $volist)
+volist_in="'${volist// /','}'"
 
 coreslist=`echo "use gratia ;
   select distinct m.Cores
