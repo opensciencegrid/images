@@ -176,7 +176,7 @@ for cores in $coreslist ; do
                echo $unique_rgs | wc >>$logdir/multicore.log
                for unique_rg in $unique_rgs ; do
                    case $(tr A-Z a-z <<< $unique_rg) in
-                     none|null) echo "skipping unique_rg '$unique_rg' for user '$user'" >>$pubdir/tmp/problems_${month}_$year
+                     none|null|unavailable) echo "skipping unique_rg '$unique_rg' for user '$user'" >>$pubdir/tmp/problems_${month}_$year
                                 continue ;;
                    esac
 ## initialize use summations here
