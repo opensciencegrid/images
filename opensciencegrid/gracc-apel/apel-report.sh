@@ -127,7 +127,7 @@ for cores in $coreslist ; do
        now=`date`
        echo "$now : Found $nusers users">>$logdir/multicore.log
 
-       for user_index in `seq 0 $nusers` ; do
+       for user_index in `seq 0 $((nusers-1))` ; do
 
            now=`date`
            echo "$now : Getting user list">>$logdir/multicore.log
