@@ -282,13 +282,13 @@ for cores in $coreslist ; do
 
                                now=`date`
                                x=`echo $results | awk '{ print $1 }'`
-                               wall=`echo "$wall+$cores*$x" | bc`
+                               wall=`echo "$wall+$x" | bc`
 
                                x=`echo $results | awk '{ print $2 }'`
                                cpu=`echo "$cpu+$x" | bc`
 
                                x=`echo $results | awk '{ print $1 }'`
-                               nwall=`echo "$nwall+$cores*$x*$nf" | bc`
+                               nwall=`echo "$nwall+$x*$nf" | bc`
 
                                x=`echo $results | awk '{ print $2 }'`
                                ncpu=`echo "$ncpu+$x*$nf" | bc`
