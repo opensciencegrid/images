@@ -102,7 +102,7 @@ coreslist=`echo "use gratia ;
     from MasterSummaryData m
        , VONameCorrection v
    where m.VOcorrid = v.corrid
-     and v.ReportableVOName in ($volist_in)
+     and lower(v.ReportableVOName) in ($volist_in)
      and m.EndTime >= '$year-$month-01'
      and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
 " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
@@ -118,7 +118,7 @@ for cores in $coreslist ; do
            from MasterSummaryData m
               , VONameCorrection v
           where m.VOcorrid = v.corrid
-            and v.ReportableVOName = '$vo'
+            and lower(v.ReportableVOName) = '$vo'
             and m.Cores = $cores
             and m.EndTime >= '$year-$month-01'
             and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
@@ -136,7 +136,7 @@ for cores in $coreslist ; do
                from MasterSummaryData m
                   , VONameCorrection v
               where m.VOcorrid = v.corrid
-                and v.ReportableVOName = '$vo'
+                and lower(v.ReportableVOName) = '$vo'
                 and m.Cores = $cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
@@ -162,7 +162,7 @@ for cores in $coreslist ; do
               where m.VOcorrid = v.corrid
                 and s.siteid = p.siteid
                 and p.probename = m.ProbeName
-                and v.ReportableVOName = '$vo'
+                and lower(v.ReportableVOName) = '$vo'
                 and m.Cores=$cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
@@ -247,7 +247,7 @@ for cores in $coreslist ; do
                                 and s.siteid = p.siteid
                                 and p.probename = m.ProbeName
                                 and s.SiteName = '$resource'
-                                and v.ReportableVOName = '$vo'
+                                and lower(v.ReportableVOName) = '$vo'
                                 and m.Cores=$cores
                                 and m.EndTime >= '$year-$month-01'
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
@@ -268,7 +268,7 @@ for cores in $coreslist ; do
                               where m.VOcorrid = v.corrid
                                 and s.siteid = p.siteid
                                 and p.probename = m.ProbeName
-                                and v.ReportableVOName = '$vo'
+                                and lower(v.ReportableVOName) = '$vo'
                                 and m.Cores=$cores
                                 and m.EndTime >= '$year-$month-01'
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
