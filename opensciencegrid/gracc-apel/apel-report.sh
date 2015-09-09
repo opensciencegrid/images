@@ -4,6 +4,12 @@ loc=$(dirname "$0")
 
 logdir=/var/log
 pubdir=/net/nas01/Public
+QQQ=${QQQ:-$loc/qqq}
+
+if [[ ! -r $QQQ ]]; then
+  echo "Can't read mysql defaults file '$QQQ'" >&2
+  exit 1
+fi
 
 # test run; log under current dir
 if [[ $1 = -t ]]; then
@@ -105,7 +111,7 @@ coreslist=`echo "use gratia ;
      and lower(v.ReportableVOName) in ($volist_in)
      and m.EndTime >= '$year-$month-01'
      and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
-" | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+" | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
 for cores in $coreslist ; do
    for vo in $volist ; do
@@ -122,7 +128,7 @@ for cores in $coreslist ; do
             and m.Cores = $cores
             and m.EndTime >= '$year-$month-01'
             and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
-       " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+       " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
        now=`date`
        echo "$now : Found $nusers users">>$logdir/multicore.log
@@ -141,7 +147,7 @@ for cores in $coreslist ; do
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
               limit $user_index,1;
-           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+           " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
 ## escape user dn, which can contain apostrophies...
            user_esc=${user//"'"/"''"}
@@ -167,7 +173,7 @@ for cores in $coreslist ; do
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
                 and m.DistinguishedName = '$user_esc';
-           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+           " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
 ## have a non-null resources list, find the resource groups of the resources
@@ -252,7 +258,7 @@ for cores in $coreslist ; do
                                 and m.EndTime >= '$year-$month-01'
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
                                 and m.DistinguishedName = '$user_esc' ;
-                           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+                           " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
 ## find the max and min job end times for the jobs defining usage.
 ## This is per request from APEL and is different that John W report
@@ -274,7 +280,7 @@ for cores in $coreslist ; do
                                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
                                 and m.DistinguishedName = '$user_esc'
                                 and s.SiteName = '$resource';
-                           " | mysql --defaults-extra-file=$loc/qqq | tail -n +2`
+                           " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
                            echo $results | grep NULL >/dev/null
 ## sum up the results for this user, there may be more than one resource in this resource group
