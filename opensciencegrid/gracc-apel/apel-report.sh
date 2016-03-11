@@ -56,6 +56,13 @@ else
        fi
     fi
 fi
+
+# Nebraska-HCC needs to be reported as Nebraska
+# https://ticket.grid.iu.edu/28838
+case $rg in
+  Nebraska-HCC ) rg=Nebraska ;;
+esac
+
 echo $rg
 }
 
