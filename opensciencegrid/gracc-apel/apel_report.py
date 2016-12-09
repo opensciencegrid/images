@@ -86,8 +86,8 @@ def print_record(year, month, vo, site, cores, dn, bkt):
     print "NumberOfJobs:",           int(bkt.NumberOfJobs.value)
     print fixed_separator
 
-def sorted_buckets(agg):
-    return sorted(agg.buckets, key=operator.attrgetter('key'))
+def sorted_buckets(agg, key=operator.attrgetter('key')):
+    return sorted(agg.buckets, key=key)
 
 def main():
     try:
