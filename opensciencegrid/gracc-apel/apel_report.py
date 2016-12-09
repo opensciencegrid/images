@@ -53,33 +53,37 @@ def gracc_query_apel(year, month):
     return response
 
 # Fixed entries:
-header = "APEL-summary-job-message: v0.3"
-separator = "%%"
-infrastructure = "Gratia-OSG"
-nodecount = 1
-normalizationfactor = 1
+fixed_header = "APEL-summary-job-message: v0.3"
+fixed_separator = "%%"
+fixed_infrastructure = "Gratia-OSG"
+fixed_nodecount = 1
+fixed_normalizationfactor = 12
 
 def print_header():
-    print header
+    print fixed_header
 
-def print_record(vo, cores, dn, site, corewalldur, cpudur, nf,
-                 count, year, month, mintime, maxtime):
-    print "Site:", site
-    print "VO:", vo
-    print "EarliestEndTime:", mintime
-    print "LatestEndTime:", maxtime
-    print "Month:", month
-    print "Year:", year
-    print "Infrastructure:", infrastructure
-    print "GlobalUserName:", dn
-    print "Processors:", cores
-    print "NodeCount:", nodecount
-    print "WallDuration:", corewalldur
-    print "CpuDuration:", cpudur
+def print_record(vo, site, cores, dn, bkt):
+    walldur = int(bkt.WallDuration.value)
+    corewalldur = walldur * cores
+    cpudur = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
+    nf = fixed_normalizationfactor
+
+    print "Site:",                   site
+    print "VO:",                     vo
+    print "EarliestEndTime:",        bkt.EarliestEndTime.value / 1000
+    print "LatestEndTime:",          bkt.LatestEndTime.value / 1000
+    print "Month:",                  "%02d" % month
+    print "Year:",                   year
+    print "Infrastructure:",         fixed_infrastructure
+    print "GlobalUserName:",         dn
+    print "Processors:",             cores
+    print "NodeCount:",              fixed_nodecount
+    print "WallDuration:",           corewalldur
+    print "CpuDuration:",            cpudur
     print "NormalisedWallDuration:", int(corewalldur * nf)
-    print "NormalisedCpuDuration:", int(cpudur * nf)
-    print "NumberOfJobs:", count
-    print separator
+    print "NormalisedCpuDuration:",  int(cpudur * nf)
+    print "NumberOfJobs:",           int(bkt.NumberOfJobs.value)
+    print fixed_separator
 
 def main():
     try:
@@ -97,16 +101,8 @@ def main():
                 dn = dn_bkt.key
                 for site_bkt in dn_bkt.Site.buckets:
                     site = site_bkt.key
-                    walldur = int(site_bkt.WallDuration.value)
-                    corewalldur = walldur * cores
-                    cpudur = int(site_bkt.CpuDuration_user.value + \
-                                 site_bkt.CpuDuration_system.value)
-                    count = int(site_bkt.NumberOfJobs.value)
-                    mintime = int(site_bkt.EarliestEndTime.value)
-                    maxtime = int(site_bkt.LatestEndTime.value)
-                    print_record(vo, cores, dn, site, corewalldur, cpudur,
-                                 normalizationfactor, count, year, month,
-                                 mintime, maxtime)
+                    print_record(vo, site, cores, dn, site_bkt)
+
 
 if __name__ == '__main__':
     main()
