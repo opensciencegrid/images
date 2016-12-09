@@ -93,6 +93,8 @@ def main():
         sys.exit(0)
     resp = gracc_query_apel(year, month)
     aggs = resp.aggregations
+
+    print_header()
     for cores_bkt in aggs.Cores.buckets:
         cores = cores_bkt.key
         for vo_bkt in cores_bkt.VO.buckets:
