@@ -62,7 +62,7 @@ fixed_normalizationfactor = 12
 def print_header():
     print fixed_header
 
-def print_record(vo, site, cores, dn, bkt):
+def print_record(year, month, vo, site, cores, dn, bkt):
     walldur = int(bkt.WallDuration.value)
     corewalldur = walldur * cores
     cpudur = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
@@ -101,7 +101,7 @@ def main():
                 dn = dn_bkt.key
                 for site_bkt in dn_bkt.Site.buckets:
                     site = site_bkt.key
-                    print_record(vo, site, cores, dn, site_bkt)
+                    print_record(year, month, vo, site, cores, dn, site_bkt)
 
 
 if __name__ == '__main__':
