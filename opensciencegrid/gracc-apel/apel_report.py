@@ -71,8 +71,8 @@ def print_record(year, month, vo, site, cores, dn, bkt):
 
     print "Site:",                   site
     print "VO:",                     vo
-    print "EarliestEndTime:",        bkt.EarliestEndTime.value / 1000
-    print "LatestEndTime:",          bkt.LatestEndTime.value / 1000
+    print "EarliestEndTime:",        int(bkt.EarliestEndTime.value / 1000)
+    print "LatestEndTime:",          int(bkt.LatestEndTime.value / 1000)
     print "Month:",                  "%02d" % month
     print "Year:",                   year
     print "Infrastructure:",         fixed_infrastructure
