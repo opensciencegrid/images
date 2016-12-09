@@ -4,6 +4,7 @@ import elasticsearch
 from elasticsearch_dsl import Search, A, Q
 #import logging
 import datetime
+import operator
 import sys
 import os
 
@@ -85,6 +86,9 @@ def print_record(year, month, vo, site, cores, dn, bkt):
     print "NumberOfJobs:",           int(bkt.NumberOfJobs.value)
     print fixed_separator
 
+def sorted_buckets(agg):
+    return sorted(agg.buckets, key=operator.attrgetter('key'))
+
 def main():
     try:
         year,month = map(int, sys.argv[1:])
@@ -95,13 +99,13 @@ def main():
     aggs = resp.aggregations
 
     print_header()
-    for cores_bkt in aggs.Cores.buckets:
+    for cores_bkt in sorted_buckets(aggs.Cores):
         cores = cores_bkt.key
-        for vo_bkt in cores_bkt.VO.buckets:
+        for vo_bkt in sorted_buckets(cores_bkt.VO):
             vo = vo_bkt.key
-            for dn_bkt in vo_bkt.GlobalUsername.buckets:
+            for dn_bkt in sorted_buckets(vo_bkt.GlobalUsername):
                 dn = dn_bkt.key
-                for site_bkt in dn_bkt.Site.buckets:
+                for site_bkt in sorted_buckets(dn_bkt.Site):
                     site = site_bkt.key
                     print_record(year, month, vo, site, cores, dn, site_bkt)
 
