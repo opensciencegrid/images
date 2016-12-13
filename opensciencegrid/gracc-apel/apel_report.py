@@ -40,15 +40,12 @@ def gracc_query_apel(year, month):
     #bkt = bkt.bucket('Site',          'terms', field='SiteName')
     #bkt = bkt.bucket('Site',          'terms', field='WLCGAccountingName')
 
-    bkt = bkt.metric('WallDuration',       'sum', field='WallDuration')
     bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
     bkt = bkt.metric('CpuDuration_user',   'sum', field='CpuDuration_user')
     bkt = bkt.metric('CoreHours',          'sum', field='CoreHours')
     bkt = bkt.metric('NumberOfJobs',       'sum', field='Count')
     bkt = bkt.metric('EarliestEndTime',    'min', field='EndTime')
     bkt = bkt.metric('LatestEndTime',      'max', field='EndTime')
-
-    #bkt = bkt.metric('CoreHours', 'sum', field='CoreHours')
 
     response = s.execute()
     return response
@@ -64,8 +61,6 @@ def print_header():
     print fixed_header
 
 def print_record(year, month, vo, site, cores, dn, bkt):
-    walldur = int(bkt.WallDuration.value)
-    corewalldur = walldur * cores
     cpudur = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
     nf = fixed_normalizationfactor
 
@@ -79,7 +74,7 @@ def print_record(year, month, vo, site, cores, dn, bkt):
     print "GlobalUserName:",         dn
     print "Processors:",             cores
     print "NodeCount:",              fixed_nodecount
-    print "WallDuration:",           corewalldur
+    print "WallDuration:",           int(bkt.CoreHours.value * 3600)
     print "CpuDuration:",            cpudur
     print "NormalisedWallDuration:", int(corewalldur * nf)
     print "NormalisedCpuDuration:",  int(cpudur * nf)
