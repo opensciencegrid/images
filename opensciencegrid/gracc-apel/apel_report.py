@@ -65,6 +65,9 @@ def print_record(year, month, vo, site, cores, dn, bkt):
     corewalldur = int(bkt.CoreHours.value * 3600)
     nf = fixed_normalizationfactor
 
+    if dn == "N/A":
+        dn = "generic %s user" % vo
+
     print "Site:",                   site
     print "VO:",                     vo
     print "EarliestEndTime:",        int(bkt.EarliestEndTime.value / 1000)
