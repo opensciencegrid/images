@@ -62,6 +62,7 @@ def print_header():
 
 def print_record(year, month, vo, site, cores, dn, bkt):
     cpudur = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
+    corewalldur = int(bkt.CoreHours.value * 3600)
     nf = fixed_normalizationfactor
 
     print "Site:",                   site
@@ -74,7 +75,7 @@ def print_record(year, month, vo, site, cores, dn, bkt):
     print "GlobalUserName:",         dn
     print "Processors:",             cores
     print "NodeCount:",              fixed_nodecount
-    print "WallDuration:",           int(bkt.CoreHours.value * 3600)
+    print "WallDuration:",           corewalldur
     print "CpuDuration:",            cpudur
     print "NormalisedWallDuration:", int(corewalldur * nf)
     print "NormalisedCpuDuration:",  int(cpudur * nf)
