@@ -42,7 +42,7 @@ def gracc_query_apel(year, month):
 
     bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
     bkt = bkt.metric('CpuDuration_user',   'sum', field='CpuDuration_user')
-    bkt = bkt.metric('CoreHours',          'sum', field='CoreHours')
+    bkt = bkt.metric('WallDuration',       'sum', field='WallDuration')
     bkt = bkt.metric('NumberOfJobs',       'sum', field='Count')
     bkt = bkt.metric('EarliestEndTime',    'min', field='EndTime')
     bkt = bkt.metric('LatestEndTime',      'max', field='EndTime')
@@ -62,7 +62,7 @@ def print_header():
 
 def print_record(year, month, vo, site, cores, dn, bkt):
     cpudur = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
-    corewalldur = int(bkt.CoreHours.value * 3600)
+    walldur = int(bkt.WallDuration.value)
     nf = fixed_normalizationfactor
 
     if dn == "N/A":
@@ -78,9 +78,9 @@ def print_record(year, month, vo, site, cores, dn, bkt):
     print "GlobalUserName:",         dn
     print "Processors:",             cores
     print "NodeCount:",              fixed_nodecount
-    print "WallDuration:",           corewalldur
+    print "WallDuration:",           walldur
     print "CpuDuration:",            cpudur
-    print "NormalisedWallDuration:", int(corewalldur * nf)
+    print "NormalisedWallDuration:", int(walldur * nf)
     print "NormalisedCpuDuration:",  int(cpudur * nf)
     print "NumberOfJobs:",           int(bkt.NumberOfJobs.value)
     print fixed_separator
