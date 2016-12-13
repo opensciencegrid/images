@@ -107,7 +107,7 @@ zero=0
 ## add header, once per upload
 echo "APEL-summary-job-message: v0.3"
 
-volist="atlas alice cms enmr.eu"
+volist="alice atlas cms enmr.eu"
 volist_in="'${volist// /','}'"
 
 coreslist=`echo "use gratia ;
@@ -117,7 +117,8 @@ coreslist=`echo "use gratia ;
    where m.VOcorrid = v.corrid
      and lower(v.ReportableVOName) in ($volist_in)
      and m.EndTime >= '$year-$month-01'
-     and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
+     and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+   order by m.Cores;
 " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
 for cores in $coreslist ; do
@@ -153,6 +154,7 @@ for cores in $coreslist ; do
                 and m.Cores = $cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+              order by m.DistinguishedName
               limit $user_index,1;
            " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
@@ -179,7 +181,8 @@ for cores in $coreslist ; do
                 and m.Cores=$cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                and m.DistinguishedName = '$user_esc';
+                and m.DistinguishedName = '$user_esc'
+              order by s.SiteName;
            " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
