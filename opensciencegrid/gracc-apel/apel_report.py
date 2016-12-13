@@ -17,7 +17,7 @@ es = elasticsearch.Elasticsearch(
 osg_raw_index = 'gracc.osg.raw-*'
 osg_summary_index = 'gracc.osg.summary'
 
-vo_list = ['atlas','alice','cms','enmr.eu']
+vo_list = ['atlas', 'alice', 'cms', 'enmr.eu']
 
 def gracc_query_apel(year, month):
     index = osg_summary_index
