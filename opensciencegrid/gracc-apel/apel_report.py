@@ -39,6 +39,7 @@ def gracc_query_apel(year, month):
     bkt = bkt.bucket('Site',           'terms', field='ResourceGroup')
     #bkt = bkt.bucket('Site',          'terms', field='SiteName')
     #bkt = bkt.bucket('Site',          'terms', field='WLCGAccountingName')
+    #bkt = bkt.bucket('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
 
     bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
     bkt = bkt.metric('CpuDuration_user',   'sum', field='CpuDuration_user')
@@ -57,13 +58,57 @@ fixed_infrastructure = "Gratia-OSG"
 fixed_nodecount = 1
 fixed_normalizationfactor = 12
 
+def normal_hepspec_table():
+    from os.path import join, dirname, abspath
+    normal_hepspec_path = join(dirname(abspath(__file__)), "normal_hepspec")
+    table = {}
+    for line in open(normal_hepspec_path):
+        if line.startswith('#'):
+            continue
+        tokens = line.split()
+        if len(tokens) != 2:
+            continue
+        site, nf = tokens
+        nf = float(nf)
+        table[site] = nf
+    return table
+
+nf_table = normal_hepspec_table()
+
+def norm_factor(bkt, site):
+    nf_max = 200
+    nf_default = 12
+    if len(bkt.NormalFactor.value) == 0:
+        # XXX: *should* look up from table here, but the old script just
+        #      used the default (12) when not found on OIM.
+        # TODO: log
+        nf = nf_default
+    elif len(bkt.NormalFactor.value) == 1:
+        # ok, normal case
+        nf = bkt.NormalFactor.value[0]
+    else:
+        # oh weird, why more than one norm factor here?
+        # TODO: log
+        nf = 1.0 * sum(bkt.NormalFactor.value) / len(bkt.NormalFactor.value)
+
+    if not ( 0 < nf < nf_max ):
+        # out of range: do table lookup
+        # TODO: log
+        if site in nf_table:
+            # TODO: log
+            nf = nf_table[site]
+        else:
+            # TODO: log
+            nf = nf_default
+    return nf
+
 def print_header():
     print fixed_header
 
 def print_record(year, month, vo, site, cores, dn, bkt):
     cpudur = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
     walldur = int(bkt.WallDuration.value)
-    nf = fixed_normalizationfactor
+    nf = norm_factor(bkt, site)
 
     if dn == "N/A":
         dn = "generic %s user" % vo
