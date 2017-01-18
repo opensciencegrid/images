@@ -36,7 +36,7 @@ def gracc_query_apel(year, month):
     bkt = bkt.bucket('Cores',          'terms', field='Processors')
     bkt = bkt.bucket('VO',             'terms', field='ReportableVOName')
     bkt = bkt.bucket('GlobalUsername', 'terms', field='DN')
-    bkt = bkt.bucket('Site',           'terms', field='ResourceGroup')
+    bkt = bkt.bucket('Site',           'terms', field='OIM_ResourceGroup')
     #bkt = bkt.bucket('Site',          'terms', field='SiteName')
     #bkt = bkt.bucket('Site',          'terms', field='WLCGAccountingName')
     #bkt = bkt.bucket('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
