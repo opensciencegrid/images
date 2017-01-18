@@ -39,8 +39,8 @@ def gracc_query_apel(year, month):
     bkt = bkt.bucket('Site',           'terms', field='OIM_ResourceGroup')
     #bkt = bkt.bucket('Site',          'terms', field='SiteName')
     #bkt = bkt.bucket('Site',          'terms', field='WLCGAccountingName')
-    #bkt = bkt.bucket('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
 
+    bkt = bkt.metric('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
     bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
     bkt = bkt.metric('CpuDuration_user',   'sum', field='CpuDuration_user')
     bkt = bkt.metric('WallDuration',       'sum', field='WallDuration')
@@ -78,18 +78,19 @@ nf_table = normal_hepspec_table()
 def norm_factor(bkt, site):
     nf_max = 200
     nf_default = 12
-    if len(bkt.NormalFactor.value) == 0:
+    nf_buckets = bkt.NormalFactor.buckets
+    if len(nf_buckets) == 0:
         # XXX: *should* look up from table here, but the old script just
         #      used the default (12) when not found on OIM.
         # TODO: log
         nf = nf_default
-    elif len(bkt.NormalFactor.value) == 1:
+    elif len(nf_buckets) == 1:
         # ok, normal case
-        nf = bkt.NormalFactor.value[0]
+        nf = nf_buckets[0].key
     else:
         # oh weird, why more than one norm factor here?
         # TODO: log
-        nf = 1.0 * sum(bkt.NormalFactor.value) / len(bkt.NormalFactor.value)
+        nf = 1.0 * sum(b.key for b in nf_buckets) / len(nf_buckets)
 
     if not ( 0 < nf < nf_max ):
         # out of range: do table lookup
