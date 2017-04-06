@@ -32,13 +32,15 @@ def gracc_query_apel(year, month):
         ]
     )
 
+    MAXSZ=2**30
+
     bkt = s.aggs
-    bkt = bkt.bucket('Cores',          'terms', size=1000000000, field='Processors')
-    bkt = bkt.bucket('VO',             'terms', size=1000000000, field='ReportableVOName')
-    bkt = bkt.bucket('GlobalUsername', 'terms', size=1000000000, field='DN')
-    bkt = bkt.bucket('Site',           'terms', size=1000000000, field='OIM_ResourceGroup')
-    #bkt = bkt.bucket('Site',          'terms', size=1000000000, field='SiteName')
-    #bkt = bkt.bucket('Site',          'terms', size=1000000000, field='WLCGAccountingName')
+    bkt = bkt.bucket('Cores', 'terms', size=MAXSZ, field='Processors')
+    bkt = bkt.bucket('VO',    'terms', size=MAXSZ, field='ReportableVOName')
+    bkt = bkt.bucket('GlobalUsername', 'terms', size=MAXSZ, field='DN')
+    bkt = bkt.bucket('Site',  'terms', size=MAXSZ, field='OIM_ResourceGroup')
+    #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='SiteName')
+    #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='WLCGAccountingName')
 
     bkt = bkt.metric('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
     bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
