@@ -38,7 +38,7 @@ def gracc_query_apel(year, month):
     bkt = s.aggs
     bkt = bkt.bucket('Cores', 'terms', size=MAXSZ, field='Processors')
     bkt = bkt.bucket('VO',    'terms', size=MAXSZ, field='VOName')
-    bkt = bkt.bucket('GlobalUsername', 'terms', size=MAXSZ, field='DN')
+    bkt = bkt.bucket('DN',    'terms', size=MAXSZ, field='DN')
     bkt = bkt.bucket('Site',  'terms', size=MAXSZ, field='OIM_ResourceGroup')
     #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='SiteName')
     #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='WLCGAccountingName')
@@ -154,7 +154,7 @@ def main():
         cores = cores_bkt.key
         for vo_bkt in sorted_buckets(cores_bkt.VO):
             vo = vo_bkt.key
-            for dn_bkt in sorted_buckets(vo_bkt.GlobalUsername):
+            for dn_bkt in sorted_buckets(vo_bkt.DN):
                 dn = dn_bkt.key
                 for site_bkt in sorted_buckets(dn_bkt.Site):
                     site = site_bkt.key
