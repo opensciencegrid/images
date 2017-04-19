@@ -306,14 +306,16 @@ for cores in $coreslist ; do
                                x=`echo $results | awk '{ print $1 }'`
                                wall=`echo "$wall+$x" | bc`
 
-                               x=`echo $results | awk '{ print $2 + $4 }'`
-                               cpu=`echo "$cpu+$x" | bc`
+                               x=`echo $results | awk '{ print $2 }'`
+                               x2=`echo $results | awk '{ print $4 }'`
+                               cpu=`echo "$cpu+$x+$x2" | bc`
 
                                x=`echo $results | awk '{ print $1 }'`
                                nwall=`echo "$nwall+$x*$nf" | bc`
 
-                               x=`echo $results | awk '{ print $2 + $4 }'`
-                               ncpu=`echo "$ncpu+$x*$nf" | bc`
+                               x=`echo $results | awk '{ print $2 }'`
+                               x2=`echo $results | awk '{ print $4 }'`
+                               ncpu=`echo "$ncpu+($x+$x2)*$nf" | bc`
 
                                x=`echo $results | awk '{ print $3 }'`
                                kjobs=`echo "$kjobs+$x" | bc`
