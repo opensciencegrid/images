@@ -28,7 +28,7 @@ def gracc_query_apel(year, month):
     s = s.query('bool',
         filter=[
             Q('range', EndTime={'gte': starttime, 'lt': endtime })
-          & Q('terms', ReportableVOName=vo_list)
+          & Q('terms', VOName=vo_list)
           & Q('term',  ResourceType='Batch')
         ]
     )
@@ -37,7 +37,7 @@ def gracc_query_apel(year, month):
 
     bkt = s.aggs
     bkt = bkt.bucket('Cores', 'terms', size=MAXSZ, field='Processors')
-    bkt = bkt.bucket('VO',    'terms', size=MAXSZ, field='ReportableVOName')
+    bkt = bkt.bucket('VO',    'terms', size=MAXSZ, field='VOName')
     bkt = bkt.bucket('GlobalUsername', 'terms', size=MAXSZ, field='DN')
     bkt = bkt.bucket('Site',  'terms', size=MAXSZ, field='OIM_ResourceGroup')
     #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='SiteName')
