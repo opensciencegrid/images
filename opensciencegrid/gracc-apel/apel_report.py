@@ -19,12 +19,14 @@ osg_summary_index = 'gracc.osg.summary'
 
 vo_list = ['atlas', 'alice', 'cms', 'enmr.eu']
 
+MAXSZ=2**30
+
 def gracc_query_apel(year, month):
     index = osg_summary_index
-    s = Search(using=es, index=index)
     starttime = datetime.datetime(year, month, 1)
     endymd = (year, month+1, 1) if month < 12 else (year+1, 1, 1)
     endtime = datetime.datetime(*endymd)
+    s = Search(using=es, index=index)
     s = s.query('bool',
         filter=[
             Q('range', EndTime={'gte': starttime, 'lt': endtime })
@@ -32,8 +34,6 @@ def gracc_query_apel(year, month):
           & Q('term',  ResourceType='Batch')
         ]
     )
-
-    MAXSZ=2**30
 
     bkt = s.aggs
     bkt = bkt.bucket('Cores', 'terms', size=MAXSZ, field='Processors')
