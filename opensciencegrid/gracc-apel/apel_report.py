@@ -21,6 +21,16 @@ vo_list = ['atlas', 'alice', 'cms', 'enmr.eu']
 
 MAXSZ=2**30
 
+def add_bkt_metrics(bkt):
+    bkt = bkt.metric('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
+    bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
+    bkt = bkt.metric('CpuDuration_user',   'sum', field='CpuDuration_user')
+    bkt = bkt.metric('WallDuration',       'sum', field='WallDuration')
+    bkt = bkt.metric('NumberOfJobs',       'sum', field='Count')
+    bkt = bkt.metric('EarliestEndTime',    'min', field='EndTime')
+    bkt = bkt.metric('LatestEndTime',      'max', field='EndTime')
+    return bkt
+
 def gracc_query_apel(year, month):
     index = osg_summary_index
     starttime = datetime.datetime(year, month, 1)
@@ -43,13 +53,7 @@ def gracc_query_apel(year, month):
     #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='SiteName')
     #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='WLCGAccountingName')
 
-    bkt = bkt.metric('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
-    bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
-    bkt = bkt.metric('CpuDuration_user',   'sum', field='CpuDuration_user')
-    bkt = bkt.metric('WallDuration',       'sum', field='WallDuration')
-    bkt = bkt.metric('NumberOfJobs',       'sum', field='Count')
-    bkt = bkt.metric('EarliestEndTime',    'min', field='EndTime')
-    bkt = bkt.metric('LatestEndTime',      'max', field='EndTime')
+    add_bkt_metrics(bkt)
 
     response = s.execute()
     return response
