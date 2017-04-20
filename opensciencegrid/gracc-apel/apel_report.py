@@ -20,6 +20,7 @@ osg_summary_index = 'gracc.osg.summary'
 vo_list = ['atlas', 'alice', 'cms', 'enmr.eu']
 
 MAXSZ=2**30
+MISSING='__MISSING__'
 
 def add_bkt_metrics(bkt):
     bkt = bkt.metric('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
@@ -49,9 +50,12 @@ def gracc_query_apel(year, month):
     bkt = bkt.bucket('Cores', 'terms', size=MAXSZ, field='Processors')
     bkt = bkt.bucket('VO',    'terms', size=MAXSZ, field='VOName')
     bkt = bkt.bucket('DN',    'terms', size=MAXSZ, field='DN')
-    bkt = bkt.bucket('Site',  'terms', size=MAXSZ, field='OIM_ResourceGroup')
+    bkt = bkt.bucket('Site',  'terms', size=MAXSZ, missing=MISSING, field='OIM_ResourceGroup')
     #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='SiteName')
     #bkt = bkt.bucket('Site', 'terms', size=MAXSZ, field='WLCGAccountingName')
+    add_bkt_metrics(bkt)
+
+    bkt = bkt.bucket('SiteName',  'terms', size=MAXSZ, field='SiteName')
 
     add_bkt_metrics(bkt)
 
@@ -162,7 +166,12 @@ def main():
                 dn = dn_bkt.key
                 for site_bkt in sorted_buckets(dn_bkt.Site):
                     site = site_bkt.key
-                    print_record(year, month, vo, site, cores, dn, site_bkt)
+                    if site == MISSING:
+                        for sitename_bkt in sorted_buckets(site_bkt.SiteName):
+                            sitename = sitename_bkt.key
+                            print_record(year, month, vo, sitename, cores, dn, sitename_bkt)
+                    else:
+                        print_record(year, month, vo, site, cores, dn, site_bkt)
 
 
 if __name__ == '__main__':
