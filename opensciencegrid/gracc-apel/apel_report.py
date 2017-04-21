@@ -4,9 +4,11 @@ import elasticsearch
 from elasticsearch_dsl import Search, A, Q
 #import logging
 import datetime
+import dateutil.relativedelta
 import operator
 import sys
 import os
+
 
 #logging.basicConfig(level=logging.WARN)
 es = elasticsearch.Elasticsearch(
@@ -174,12 +176,30 @@ def bkt_key_lower(bkt):
 def sorted_buckets(agg, key=operator.attrgetter('key')):
     return sorted(agg.buckets, key=key)
 
+def auto_year_month():
+    today = datetime.datetime.today()
+    if today.day < 3:
+        onemonth = dateutil.relativedelta.relativedelta(months=1)
+        lastmonth = today - onemonth
+        return lastmonth.year, lastmonth.month
+    else:
+        return today.year, today.month
+
 def main():
-    try:
-        year,month = map(int, sys.argv[1:])
-    except:
-        print "usage: %s YEAR MONTH" % os.path.basename(__file__)
-        sys.exit(0)
+    if len(sys.argv[1:]) == 0:
+        year,month = auto_year_month()
+    else:
+        try:
+            year,month = map(int, sys.argv[1:])
+        except:
+            print >>sys.stderr, \
+                  "usage: %s [YEAR MONTH]" % os.path.basename(__file__)
+            sys.exit(0)
+
+    orig_stdout = sys.stdout
+    outfile = "%d_%02d.apel" % (year, month)
+    sys.stdout = open(outfile, "w")
+
     resp = gracc_query_apel(year, month)
     aggs = resp.aggregations
 
@@ -200,6 +220,8 @@ def main():
                     else:
                         print_record(year, month, vo, site, cores, dn, site_bkt)
 
+    sys.stdout = orig_stdout
+    print "wrote: %s" % outfile
 
 if __name__ == '__main__':
     main()
