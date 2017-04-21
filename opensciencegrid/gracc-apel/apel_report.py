@@ -114,6 +114,32 @@ def norm_factor(bkt, site):
             nf = nf_default
     return nf
 
+from collections import namedtuple
+RecordKey = namedtuple('RecordKey', ['vo', 'site', 'cores', 'dn'])
+Record = namedtuple('Record', ["EarliestEndTime", "LatestEndTime",
+                               "WallDuration", "CpuDuration",
+                               "NormFactor", "NumberOfJobs"])
+
+def bkt_record(bkt, site):
+    mintime = int(bkt.EarliestEndTime.value / 1000)
+    maxtime = int(bkt.LatestEndTime.value / 1000)
+    walldur = int(bkt.WallDuration.value)
+    cpudur  = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
+    nf      = norm_factor(bkt, site)
+    njobs   = int(bkt.NumberOfJobs.value)
+    return Record(mintime, maxtime, walldur, cpudur, nf, njobs)
+
+def record_adder(a,b):
+    mintime = min(a.EarliestEndTime, b.EarliestEndTime)
+    maxtime = max(a.LatestEndTime, b.LatestEndTime)
+    walldur = a.WallDuration + b.WallDuration
+    cpudur  = a.CpuDuration + b.CpuDuration
+    nf      = min(a.NormFactor, b.NormFactor)
+    njobs   = a.NumberOfJobs + b.NumberOfJobs
+    return Record(mintime, maxtime, walldur, cpudur, nf, njobs)
+
+Record.__add__ = record_adder
+
 def print_header():
     print fixed_header
 
