@@ -195,7 +195,8 @@ def main():
                     if site == MISSING:
                         for sitename_bkt in sorted_buckets(site_bkt.SiteName):
                             sitename = sitename_bkt.key
-                            print_record(year, month, vo, sitename, cores, dn, sitename_bkt)
+                            print_record(year, month, vo, sitename, cores, dn,
+                                         sitename_bkt)
                     else:
                         print_record(year, month, vo, site, cores, dn, site_bkt)
 
