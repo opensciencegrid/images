@@ -219,7 +219,7 @@ def main():
             sys.exit(0)
 
     orig_stdout = sys.stdout
-    outfile = "%d_%02d.apel" % (year, month)
+    outfile = "%02d_%d.apel" % (month, year)
     sys.stdout = open(outfile, "w")
 
     resp = gracc_query_apel(year, month)
