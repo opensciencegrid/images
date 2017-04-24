@@ -150,6 +150,21 @@ def record_adder(a,b):
 
 Record.__add__ = record_adder
 
+site_map = {
+    'Crane':     'Nebraska',
+    'Sandhills': 'Nebraska',
+    'Tusker':    'Nebraska'
+}
+
+def add_record(recs, vo, site, cores, dn, bkt):
+    if site in site_map:
+        site = site_map[site]
+
+    rk  = RecordKey(vo, site, cores, dn)
+    rec = bkt_record(bkt, site)
+
+    recs[rk] += rec
+
 def print_header():
     print fixed_header
 
@@ -224,13 +239,10 @@ def main():
                     if site == MISSING:
                         for sitename_bkt in sorted_buckets(site_bkt.SiteName):
                             sitename = sitename_bkt.key
-                            rk  = RecordKey(vo, sitename, cores, dn)
-                            rec = bkt_record(sitename_bkt, sitename)
-                            recs[rk] += rec
+                            add_record(recs, vo, sitename, cores, dn,
+                                       sitename_bkt)
                     else:
-                        rk  = RecordKey(vo, site, cores, dn)
-                        rec = bkt_record(site_bkt, site)
-                        recs[rk] += rec
+                        add_record(recs, vo, site, cores, dn, site_bkt)
 
     for rk,rec in sorted(recs.items()):
         print_rk_recr(year, month, rk, rec)
