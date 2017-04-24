@@ -116,11 +116,19 @@ def norm_factor(bkt, site):
             nf = nf_default
     return nf
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
+
+class autodict(defaultdict):
+    def __init__(self,*other):
+        defaultdict.__init__(self, self.__class__, *other)
+    def __add__ (self, other):
+        return other
+    def __repr__(self):
+        return '%s(%s)' % (self.__class__.__name__, dict.__repr__(self))
+
 RecordKey = namedtuple('RecordKey', ['vo', 'site', 'cores', 'dn'])
-Record = namedtuple('Record', ["EarliestEndTime", "LatestEndTime",
-                               "WallDuration", "CpuDuration",
-                               "NormFactor", "NumberOfJobs"])
+Record = namedtuple('Record', ["mintime", "maxtime", "walldur", "cpudur",
+                               "nf", "njobs"])
 
 def bkt_record(bkt, site):
     mintime = int(bkt.EarliestEndTime.value / 1000)
@@ -132,12 +140,12 @@ def bkt_record(bkt, site):
     return Record(mintime, maxtime, walldur, cpudur, nf, njobs)
 
 def record_adder(a,b):
-    mintime = min(a.EarliestEndTime, b.EarliestEndTime)
-    maxtime = max(a.LatestEndTime, b.LatestEndTime)
-    walldur = a.WallDuration + b.WallDuration
-    cpudur  = a.CpuDuration + b.CpuDuration
-    nf      = min(a.NormFactor, b.NormFactor)
-    njobs   = a.NumberOfJobs + b.NumberOfJobs
+    mintime = min(a.mintime, b.mintime)
+    maxtime = max(a.maxtime, b.maxtime)
+    walldur = a.walldur + b.walldur
+    cpudur  = a.cpudur  + b.cpudur
+    nf      = min(a.nf, b.nf)
+    njobs   = a.njobs + b.njobs
     return Record(mintime, maxtime, walldur, cpudur, nf, njobs)
 
 Record.__add__ = record_adder
@@ -145,29 +153,28 @@ Record.__add__ = record_adder
 def print_header():
     print fixed_header
 
-def print_record(year, month, vo, site, cores, dn, bkt):
-    cpudur = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
-    walldur = int(bkt.WallDuration.value)
-    nf = norm_factor(bkt, site)
+def print_rk_recr(year, month, rk, rec):
 
-    if dn == "N/A":
-        dn = "generic %s user" % vo
+    if rk.dn == "N/A":
+        dn = "generic %s user" % rk.vo
+    else:
+        dn = rk.dn
 
-    print "Site:",                   site
-    print "VO:",                     vo
-    print "EarliestEndTime:",        int(bkt.EarliestEndTime.value / 1000)
-    print "LatestEndTime:",          int(bkt.LatestEndTime.value / 1000)
+    print "Site:",                   rk.site
+    print "VO:",                     rk.vo
+    print "EarliestEndTime:",        rec.mintime
+    print "LatestEndTime:",          rec.maxtime
     print "Month:",                  "%02d" % month
     print "Year:",                   year
     print "Infrastructure:",         fixed_infrastructure
     print "GlobalUserName:",         dn
-    print "Processors:",             cores
+    print "Processors:",             rk.cores
     print "NodeCount:",              fixed_nodecount
-    print "WallDuration:",           walldur
-    print "CpuDuration:",            cpudur
-    print "NormalisedWallDuration:", int(walldur * nf)
-    print "NormalisedCpuDuration:",  int(cpudur * nf)
-    print "NumberOfJobs:",           int(bkt.NumberOfJobs.value)
+    print "WallDuration:",           rec.walldur
+    print "CpuDuration:",            rec.cpudur
+    print "NormalisedWallDuration:", int(rec.walldur * rec.nf)
+    print "NormalisedCpuDuration:",  int(rec.cpudur  * rec.nf)
+    print "NumberOfJobs:",           rec.njobs
     print fixed_separator
 
 def bkt_key_lower(bkt):
@@ -203,6 +210,8 @@ def main():
     resp = gracc_query_apel(year, month)
     aggs = resp.aggregations
 
+    recs = autodict()
+
     print_header()
     for cores_bkt in sorted_buckets(aggs.Cores):
         cores = cores_bkt.key
@@ -215,10 +224,16 @@ def main():
                     if site == MISSING:
                         for sitename_bkt in sorted_buckets(site_bkt.SiteName):
                             sitename = sitename_bkt.key
-                            print_record(year, month, vo, sitename, cores, dn,
-                                         sitename_bkt)
+                            rk  = RecordKey(vo, sitename, cores, dn)
+                            rec = bkt_record(sitename_bkt, sitename)
+                            recs[rk] += rec
                     else:
-                        print_record(year, month, vo, site, cores, dn, site_bkt)
+                        rk  = RecordKey(vo, site, cores, dn)
+                        rec = bkt_record(site_bkt, site)
+                        recs[rk] += rec
+
+    for rk,rec in sorted(recs.items()):
+        print_rk_recr(year, month, rk, rec)
 
     sys.stdout = orig_stdout
     print "wrote: %s" % outfile
