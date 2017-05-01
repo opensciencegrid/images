@@ -91,21 +91,21 @@ nf_table = normal_hepspec_table()
 def norm_factor(bkt, site):
     nf_max = 200
     nf_default = 12
-    nf_buckets = bkt.NormalFactor.buckets
-    if len(nf_buckets) == 0:
+    nf_values = [ b.key for b in bkt.NormalFactor.buckets if b.key > 0 ]
+    if len(nf_values) == 0:
         # XXX: *should* look up from table here, but the old script just
         #      used the default (12) when not found on OIM.
         # TODO: log
         nf = nf_default
-    elif len(nf_buckets) == 1:
+    elif len(nf_values) == 1:
         # ok, normal case
-        nf = nf_buckets[0].key
+        nf = nf_values[0]
     else:
         # oh weird, why more than one norm factor here?
         # TODO: log
-        nf = 1.0 * sum(b.key for b in nf_buckets) / len(nf_buckets)
+        nf = 1.0 * sum(nf_values) / len(nf_values)
 
-    if not ( 0 < nf < nf_max ):
+    if nf >= nf_max:
         # out of range: do table lookup
         # TODO: log
         if site in nf_table:
