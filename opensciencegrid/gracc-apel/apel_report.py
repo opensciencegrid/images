@@ -44,7 +44,7 @@ def gracc_query_apel(year, month):
         filter=[
             Q('range', EndTime={'gte': starttime, 'lt': endtime })
           & Q('terms', VOName=vo_list)
-          & ( Q('term', ResourceType='Batch') | Q('term', Grid='Local')) )
+          & ( Q('term', ResourceType='Batch') | Q('term', Grid='Local') )
         ]
     )
 
