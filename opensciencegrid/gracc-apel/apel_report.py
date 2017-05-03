@@ -37,8 +37,8 @@ def add_bkt_metrics(bkt):
 def gracc_query_apel(year, month):
     index = osg_summary_index
     starttime = datetime.datetime(year, month, 1)
-    endymd = (year, month+1, 1) if month < 12 else (year+1, 1, 1)
-    endtime = datetime.datetime(*endymd)
+    onemonth = dateutil.relativedelta.relativedelta(months=1)
+    endtime = starttime + onemonth
     s = Search(using=es, index=index)
     s = s.query('bool',
         filter=[
