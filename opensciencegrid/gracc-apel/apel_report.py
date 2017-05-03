@@ -200,7 +200,7 @@ def sorted_buckets(agg, key=operator.attrgetter('key')):
 
 def auto_year_month():
     today = datetime.datetime.today()
-    if today.day < 3:
+    if today.day <= 3:
         onemonth = dateutil.relativedelta.relativedelta(months=1)
         lastmonth = today - onemonth
         return lastmonth.year, lastmonth.month
