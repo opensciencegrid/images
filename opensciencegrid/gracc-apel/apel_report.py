@@ -181,7 +181,7 @@ def print_rk_recr(year, month, rk, rec):
     print "Site:",                   rk.site
     print "VO:",                     rk.vo
     print "EarliestEndTime:",        rec.mintime
-    print "LatestEndTime:",          rec.maxtime
+    print "LatestEndTime:",          rec.maxtime + 60*60*24 - 1
     print "Month:",                  "%02d" % month
     print "Year:",                   year
     print "Infrastructure:",         fixed_infrastructure
