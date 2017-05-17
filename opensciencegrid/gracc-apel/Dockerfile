@@ -1,5 +1,5 @@
 
-FROM centos:7
+FROM opensciencegrid/osg-wn:3.3-el7
 
 # install dependencies
 RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
