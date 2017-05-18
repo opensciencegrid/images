@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This is the old Gratia-based reporting script from Scott T; it is kept here
+# only for reference.  Use the GRACC-based script, apel_report.py, instead.
+
 loc=$(dirname "$0")
 
 logdir=/var/log
@@ -107,7 +110,7 @@ zero=0
 ## add header, once per upload
 echo "APEL-summary-job-message: v0.3"
 
-volist="atlas alice cms enmr.eu"
+volist="alice atlas cms enmr.eu"
 volist_in="'${volist// /','}'"
 
 coreslist=`echo "use gratia ;
@@ -115,9 +118,12 @@ coreslist=`echo "use gratia ;
     from MasterSummaryData m
        , VONameCorrection v
    where m.VOcorrid = v.corrid
+     and (m.ResourceType = 'Batch' or
+         (m.ResourceType = 'BatchPilot' and Grid = 'Local'))
      and lower(v.ReportableVOName) in ($volist_in)
      and m.EndTime >= '$year-$month-01'
-     and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH;
+     and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+   order by m.Cores;
 " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
 for cores in $coreslist ; do
@@ -131,6 +137,8 @@ for cores in $coreslist ; do
            from MasterSummaryData m
               , VONameCorrection v
           where m.VOcorrid = v.corrid
+            and (m.ResourceType = 'Batch' or
+                (m.ResourceType = 'BatchPilot' and Grid = 'Local'))
             and lower(v.ReportableVOName) = '$vo'
             and m.Cores = $cores
             and m.EndTime >= '$year-$month-01'
@@ -149,10 +157,13 @@ for cores in $coreslist ; do
                from MasterSummaryData m
                   , VONameCorrection v
               where m.VOcorrid = v.corrid
+                and (m.ResourceType = 'Batch' or
+                    (m.ResourceType = 'BatchPilot' and Grid = 'Local'))
                 and lower(v.ReportableVOName) = '$vo'
                 and m.Cores = $cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
+              order by m.DistinguishedName
               limit $user_index,1;
            " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
 
@@ -173,13 +184,16 @@ for cores in $coreslist ; do
                   , Site s
                   , Probe p
               where m.VOcorrid = v.corrid
+                and (m.ResourceType = 'Batch' or
+                    (m.ResourceType = 'BatchPilot' and Grid = 'Local'))
                 and s.siteid = p.siteid
                 and p.probename = m.ProbeName
                 and lower(v.ReportableVOName) = '$vo'
                 and m.Cores=$cores
                 and m.EndTime >= '$year-$month-01'
                 and m.EndTime <  '$year-$month-01' + INTERVAL 1 MONTH
-                and m.DistinguishedName = '$user_esc';
+                and m.DistinguishedName = '$user_esc'
+              order by s.SiteName;
            " | mysql --defaults-extra-file="$QQQ" | tail -n +2`
            size=${#resources}
            if [ "$size" -gt "$nlimit" ] ; then
@@ -257,6 +271,9 @@ for cores in $coreslist ; do
                                   , Site s
                                   , Probe p
                               where m.VOcorrid = v.corrid
+                                and (m.ResourceType = 'Batch' or
+                                    (m.ResourceType = 'BatchPilot' and
+                                     Grid = 'Local'))
                                 and s.siteid = p.siteid
                                 and p.probename = m.ProbeName
                                 and s.SiteName = '$resource'
@@ -279,6 +296,9 @@ for cores in $coreslist ; do
                                   , Site s
                                   , Probe p
                               where m.VOcorrid = v.corrid
+                                and (m.ResourceType = 'Batch' or
+                                    (m.ResourceType = 'BatchPilot' and
+                                     Grid = 'Local'))
                                 and s.siteid = p.siteid
                                 and p.probename = m.ProbeName
                                 and lower(v.ReportableVOName) = '$vo'
@@ -298,13 +318,15 @@ for cores in $coreslist ; do
                                wall=`echo "$wall+$x" | bc`
 
                                x=`echo $results | awk '{ print $2 }'`
-                               cpu=`echo "$cpu+$x" | bc`
+                               x2=`echo $results | awk '{ print $4 }'`
+                               cpu=`echo "$cpu+$x+$x2" | bc`
 
                                x=`echo $results | awk '{ print $1 }'`
                                nwall=`echo "$nwall+$x*$nf" | bc`
 
                                x=`echo $results | awk '{ print $2 }'`
-                               ncpu=`echo "$ncpu+$x*$nf" | bc`
+                               x2=`echo $results | awk '{ print $4 }'`
+                               ncpu=`echo "$ncpu+($x+$x2)*$nf" | bc`
 
                                x=`echo $results | awk '{ print $3 }'`
                                kjobs=`echo "$kjobs+$x" | bc`
