@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This is the old Gratia-based reporting script from Scott T; it is kept here
+# only for reference.  Use the GRACC-based script, apel_report.py, instead.
+
 loc=$(dirname "$0")
 
 logdir=/var/log

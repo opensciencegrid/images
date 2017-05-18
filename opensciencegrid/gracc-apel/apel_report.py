@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# GRACC-based APEL reporting script; run from docker-run.sh
+
 import elasticsearch
 from elasticsearch_dsl import Search, A, Q
 #import logging
