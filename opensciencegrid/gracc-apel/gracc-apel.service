@@ -1,0 +1,8 @@
+# /etc/systemd/system/gracc-apel.service
+[Unit]
+Description=GRACC APEL reporting Docker container
+
+[Service]
+Type=oneshot
+ExecStart=/bin/docker run -v /etc/grid-security/apel/apelcert.pem:/etc/grid-security/apel/apelcert.pem -v /etc/grid-security/apel/apelkey.pem:/etc/grid-security/apel/apelkey.pem opensciencegrid/gracc-apel
+
