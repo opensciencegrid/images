@@ -1,13 +1,8 @@
 # /etc/systemd/system/gracc-apel.service
 [Unit]
 Description=GRACC APEL reporting Docker container
-After=docker.service
-Requires=docker.service
-# This will auto-start the cron timer
-Wants=gracc-apel-cron.timer
 
 [Service]
-EnvironmentFile=-/etc/sysconfig/gracc-apel
-# Giving the container a name (gracc-apel.service in this case) is really helpful later on
+Type=oneshot
 ExecStart=/bin/docker run -v /etc/grid-security/apel/apelcert.pem:/etc/grid-security/apel/apelcert.pem -v /etc/grid-security/apel/apelkey.pem:/etc/grid-security/apel/apelkey.pem opensciencegrid/gracc-apel
 

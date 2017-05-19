@@ -1,16 +1,14 @@
-# /etc/systemd/system/gracc-apel-cron.timer
+# /etc/systemd/system/gracc-apel.timer
 [Unit]
-Description=Run gracc apel reporting script daily
-# Auto-shutdown if 'gracc-apel.service' is not available
-Requires=gracc-apel.service
+Description=Run GRACC-to-APEL reporting script
 
 [Timer]
 # Explicitly declare service that this timer is responsible for
-Unit=gracc-apel-cron.service
-# Runs 'gracc-apel-cron' relative to when the *timer-unit* has been activated
-OnActiveSec=1day
-# Runs 'gracc-apel-cron' relative to when *service-unit* was last deactivated
-OnUnitInactiveSec=1day
+Unit=gracc-apel.service
+# Runs 'gracc-apel' relative to when the *timer-unit* has been activated
+OnActiveSec=1hour
+# Runs 'gracc-apel' relative to when *service-unit* was last deactivated
+OnUnitInactiveSec=1hour
 
 [Install]
 WantedBy=timers.target
