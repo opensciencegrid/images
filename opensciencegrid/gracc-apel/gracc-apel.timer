@@ -1,0 +1,17 @@
+# /etc/systemd/system/gracc-apel.timer
+[Unit]
+Description=Run GRACC-to-APEL reporting script
+
+[Timer]
+# Explicitly declare service that this timer is responsible for
+Unit=gracc-apel.service
+# Runs 'gracc-apel' relative to when the *timer-unit* has been activated
+OnActiveSec=1hour
+# Runs 'gracc-apel' relative to when *service-unit* was last deactivated
+OnUnitInactiveSec=1hour
+
+# Randomize runtime by a small amount each run.
+RandomizedDelaySec=2min
+
+[Install]
+WantedBy=timers.target
