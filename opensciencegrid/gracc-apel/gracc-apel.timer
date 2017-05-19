@@ -10,5 +10,8 @@ OnActiveSec=1hour
 # Runs 'gracc-apel' relative to when *service-unit* was last deactivated
 OnUnitInactiveSec=1hour
 
+# Randomize runtime by a small amount each run.
+RandomizedDelaySec=2min
+
 [Install]
 WantedBy=timers.target
