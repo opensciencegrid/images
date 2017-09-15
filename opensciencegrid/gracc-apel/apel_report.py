@@ -30,7 +30,6 @@ def add_bkt_metrics(bkt):
     bkt = bkt.metric('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
     bkt = bkt.metric('CpuDuration_system', 'sum', field='CpuDuration_system')
     bkt = bkt.metric('CpuDuration_user',   'sum', field='CpuDuration_user')
-    bkt = bkt.metric('CpuDuration',        'sum', field='CpuDuration')
     bkt = bkt.metric('WallDuration',       'sum', field='WallDuration')
     bkt = bkt.metric('NumberOfJobs',       'sum', field='Count')
     bkt = bkt.metric('EarliestEndTime',    'min', field='EndTime')
@@ -140,10 +139,7 @@ def bkt_record(bkt, site):
     mintime = int(bkt.EarliestEndTime.value / 1000)
     maxtime = int(bkt.LatestEndTime.value / 1000)
     walldur = int(bkt.WallDuration.value)
-    if bkt.CpuDuration_user.value == 0 and bkt.CpuDuration_system.value == 0:
-        cpudur = int(bkt.CpuDuration.value)
-    else:
-        cpudur  = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
+    cpudur  = int(bkt.CpuDuration_user.value + bkt.CpuDuration_system.value)
     nf      = norm_factor(bkt, site)
     njobs   = int(bkt.NumberOfJobs.value)
     return Record(mintime, maxtime, walldur, cpudur, nf, njobs)
