@@ -14,6 +14,5 @@ COPY entrypoint.sh /sbin/entrypoint.sh
 
 
 EXPOSE 3128
-VOLUME ["/var/cache/squid"]
 
 CMD ["/sbin/entrypoint.sh"]
