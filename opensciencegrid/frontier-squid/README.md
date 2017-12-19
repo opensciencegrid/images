@@ -7,7 +7,7 @@ A [Docker](https://www.docker.com/) container image for [Squid proxy server](htt
 To run with the defaults:
 
 ```bash
-docker run --rm --name --name osg-frontier-squid \
+docker run --rm --name osg-frontier-squid \
   -p 3128:3128 slateci/osg-frontier-squid
 ```
 

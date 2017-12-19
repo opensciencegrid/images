@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if [[ ! -e /etc/squid/squid.conf ]]; then
+  echo "Genrating squid.conf..."
   /etc/squid/customize.sh < /etc/squid/squid.conf.frontierdefault > /etc/squid/squid.conf
 fi
 
@@ -11,7 +12,7 @@ if [[ -z ${1} ]]; then
     echo "Initializing cache..."
     /usr/sbin/squid -N -f /etc/squid/squid.conf -z
   fi
-  echo "Starting squid3..."
+  echo "Starting squid..."
   exec /usr/sbin/squid -f /etc/squid/squid.conf -NYCd 1
 else
   exec "$@"
