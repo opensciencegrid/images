@@ -29,4 +29,4 @@ X-Cache: HIT from 797a56e426cf
 |---|---|---|---|
 | /etc/squid/customize.sh | Conf file (VOLUME)  | One possible way to configure squid is by passing the customise.sh file.  | -v ~/customize.sh:/etc/squid/customize.sh  |
 | /etc/squid/squid.conf  | Conf file (VOLUME)  | One possible way to configure squid is by passing directly squid.conf file.  | -v ~/squid.conf:/etc/squid/squid.conf  |
-| /var/cache/squid  | Cache dir (VOLUME)  | This directory contains the cache for squid. If the directory is persistent, the cache will presist after a redeployment.  |   |
+| /var/cache/squid  | Cache dir (VOLUME)  | This directory contains the cache for squid. If the directory is persistent, the cache will presist after a redeployment.  | -v /tmp/squid:/var/cache/squid |
