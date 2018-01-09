@@ -17,6 +17,5 @@ spec:
       containers:
       - name: osg-frontier-squid
         image: slateci/osg-frontier-squid
-        imagePullPolicy: Never #specifically for minikube testing
         ports:
         - containerPort: 3128
