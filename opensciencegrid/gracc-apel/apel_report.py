@@ -21,7 +21,7 @@ es = elasticsearch.Elasticsearch(
 osg_raw_index = 'gracc.osg.raw-*'
 osg_summary_index = 'gracc.osg.summary'
 
-vo_list = ['atlas', 'alice', 'cms', 'enmr.eu']
+vo_list = ['atlas', 'alice', 'belle', 'cms', 'enmr.eu']
 
 MAXSZ=2**30
 MISSING='__MISSING__'
