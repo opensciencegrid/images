@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: frontier-squid
+  name: frontier-squid
+  namespace: cvmfs
+spec:
+  ports:
+  - port: 3128
+    protocol: TCP
+    targetPort: 3128
+  selector:
+    k8s-app: frontier-squid
+  type: ClusterIP
