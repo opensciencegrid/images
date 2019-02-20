@@ -2,5 +2,5 @@
 
 configmap:
 	-kubectl delete configmap cvmfs-osg-config -n cvmfs
-	kubectl create configmap cvmfs-osg-config -n cvmfs --from-file=default.local
+	./create_local.sh && kubectl create configmap cvmfs-osg-config -n cvmfs --from-file=default.local
 

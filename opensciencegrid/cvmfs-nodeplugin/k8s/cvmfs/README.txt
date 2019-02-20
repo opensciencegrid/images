@@ -1,3 +1,5 @@
+# Important: Make sure the frontend-squid service has been created
+
 # create configmap in the default cvmfs namespace
 make
 

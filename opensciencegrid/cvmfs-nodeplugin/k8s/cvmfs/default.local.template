@@ -1,5 +1,6 @@
 CVMFS_SERVER_URL="http://cvmfs-s1bnl.opensciencegrid.org:8000/cvmfs/@fqrn@;http://cvmfs-s1fnal.opensciencegrid.org:8000/cvmfs/@fqrn@;http://cvmfs-s1goc.opensciencegrid.org:8000/cvmfs/@fqrn@"
 CVMFS_KEYS_DIR=/etc/cvmfs/keys/opensciencegrid.org/
 CVMFS_USE_GEOAPI=yes
-CVMFS_HTTP_PROXY="http://cvmfs-1.t2.ucsd.edu:3128"
-CVMFS_QUOTA_LIMIT=2000
+# Note: FRONTIERSQUIDSERVICE will be replaced with the IP of the frontier-squid service
+CVMFS_HTTP_PROXY="http://FRONTIERSQUIDSERVICE:3128"
+CVMFS_QUOTA_LIMIT=5000
