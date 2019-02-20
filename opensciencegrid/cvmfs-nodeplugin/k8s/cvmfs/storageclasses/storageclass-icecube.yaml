@@ -1,0 +1,8 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: csi-cvmfs-icecube
+  namespace: cvmfs
+provisioner: csi-cvmfsplugin
+parameters:
+  repository: icecube.opensciencegrid.org
