@@ -8,11 +8,14 @@ RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
 RUN yum clean all && \
     yum update -y && \
     yum install -y frontier-squid && \
+    yum install -y supervisor && \
     systemctl enable frontier-squid
 
-COPY app/ /app
+ADD sbin/* /usr/local/sbin/
 
+ADD supervisord.conf /etc/
+ADD supervisord.d/* /etc/supervisord.d/
 
 EXPOSE 3128
 
-CMD ["/app/entrypoint.sh"]
+CMD ["/usr/local/sbin/supervisord_startup.sh"]
