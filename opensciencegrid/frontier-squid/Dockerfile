@@ -1,15 +1,21 @@
-FROM centos:7
-MAINTAINER carcassi@umich.edu
+FROM centos:centos7
 
-RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
-    yum install -y yum-plugin-priorities && \
-    rpm -Uvh http://mirror.grid.uchicago.edu/pub/osg/3.4/osg-3.4-el7-release-latest.rpm
+LABEL maintainer OSG Software <help@opensciencegrid.org>
+
+RUN yum -y install http://repo.opensciencegrid.org/osg/3.4/osg-3.4-el7-release-latest.rpm \
+                   epel-release \
+                   yum-plugin-priorities
 
 RUN yum clean all && \
-    yum update -y && \
-    yum install -y frontier-squid && \
-    yum install -y supervisor && \
-    systemctl enable frontier-squid
+    yum update -y 
+
+RUN yum install -y frontier-squid && \
+    yum install -y supervisor
+
+RUN yum clean all --enablerepo=* && rm -rf /var/cache/yum/
+
+
+RUN systemctl enable frontier-squid
 
 ADD sbin/* /usr/local/sbin/
 
