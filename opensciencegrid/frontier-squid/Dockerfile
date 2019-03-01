@@ -2,6 +2,11 @@ FROM centos:centos7
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
+# Create the squid user with a fixed GID/UID
+RUN groupadd -o -g 10941 squid
+RUN useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid
+
+
 RUN yum -y install http://repo.opensciencegrid.org/osg/3.4/osg-3.4-el7-release-latest.rpm \
                    epel-release \
                    yum-plugin-priorities
@@ -21,6 +26,7 @@ ADD sbin/* /usr/local/sbin/
 
 ADD supervisord.conf /etc/
 ADD supervisord.d/* /etc/supervisord.d/
+RUN mkdir -p /var/log/supervisor
 
 EXPOSE 3128
 
