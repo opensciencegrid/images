@@ -28,6 +28,4 @@ ADD supervisord.conf /etc/
 ADD supervisord.d/* /etc/supervisord.d/
 RUN mkdir -p /var/log/supervisor
 
-EXPOSE 3128
-
 CMD ["/usr/local/sbin/supervisord_startup.sh"]
