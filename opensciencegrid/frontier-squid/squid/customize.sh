@@ -2,7 +2,7 @@
 #
 # This file provides a parametrized version of
 #  /etc/squid/customize.sh
-# that comes from the RPM.
+# that comes from the OSG RPM.
 # Note:
 #   It will not be overwritten by upgrades.
 # See customhelps.awk for information on predefined edit functions.
