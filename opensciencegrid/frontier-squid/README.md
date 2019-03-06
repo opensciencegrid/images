@@ -26,7 +26,7 @@ Three such variables are supported:
                      Note: The cache disk area is located at /var/cache/squid.
 * SQUID_CACHE_MEM - Sets the cache_mem option which regulates the size squid reserves for caching small objects in memory. Defaults to "128 MB".
 
-For more details, see the [squid official page](https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Configuration).
+For more details, see the [Frontier Squid documentation](https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Configuration).
 
 
 Validate
