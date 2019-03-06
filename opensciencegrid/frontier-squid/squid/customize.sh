@@ -9,7 +9,7 @@
 # Avoid single quotes in the awk source or you have to protect them from bash.
 #
 
-# If some of the variables are not defined, set the to their default values
+# If some of the variables are not defined, set them to their default values
 # These values should reflect what was in the RPM
 
 if [ -z "$SQUID_IPRANGE" ]; then
