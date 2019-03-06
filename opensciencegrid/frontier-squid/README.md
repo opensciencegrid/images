@@ -21,6 +21,9 @@ Configuring Squid
 
 The recommended way to configure the squid in the container is by means of environment variables.
 Three such variables are supported:
+
+| Variable name       | Description                                                             | Defaults                                     |
+|
 |---------------------|-------------------------------------------------------------------------|----------------------------------------------|
 | SQUID_IPRANGE       | Limits the incoming connections to the provided whitelist.     |By default only standard private network addresses are whitelisted. |
 | SQUID_CACHE_DISK    | Sets the cache_dir option which determines the disk size squid uses. Must be an integer value, and its unit is MBs. Note: The cache disk area is located at /var/cache/squid. | Defaults to 10000. |
@@ -28,6 +31,9 @@ Three such variables are supported:
 |---------------------|-------------------------------------------------------------------------|----------------------------------------------|
 
 Moreover, be aware that in order to preserve the cache between redeployments, you should map the following areas to persistent storage outside the container:
+
+| Mountpoint       | Description                                                                   |
+|
 |------------------|-------------------------------------------------------------------------------|
 | /var/cache/squid | This directory contains the cache for squid. See also SQUID_CACHE_DISK above. |
 | /var/log/squid   | This directory contains the squid logs.                                       |
