@@ -19,11 +19,24 @@ docker run --rm --name osg-frontier-squid \
 Configuring Squid
 -----------------
 
-|                         | Type               | Description                                                                                                               | Example                                   |
-|-------------------------|--------------------|---------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
-| /etc/squid/customize.sh | Conf file (VOLUME) | One possible way to configure squid is by passing the customize.sh file.                                                  | -v ~/customize.sh:/etc/squid/customize.sh |
-| /etc/squid/squid.conf   | Conf file (VOLUME) | One possible way to configure squid is by passing directly squid.conf file.                                               | -v ~/squid.conf:/etc/squid/squid.conf     |
-| /var/cache/squid        | Cache dir (VOLUME) | This directory contains the cache for squid. If the directory is persistent, the cache will presist after a redeployment. | -v /tmp/squid:/var/cache/squid            |
+The recommended way to configure the squid in the container is by means of environment variables.
+Three such variables are supported:
+
+Variable name       | Description                                                             | Defaults                                     |
+---------------------|-------------------------------------------------------------------------|----------------------------------------------|
+SQUID_IPRANGE       | Limits the incoming connections to the provided whitelist.     |By default only standard private network addresses are whitelisted. |
+SQUID_CACHE_DISK    | Sets the cache_dir option which determines the disk size squid uses. Must be an integer value, and its unit is MBs. Note: The cache disk area is located at /var/cache/squid. | Defaults to 10000. |
+SQUID_CACHE_MEM     | Sets the cache_mem option which regulates the size squid reserves for caching small objects in memory. | Defaults to "128 MB". |
+
+Moreover, be aware that in order to preserve the cache between redeployments, you should map the following areas to persistent storage outside the container:
+
+Mountpoint       | Description                                                          | Example docker mount               |
+-----------------|----------------------------------------------------------------------|------------------------------------|
+/var/cache/squid | This directory contains the cache for squid. See also SQUID_CACHE_DISK above. | -v /tmp/squid:/var/cache/squid |
+/var/log/squid   | This directory contains the squid logs.                              | -v /tmp/log:/var/log/squid         |
+
+For more details, see the [Frontier Squid documentation](https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Configuration).
+
 
 
 Validate

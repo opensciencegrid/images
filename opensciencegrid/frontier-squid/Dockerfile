@@ -20,11 +20,18 @@ RUN yum install -y frontier-squid && \
 RUN yum clean all --enablerepo=* && rm -rf /var/cache/yum/
 
 ADD sbin/* /usr/local/sbin/
+ADD squid/* /etc/squid/
 
 ADD supervisord.conf /etc/
 ADD supervisord.d/* /etc/supervisord.d/
 RUN mkdir -p /var/log/supervisor
 
 EXPOSE 3128
+
+# These env variables can be changed in the container instance
+# Set default values which should reflect what is in the RPM
+ENV SQUID_IPRANGE="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fc00::/7 fe80::/10"
+ENV SQUID_CACHE_MEM="128 MB"
+ENV SQUID_CACHE_DISK="10000"
 
 CMD ["/usr/local/sbin/supervisord_startup.sh"]
