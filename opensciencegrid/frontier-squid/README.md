@@ -23,7 +23,7 @@ The recommended way to configure the squid in the container is by means of envir
 Three such variables are supported:
 * SQUID_IPRANGE - Limits the incoming connections to the provided whitelist. By default only standard private network addresses are whitelisted.
 * SQUID_CACHE_DISK - Sets the cache_dir option which determines the disk size squid uses. Must be an integer value, and its unit is MBs. Defaults to 10000.
-                     Note: The cache are is located at /var/cache/squid.
+                     Note: The cache disk area is located at /var/cache/squid.
 * SQUID_CACHE_MEM - Sets the cache_mem option which regulates the size squid reserves for caching small objects in memory. Defaults to "128 MB".
 
 For more details, see the [squid official page](https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Configuration).
