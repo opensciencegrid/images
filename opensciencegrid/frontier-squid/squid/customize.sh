@@ -10,7 +10,7 @@
 #
 
 # If some of the variables are not defined, set them to their default values
-# These values should reflect what was in the RPM
+# These values should reflect what is in the RPM
 
 if [ -z "$SQUID_IPRANGE" ]; then
   export SQUID_IPRANGE="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fc00::/7 fe80::/10" 
