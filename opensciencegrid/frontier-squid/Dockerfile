@@ -20,6 +20,7 @@ RUN yum install -y frontier-squid && \
 RUN yum clean all --enablerepo=* && rm -rf /var/cache/yum/
 
 ADD sbin/* /usr/local/sbin/
+ADD squid/* /etc/squid/
 
 ADD supervisord.conf /etc/
 ADD supervisord.d/* /etc/supervisord.d/
