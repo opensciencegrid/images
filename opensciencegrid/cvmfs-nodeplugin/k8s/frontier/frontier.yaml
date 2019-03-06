@@ -10,7 +10,7 @@ spec:
         kubernetes.io/hostname: k8s-gpu-03.sdsc.optiputer.net
       containers:
       - name: frontier-squid
-        image: sfiligoi/prp-osg-cvmfs:frontier
+        image: opensciencegrid/frontier-squid:development
         imagePullPolicy: Always
         #command: ["sh", "-c", "sleep infinity"]
         ports:
