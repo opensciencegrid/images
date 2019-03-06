@@ -13,15 +13,18 @@
 # These values should reflect what is in the RPM
 
 if [ -z "$SQUID_IPRANGE" ]; then
-  export SQUID_IPRANGE="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fc00::/7 fe80::/10" 
+  echo "ERROR: SQUID_IPRANGE undefined, aborting" 1>&2
+  exit 1
 fi
 
 if [ -z "$SQUID_CACHE_MEM" ]; then
-  export SQUID_CACHE_MEM="128 MB" 
+  echo "ERROR: SQUID_CACHE_MEM undefined, aborting" 1>&2
+  exit 1
 fi
 
 if [ -z "$SQUID_CACHE_DISK" ]; then
-  export SQUID_CACHE_DISK="10000"
+  echo "ERROR: SQUID_CACHE_DISK undefined, aborting" 1>&2
+  exit 1
 fi
 
 # Now actually run the config command
