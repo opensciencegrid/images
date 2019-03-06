@@ -30,10 +30,10 @@ SQUID_CACHE_MEM     | Sets the cache_mem option which regulates the size squid r
 
 Moreover, be aware that in order to preserve the cache between redeployments, you should map the following areas to persistent storage outside the container:
 
-Mountpoint       | Description                                                                   | Example docker mount |
------------------|-------------------------------------------------------------------------------|--------------------------------|
+Mountpoint       | Description                                                          | Example docker mount               |
+-----------------|----------------------------------------------------------------------|------------------------------------|
 /var/cache/squid | This directory contains the cache for squid. See also SQUID_CACHE_DISK above. | -v /tmp/squid:/var/cache/squid |
-/var/log/squid   | This directory contains the squid logs.                                       | -v /tmp/log:/var/log/squid     |
+/var/log/squid   | This directory contains the squid logs.                              | -v /tmp/log:/var/log/squid         |
 
 For more details, see the [Frontier Squid documentation](https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Configuration).
 
