@@ -15,7 +15,7 @@ RUN yum clean all && \
     yum update -y 
 
 RUN yum install -y frontier-squid && \
-    yum install -y supervisor
+    yum install -y supervisor cronie
 
 RUN yum clean all --enablerepo=* && rm -rf /var/cache/yum/
 
