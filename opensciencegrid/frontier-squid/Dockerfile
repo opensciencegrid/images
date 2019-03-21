@@ -13,10 +13,9 @@ RUN yum install -y frontier-squid
 
 RUN yum clean all --enablerepo=* && rm -rf /var/cache/yum/
 
-ADD sbin/* /usr/local/sbin/
-ADD squid/* /etc/squid/
-
-ADD supervisord.d/* /etc/supervisord.d/
+ADD image_post_init.sh /usr/local/sbin/
+ADD squid-customize.sh /etc/squid/customize.sh
+ADD supervisor-frontier-squid.conf /etc/supervisord.d/40-frontier-squid.conf
 
 EXPOSE 3128
 
