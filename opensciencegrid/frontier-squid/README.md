@@ -12,8 +12,8 @@ Usage
 To run with the defaults:
 
 ```bash
-docker run --rm --name osg-frontier-squid \
-  -p 3128:3128 opensciencegrid/osg-frontier-squid
+docker run --rm --name frontier-squid \
+  -p 3128:3128 opensciencegrid/osg-frontier-squid:development
 ```
 
 Configuring Squid
