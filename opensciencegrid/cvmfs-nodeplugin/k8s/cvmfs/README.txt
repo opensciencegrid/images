@@ -3,6 +3,9 @@
 # create configmap in the default cvmfs namespace
 make
 
+# the CSI processes will need service account
+kubectl create -f  accounts/
+
 # create the CVMFS k8s CSI plugin in the default cvmfs namespace
 # Note: Relying on gitlab-registry.nautilus.optiputer.net/prp/cvmfs-csi
 kubectl create -f csi-processes/
