@@ -35,7 +35,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: gitlab-registry.nautilus.optiputer.net/prp/cvmfs-csi:latest
+          image: sfiligoi/csi-cvmfsplugin:prp-osg
           args :
             - "--nodeid=$(NODE_ID)"
             - "--endpoint=$(CSI_ENDPOINT)"
