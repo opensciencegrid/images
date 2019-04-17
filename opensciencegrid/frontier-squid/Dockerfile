@@ -1,4 +1,4 @@
-FROM opensciencegrid/software-base:development
+FROM opensciencegrid/software-base:fresh
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
