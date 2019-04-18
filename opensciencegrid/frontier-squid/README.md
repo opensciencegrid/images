@@ -4,7 +4,7 @@ Frontier Squid Container Image [![Build Status](https://travis-ci.org/openscienc
 A [Docker](https://hub.docker.com/r/opensciencegrid/frontier-squid) container image for
 [Squid proxy server](http://www.squid-cache.org/) as packaged by [OSG](https://www.opensciencegrid.org/).
 The image is built according to the
-[OSG installation instructions](http://opensciencegrid.github.io/docs/data/frontier-squid/).
+[OSG installation instructions](http://opensciencegrid.org/docs/data/frontier-squid/).
 
 Usage
 -----
@@ -13,8 +13,11 @@ To run with the defaults:
 
 ```bash
 docker run --rm --name frontier-squid \
-  -p 3128:3128 opensciencegrid/osg-frontier-squid:development
+  -p 3128:3128 opensciencegrid/osg-frontier-squid:stable
 ```
+
+See [our documentation](https://opensciencegrid.org/technology/policy/container-release/#tags) for details of our docker
+image tags.
 
 Configuring Squid
 -----------------
