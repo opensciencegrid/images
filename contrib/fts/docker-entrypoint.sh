@@ -9,4 +9,4 @@ chown root:root /etc/grid-security/hostkey.pem
 cp /tmp/fts3-configs/fts3config /etc/fts3/fts3config
 cp /tmp/fts3-configs/fts-msg-monitoring.conf /etc/fts3/fts-msg-monitoring.conf
 python /usr/share/fts/fts-database-upgrade.py
-supervisorctl
+supervisorctl -c /etc/supervisord.conf
