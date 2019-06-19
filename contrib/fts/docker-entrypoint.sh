@@ -11,6 +11,6 @@ cp /tmp/fts3-configs/fts-msg-monitoring.conf /etc/fts3/fts-msg-monitoring.conf
 mkdir -p /var/lib/mysql/
 touch /var/lib/mysql/mysql.sock
 if [[ ! -z "${DATABASE_UPGRADE}" ]]; then
-   echo Y | python /usr/share/fts/fts-database-upgrade.py
+   yes Y | python /usr/share/fts/fts-database-upgrade.py
 fi
 /usr/bin/supervisord -c /etc/supervisord.conf
