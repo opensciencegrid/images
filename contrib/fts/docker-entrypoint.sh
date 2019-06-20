@@ -6,6 +6,7 @@ chown root:root /etc/grid-security/hostcert.pem
 cp /tmp/fts3-host-pems/hostkey.pem /etc/grid-security/
 chmod 400 /etc/grid-security/hostkey.pem
 chown root:root /etc/grid-security/hostkey.pem
+cp /tmp/fts3-configs/ca.crt /etc/grid-security/certificates/docker-entrypoint_ca.crt
 cp /tmp/fts3-configs/fts3config /etc/fts3/fts3config
 cp /tmp/fts3-configs/fts-msg-monitoring.conf /etc/fts3/fts-msg-monitoring.conf
 mkdir -p /var/lib/mysql/
@@ -14,6 +15,9 @@ chown fts3:fts3 /var/log/
 touch /var/lib/mysql/mysql.sock
 if [[ ! -z "${DATABASE_UPGRADE}" ]]; then
    yes Y | python /usr/share/fts/fts-database-upgrade.py
+fi
+if [[ ! -z "${WEB_INTERFACE}" ]]; then
+   rm /etc/httpd/conf.d/ftsmon.conf
 fi
 fts_server
 fts_bringonline
