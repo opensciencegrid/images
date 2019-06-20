@@ -13,4 +13,6 @@ touch /var/lib/mysql/mysql.sock
 if [[ ! -z "${DATABASE_UPGRADE}" ]]; then
    yes Y | python /usr/share/fts/fts-database-upgrade.py
 fi
-/usr/bin/supervisord -c /etc/supervisord.conf
+fts_server
+fts_bringonline
+httpd
