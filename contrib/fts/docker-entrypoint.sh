@@ -16,7 +16,7 @@ touch /var/lib/mysql/mysql.sock
 if [[ ! -z "${DATABASE_UPGRADE}" ]]; then
    yes Y | python /usr/share/fts/fts-database-upgrade.py
 fi
-if [[ ! -z "${WEB_INTERFACE}" ]]; then
+if [[ -z "${WEB_INTERFACE}" ]]; then
    rm /etc/httpd/conf.d/ftsmon.conf
 fi
 fts_server
