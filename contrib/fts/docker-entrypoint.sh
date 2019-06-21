@@ -19,6 +19,7 @@ fi
 if [[ -z "${WEB_INTERFACE}" ]]; then
    rm /etc/httpd/conf.d/ftsmon.conf
 fi
+fetch-crl
 fts_server
 fts_bringonline
 httpd

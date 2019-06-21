@@ -1,4 +1,5 @@
 FROM centos/systemd:latest
+COPY crontab /etc/crontab
 COPY supervisord.conf etc/supervisord.conf
 COPY fts3config etc/fts3/fts3config
 COPY fts-msg-monitoring.conf etc/fts3/fts-msg-monitoring.conf
