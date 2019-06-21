@@ -19,4 +19,7 @@ fi
 if [[ ! -z "${WEB_INTERFACE}" ]]; then
    rm /etc/httpd/conf.d/ftsmon.conf
 fi
+fts_server
+fts_bringonline
+httpd
 supervisord -c etc/supervisord.conf
