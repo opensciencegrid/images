@@ -12,9 +12,14 @@ cp /tmp/fts3-configs/fts-msg-monitoring.conf /etc/fts3/fts-msg-monitoring.conf
 mkdir -p /var/lib/mysql/
 mkdir -p /var/log/fts3rest/ && touch /var/log/fts3rest/fts3rest.log
 chown fts3:fts3 /var/log/
+chown fts3:fts3 /var/log/fts3rest/fts3rest.log
 touch /var/lib/mysql/mysql.sock
 if [[ ! -z "${DATABASE_UPGRADE}" ]]; then
    yes Y | python /usr/share/fts/fts-database-upgrade.py
+fi
+if [[ ! -z "${REST_HOST}" ]]; then
+   replaceCommand="sed -i -e 's/*/${REST_HOST}/g' /etc/httpd/conf.d/fts3rest.conf"
+   eval $replaceCommand
 fi
 if [[ -z "${WEB_INTERFACE}" ]]; then
    rm /etc/httpd/conf.d/ftsmon.conf
