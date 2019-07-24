@@ -9,7 +9,7 @@ RUN useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid
 RUN yum clean all && \
     yum update -y 
 
-RUN yum install -y frontier-squid
+RUN yum install -y frontier-squid --enablerepo=osg-development
 
 RUN yum clean all --enablerepo=* && rm -rf /var/cache/yum/
 
