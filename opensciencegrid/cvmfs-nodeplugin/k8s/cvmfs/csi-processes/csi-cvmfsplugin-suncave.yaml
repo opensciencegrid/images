@@ -1,5 +1,5 @@
 kind: DaemonSet
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 metadata:
   name: csi-cvmfsplugin-suncave
   namespace: cvmfs
@@ -19,7 +19,7 @@ spec:
         key: nautilus.io/suncave
         operator: Exists
       nodeSelector:
-        env: suncave
+        nautilus.io/latency: suncave-b
       containers:
         - name: csi-driver-registrar
           image: quay.io/k8scsi/csi-node-driver-registrar:v1.0.2
