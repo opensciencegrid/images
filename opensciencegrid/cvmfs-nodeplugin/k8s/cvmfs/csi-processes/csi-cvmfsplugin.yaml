@@ -14,6 +14,10 @@ spec:
     spec:
       serviceAccount: cvmfs-nodeplugin
       hostNetwork: true
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/noceph
+        operator: Exists
       containers:
         - name: csi-driver-registrar
           image: quay.io/k8scsi/csi-node-driver-registrar:v1.0.2
