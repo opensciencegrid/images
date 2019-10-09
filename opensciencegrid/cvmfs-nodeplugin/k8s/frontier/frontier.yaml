@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontier-squid
@@ -6,26 +6,31 @@ metadata:
   labels:
     k8s-app: frontier-squid
 spec:
+  selector:
+    matchLabels:
+      k8s-app: frontier-squid
   template:
     metadata: 
       labels:
         k8s-app: frontier-squid
     spec:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 1
-            preference:
-              matchExpressions:
-              - key: nw
-                operator: In
-                values:
-                - 100G
+      nodeSelector: 
+        kubernetes.io/hostname: xcache-11.t2.ucsd.edu
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/noceph
+        operator: Exists
+      - effect: NoSchedule
+        key: nautilus.io/chase-ci
+        operator: Exists
       containers:
       - name: frontier-squid
-        image: opensciencegrid/frontier-squid:development
+        image: opensciencegrid/frontier-squid:fresh
         imagePullPolicy: Always
         #command: ["sh", "-c", "sleep infinity"]
+        env:
+        - name: SQUID_IPRANGE
+          value: "0.0.0.0/0"
         ports:
         - containerPort: 3128
 
