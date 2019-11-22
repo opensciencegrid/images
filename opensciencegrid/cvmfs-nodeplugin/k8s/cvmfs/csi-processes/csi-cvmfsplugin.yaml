@@ -1,5 +1,5 @@
 kind: DaemonSet
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 metadata:
   name: csi-cvmfsplugin
   namespace: cvmfs
@@ -20,6 +20,9 @@ spec:
         operator: Exists
       - effect: NoSchedule
         key: nautilus.io/chase-ci
+        operator: Exists
+      - effect: NoSchedule
+        key: nautilus.io/ece
         operator: Exists
       containers:
         - name: csi-driver-registrar
