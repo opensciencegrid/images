@@ -6,12 +6,11 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 RUN groupadd -o -g 10941 squid
 RUN useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid
 
-RUN yum clean all && \
-    yum update -y 
+RUN yum update -y && \
+    rm -rf /var/cache/yum/*
 
-RUN yum install -y frontier-squid --enablerepo=osg-development
-
-RUN yum clean all --enablerepo=* && rm -rf /var/cache/yum/
+RUN yum install -y frontier-squid --enablerepo=osg-development && \
+    rm -rf /var/cache/yum/*
 
 ADD 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
 ADD squid-customize.sh /etc/squid/customize.sh
