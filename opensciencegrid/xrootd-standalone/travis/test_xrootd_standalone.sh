@@ -5,7 +5,7 @@ docker run --rm \
        --publish 1094:1094 \
        --volume $(pwd)/travis/test_file:/tmp/docker_xrootd_standalone/test_file \
        --volume $(pwd)/travis/15-travis-ci-config.cfg:/etc/xrootd/config.d/15-travis-ci-config.cfg \
-       --name xrootd_standalone opensciencegrid/xrootd-standalone:20191216-2210 &
+       --name xrootd_standalone opensciencegrid/xrootd-standalone:fresh &
 docker ps
 sleep 10
 
