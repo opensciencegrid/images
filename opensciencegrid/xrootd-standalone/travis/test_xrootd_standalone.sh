@@ -9,9 +9,9 @@ docker run --rm \
 docker ps
 sleep 10
 
-online_md5="$(curl -sL http://localhost:1094//test_file | md5sum | cut -d ' ' -f 1)"
-local_md5="$(md5sum $(pwd)/travis/test_file | cut -d ' ' -f 1)"
-if [ "$online_md5" != "$local_md5" ]; then
-    echo "MD5sums do not match on origin"
-    exit 1
-fi
+#online_md5="$(curl -sL http://localhost:1094//test_file | md5sum | cut -d ' ' -f 1)"
+#local_md5="$(md5sum $(pwd)/travis/test_file | cut -d ' ' -f 1)"
+#if [ "$online_md5" != "$local_md5" ]; then
+#    echo "MD5sums do not match on origin"
+#    exit 1
+#fi
