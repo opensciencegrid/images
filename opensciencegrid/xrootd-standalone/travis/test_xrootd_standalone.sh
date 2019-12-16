@@ -4,7 +4,7 @@
 docker run --rm \
        --publish 1094:1094 \
        --volume $(pwd)/travis/test_file:/tmp/docker_xrootd_standalone/test_file \
-       --name test_origin opensciencegrid/xrootd-standalone:fresh &
+       --name xrootd_standalone opensciencegrid/xrootd-standalone:fresh &
 docker ps
 sleep 20
 
