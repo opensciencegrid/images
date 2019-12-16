@@ -1,14 +1,12 @@
 #!/bin/bash -xe
 # Script for building and pushing Frontier Squid docker images
 
-org='opensciencegrid'
-timestamp=`date +%Y%m%d-%H%M`
-docker_repos='xrootd-standalone'
+timestamp="$1"
 
-for repo in $docker_repos; do
+for repo in $DOCKER_REPOS; do
     docker build \
-           -t $org/$repo:fresh \
-           -t $org/$repo:$timestamp \
+           -t $DOCKER_ORG/$repo:fresh \
+           -t $DOCKER_ORG//$repo:$timestamp \
            .
 done
 

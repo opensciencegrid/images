@@ -1,10 +1,11 @@
 services:
   - docker
 
+env:
+  - DOCKER_ORG='opensciencegrid' DOCKER_REPOS='xrootd-standalone'
+
 script:
-  - ./travis/build_docker.sh
-  - ./travis/test_xrootd_standalone.sh
-  - ./travis/push_docker.sh
+  - ./travis/travis-wrapper.sh
 
 branches:
   only:
