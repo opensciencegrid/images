@@ -3,6 +3,8 @@ if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
     exit 0
 fi
 
+org='opensciencegrid'
+timestamp=`date +%Y%m%d-%H%M`
 docker_repos='xrootd-standalone'
 # Credentials for docker push                                                                                                                                                 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
