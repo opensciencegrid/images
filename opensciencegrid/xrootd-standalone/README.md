@@ -11,7 +11,7 @@ Running a Container
 
 ```
 $ docker run --rm --publish <HOST PORT>:1094 \
-             opensciencegrid/docker-xrootd-standalone:fresh
+             opensciencegrid/xrootd-standalone:fresh
 ```
 
 The `HOST PORT` is the port on your computer which will accept caching requests.  You may see some failures.  
@@ -28,7 +28,7 @@ An example final `docker run` command:
 ```
 $ docker run --rm --publish <HOST PORT>:1094 \
              --volume /baremetalPartition:/data
-             opensciencegrid/docker-xrootd-standalone:fresh
+             opensciencegrid/xrootd-standalone:fresh
 ```
 
 1. Also needed is to create a configuration file and place it inside the container `/etc/xrootd/config.d/10-common-site-local.cfg` with the name of the resource that matches topology.
