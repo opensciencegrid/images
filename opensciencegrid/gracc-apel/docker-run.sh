@@ -2,7 +2,7 @@
 set -e
 
 echo Generating APEL report...
-wrote=$(/usr/libexec/apel/apel_report.py)
+wrote=$(/usr/libexec/apel/apel_report.py "$@")
 echo "$wrote"
 apelfile=${wrote#wrote: }
 
