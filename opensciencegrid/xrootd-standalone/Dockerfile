@@ -8,4 +8,3 @@ RUN yum install -y osg-xrootd-standalone --enablerepo=osg-development && yum cle
 
 ADD supervisord.d/* /etc/supervisord.d/
 ADD image-config.d/* /etc/osg/image-config.d/
-
