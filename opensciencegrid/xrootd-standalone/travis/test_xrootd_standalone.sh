@@ -9,7 +9,7 @@ docker run --rm \
        --volume $(pwd)/travis/auth_file:/etc/xrootd/auth_file \
        --name xrootd_standalone opensciencegrid/xrootd-standalone:fresh &
 docker ps
-sleep 5
+sleep 30
 
 online_md5="$(curl -sL http://localhost:1094//docker_xrootd_standalone/test_file | md5sum | cut -d ' ' -f 1)"
 local_md5="$(md5sum $(pwd)/travis/test_file | cut -d ' ' -f 1)"
