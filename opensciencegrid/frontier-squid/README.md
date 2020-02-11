@@ -13,7 +13,7 @@ To run with the defaults:
 
 ```bash
 docker run --rm --name frontier-squid \
-  -p 3128:3128 opensciencegrid/osg-frontier-squid:stable
+  -p 3128:3128 opensciencegrid/frontier-squid:stable
 ```
 
 See [our documentation](https://opensciencegrid.org/technology/policy/container-release/#tags) for details of our docker
