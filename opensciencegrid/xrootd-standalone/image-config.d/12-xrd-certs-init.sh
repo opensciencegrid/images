@@ -6,5 +6,5 @@ if [ -f $CERT_DIR/hostcert.pem ]; then
     cp -f $CERT_DIR/hostkey.pem /etc/grid-security/xrd/xrdkey.pem
     chmod 644  /etc/grid-security/xrd/xrdcert.pem
     chmod 600 /etc/grid-security/xrd/xrdkey.pem
-    chown xrootd:xrootd /etc/grid-security/xrd/xrd*.pem
+    chown -R xrootd:xrootd /etc/grid-security/xrd
 fi
