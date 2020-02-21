@@ -31,7 +31,7 @@ Additional configuration is needed to make XrootD Standalone production-ready.
              opensciencegrid/xrootd-standalone:stable &
     ```
 
-1. Also needed is to create a configuration file and place it inside the container `/etc/xrootd/config.d/10-common-site-local.cfg` with the name of the resource that matches topology.
+1. Create a configuration file and place it inside the container `/etc/xrootd/config.d/10-common-site-local.cfg` with the name of the resource that matches topology.
 
     Create a file `10-my-site-variables.cfg:` with the following contents:
     ```
@@ -48,7 +48,7 @@ Additional configuration is needed to make XrootD Standalone production-ready.
            --name xrootd_standalone opensciencegrid/xrootd-standalone:stable &
     ```
 
-1. You might also want to control certains part of `/data` that are served through Xrootd. You can do that by creating a file `90-my-paths.cfg` and mounting it inside the container at `/etc/xrootd/config.d/90-osg-standalone-paths.cfg`. This is done via the [export directive](https://xrootd.slac.stanford.edu/doc/dev49/ofs_config.htm#_Toc522916544). An example file in which only files that start with `/mc` and `/data` will be exported would look like this:
+1. To control certains part of `/data` that are served through Xrootd. You can do that by creating a file `90-my-paths.cfg` and mounting it inside the container at `/etc/xrootd/config.d/90-osg-standalone-paths.cfg`. This is done via the [export directive](https://xrootd.slac.stanford.edu/doc/dev49/ofs_config.htm#_Toc522916544). An example file in which only files that start with `/mc` and `/data` will be exported would look like this:
 
     ```
     all.export /mc
@@ -81,7 +81,7 @@ Additional configuration is needed to make XrootD Standalone production-ready.
            --name xrootd_standalone opensciencegrid/xrootd-standalone:stable &
     ```
 
-1. If you want to do specific mappings of X509 DN to linux users or VOMS extension to linux users in the container you can create grid-mapfiles and voms-map-files and mount them like this:
+1. (Optional) Create specific mappings of x509 DN or VOMS Extensions to linux users inside the container you can create grid-mapfiles and voms-map-files and mount them like this:
 
 
     ```
@@ -94,7 +94,7 @@ Additional configuration is needed to make XrootD Standalone production-ready.
     "/TheDNofMyFavUser" favuser
     ```
 
-    And then moun them inside the container like this:
+    And then mount them inside the container like this:
 
     ```
     docker run --rm \
@@ -108,7 +108,7 @@ Additional configuration is needed to make XrootD Standalone production-ready.
            --name xrootd_standalone opensciencegrid/xrootd-standalone:stable &
     ```
 
-1. Finally you will need to explicitly mount a host certificate and key to the default path: `/etc/grid-security/` within the container
+1. (Optional) Explicitly mount a host certificate and key to the default path: `/etc/grid-security/` within the container
 
     ```
     docker run --rm \
