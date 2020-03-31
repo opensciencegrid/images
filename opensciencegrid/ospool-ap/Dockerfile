@@ -1,17 +1,18 @@
 FROM opensciencegrid/software-base:fresh
 
+LABEL maintainer OSG Software <help@opensciencegrid.org>
+
 RUN \
  yum -y update  && \
+ yum clean all  && \
+ rm -rf /var/cache/yum/*
+
+RUN \
  yum -y install --enablerepo=osg-upcoming-rolling osg-flock  && \
  yum clean all  && \
- rm -rf /var/cache/*/*
+ rm -rf /var/cache/yum/*
 
-# Create passwords directories for token or pool password auth.
-#
-# Only root needs to know the pool password but other condor daemons
-# need access to the tokens.
-#
-# In the future, the RPMs will take care of this step.
+# In the future, the condor RPMs will create these
 RUN \
  install -m 0700 -o root -g root -d /etc/condor/passwords.d && \
  install -m 0700 -o condor -g condor -d /etc/condor/tokens.d
