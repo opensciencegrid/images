@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-NAMESPACE:=matyasosg
+NAMESPACE:=opensciencegrid
 
 
 echo:=@echo
@@ -12,9 +12,9 @@ help:
 	$(echo) "Targets:"
 	$(echo)
 	$(echotbl) "help" "This text"
-	$(echotbl) "list" "List all targets"
-	$(echotbl) "image" "Build the submit host image"
+	$(echotbl) "build" "Build the submit host image"
 	$(echotbl) "run" "Run a container"
+	$(echotbl) "clean" "Delete the image"
 	$(echo)
 	$(echo) "Variables:"
 	$(echo)
@@ -22,24 +22,18 @@ help:
 
 
 
-.PHONY: image
-image: image/* image/condor/*
-	docker build -t $(NAMESPACE)/submit image
+.PHONY: build
+build:
+	docker build -t $(NAMESPACE)/submit-host .
 
 
 .PHONY: run
 run:
-	-docker run --rm --name $(NAMESPACE)_submit $(NAMESPACE)/submit
+	-docker run --rm --name $(NAMESPACE)_submit_host $(NAMESPACE)/submit-host
 
 
 .PHONY: clean
 clean:
-	-docker rmi $(NAMESPACE)/submit
+	-docker rmi $(NAMESPACE)/submit-host
 
-
-# List all the makefile targets
-# https://stackoverflow.com/a/26339924
-.PHONY: list
-list:
-	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
