@@ -13,7 +13,8 @@ help:
 	$(echo)
 	$(echotbl) "help" "This text"
 	$(echotbl) "list" "List all targets"
-	$(echotbl) "submit" "Submit host image"
+	$(echotbl) "image" "Build the submit host image"
+	$(echotbl) "run" "Run a container"
 	$(echo)
 	$(echo) "Variables:"
 	$(echo)
@@ -21,9 +22,14 @@ help:
 
 
 
-.PHONY: submit
-submit: Dockerfile condor/* start.sh supervisord.conf update-config update-secrets
-	docker build -t $(NAMESPACE)/$@ .
+.PHONY: image
+image: image/* image/condor/*
+	docker build -t $(NAMESPACE)/$@ image
+
+
+.PHONY: run
+run:
+	-docker run --rm --name $(NAMESPACE)_submit $(NAMESPACE)/submit
 
 
 # List all the makefile targets
