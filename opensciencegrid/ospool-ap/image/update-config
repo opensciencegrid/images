@@ -5,6 +5,11 @@ if [[ -d /root/config ]]; then
     cp /root/config/*.conf /etc/condor/config.d/
 fi
 
+# Install Gratia config if available
+if [[ -f /root/config/ProbeConfig ]]; then
+    cp -f /root/config/ProbeConfig /etc/gratia/condor/ProbeConfig
+fi
+
 if pgrep condor_master &>/dev/null; then
     condor_reconfig
 fi
