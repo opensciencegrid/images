@@ -49,8 +49,10 @@ done
 [[ -s /etc/condor/config.d/01-fdfix.conf ]] && \
     echo "# This file was created by $prog" >> /etc/condor/config.d/01-fdfix.conf
 
-# The master will crash if run as pid 1 (bug?) plus supervisor can restart
-# it if it dies, and gives us the ability to run other services.
+# This isn't a real service, I can't start it via supervisor
+/etc/init.d/gratia-probes-cron start
+
+/usr/sbin/fetch-crl -p 20 -T 10
 
 exec /usr/bin/supervisord -c /etc/supervisord.conf
 

@@ -24,12 +24,17 @@ help:
 
 .PHONY: image
 image: image/* image/condor/*
-	docker build -t $(NAMESPACE)/$@ image
+	docker build -t $(NAMESPACE)/submit image
 
 
 .PHONY: run
 run:
 	-docker run --rm --name $(NAMESPACE)_submit $(NAMESPACE)/submit
+
+
+.PHONY: clean
+clean:
+	-docker rmi $(NAMESPACE)/submit
 
 
 # List all the makefile targets

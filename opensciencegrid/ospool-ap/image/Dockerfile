@@ -22,5 +22,6 @@ RUN \
 COPY supervisord.conf /etc/supervisord.conf
 COPY condor/*.conf /etc/condor/config.d/
 COPY start.sh update-config update-secrets /
+COPY fetch-crl.cron /etc/cron.d/fetch-crl
 
 CMD ["/bin/bash", "-x", "/start.sh"]
