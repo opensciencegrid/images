@@ -19,7 +19,7 @@ Instructions
 
         docker run --rm -v config:/root/config:ro \
          -v secrets:/root/secrets:ro --name osg_submit_host \
-         opensciencegrid/submit-host
+         opensciencegrid/submit-host:stable
 
 4.  Shell into the container, become `submituser`:
 
@@ -33,4 +33,3 @@ Instructions
 
 Same as above but use a ConfigMap and a Secret.
 (Examples forthcoming.)
-
