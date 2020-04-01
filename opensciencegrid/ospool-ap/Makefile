@@ -29,7 +29,9 @@ build:
 
 .PHONY: run
 run:
-	-docker run --rm --name $(NAMESPACE)_submit_host $(NAMESPACE)/submit-host
+	-mkdir -p config/
+	-mkdir -p secrets/
+	-docker run --rm -v config:/root/config:ro -v secrets:/root/secrets:ro --name $(NAMESPACE)_submit_host $(NAMESPACE)/submit-host
 
 
 .PHONY: clean
