@@ -2,6 +2,10 @@ FROM opensciencegrid/software-base:fresh
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
+RUN groupadd -g 1000 -r condor
+RUN useradd -r -g condor -d /var/lib/condor -s /sbin/nologin \
+    -u 1000 -c "Owner of HTCondor Daemons" condor
+
 RUN \
  yum -y update  && \
  yum clean all  && \
