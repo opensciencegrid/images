@@ -31,7 +31,7 @@ build:
 run:
 	-mkdir -p config/
 	-mkdir -p secrets/
-	-docker run --rm -v config:/root/config:ro -v secrets:/root/secrets:ro --name $(NAMESPACE)_submit_host $(NAMESPACE)/submit-host
+	-docker run --rm -v `pwd`/config:/root/config:ro -v `pwd`/secrets:/root/secrets:ro --name $(NAMESPACE)_submit_host $(NAMESPACE)/submit-host
 
 
 .PHONY: clean
