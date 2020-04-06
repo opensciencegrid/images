@@ -20,8 +20,8 @@ if [[ $1 == -f ]]; then
     shift
 fi
 
-read -ra flock_from <(condor_config_val FLOCK_FROM 2>/dev/null)
-if [[ ${#flock_from[*]} -eq 0 ]]; then
+flock_from=$(condor_config_val FLOCK_FROM 2>/dev/null)
+if [[ ${#flock_from} -eq 0 ]]; then
     echo "No flocking hosts"
     echo "Not generating tokens"
     exit 0
@@ -46,7 +46,7 @@ echo "*** Generating flocking tokens from $key_file ***"
 sec_token_directory=$(condor_config_val SEC_TOKEN_DIRECTORY 2>/dev/null || echo "$HOME/.condor/tokens.d")
 
 umask 077
-for host in ${flock_from[*]}; do
+for host in $flock_from; do
     id=condor@$host
     newfile=$sec_token_directory/$id
     if [[ ! -e $newfile ]] || $force; then
