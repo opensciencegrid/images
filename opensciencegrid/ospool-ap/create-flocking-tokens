@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Usage:
+#
+#    create-flocking-tokens [-f] [<keyid>]
+#
+# Creates tokens for all of the hosts in the FLOCK_FROM list.
+# The tokens don't expire and don't have extra priv restrictions on them.
+# Does not create tokens that already exist unless '-f' is passed.
+#
+# If keyid is not specified, will use $(SEC_PASSWORD_DIRECTORY)/flock_issuer.
+#
+# Does not create tokens if the key file doesn't exist, or if there are
+# no hosts in FLOCK_FROM.
+
+DEFAULT_KEY=flock_issuer
+
+
+force=false
+if [[ $1 == -f ]]; then
+    force=true
+    shift
+fi
+
+flock_from=$(condor_config_val FLOCK_FROM 2>/dev/null)
+if [[ ${#flock_from} -eq 0 ]]; then
+    echo "No flocking hosts"
+    echo "Not generating tokens"
+    exit 0
+fi
+
+sec_password_directory=$(condor_config_val SEC_PASSWORD_DIRECTORY 2>/dev/null)
+key=${1:-$DEFAULT_KEY}
+key_file=$sec_password_directory/$key
+
+if [[ ! -e $key_file ]]; then
+    echo "No key file at $key_file"
+    echo "Not generating tokens"
+    exit 0
+fi
+
+printf "%s\n" "-------------------------------------------------------------------------------"
+echo "*** Generating flocking tokens from $key_file ***"
+
+sec_token_directory=$(condor_config_val SEC_TOKEN_DIRECTORY 2>/dev/null || echo "$HOME/.condor/tokens.d")
+
+umask 077
+for host in $flock_from; do
+    id=condor@$host
+    newfile=$sec_token_directory/$id
+    if [[ ! -e $newfile ]] || $force; then
+        echo -n "$id (new): "
+        condor_token_create -key "$key" -identity "$id" -token "$id"
+        cat "$newfile"
+    else
+        echo -n "$id: "
+        cat "$newfile"
+    fi
+done
+umask 022
+
+printf "%s\n" "..............................................................................."
