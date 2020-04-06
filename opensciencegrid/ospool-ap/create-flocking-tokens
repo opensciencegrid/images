@@ -30,7 +30,7 @@ fi
 keyid_arg=
 key_file=$(condor_config_val SEC_PASSWORD_FILE)
 if [[ $1 ]]; then
-    keyid_arg=(-keyid "$1")
+    keyid_arg=(-key "$1")
     key_file=$(condor_config_val SEC_PASSWORD_DIRECTORY)/$1
 fi
 
@@ -51,7 +51,7 @@ for host in $flock_from; do
     newfile=$sec_token_directory/$id
     if [[ ! -e $newfile ]] || $force; then
         echo -n "$id (new): "
-        condor_token_create "${keyid_arg[@]}" -identity "$id" -token "$id"
+        condor_token_create ${keyid_arg[*]} -identity "$id" -token "$id"
         cat "$newfile"
     else
         echo -n "$id: "
