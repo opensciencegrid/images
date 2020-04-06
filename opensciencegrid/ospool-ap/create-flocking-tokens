@@ -40,7 +40,8 @@ if [[ ! -e $key_file ]]; then
     exit 0
 fi
 
-echo "Generating flocking tokens from $key_file"
+printf "%s\n" "-------------------------------------------------------------------------------"
+echo "*** Generating flocking tokens from $key_file ***"
 
 sec_token_directory=$(condor_config_val SEC_TOKEN_DIRECTORY 2>/dev/null || echo "$HOME/.condor/tokens.d")
 
@@ -58,3 +59,5 @@ for host in ${flock_from[*]}; do
     fi
 done
 umask 022
+
+printf "%s\n" "..............................................................................."
