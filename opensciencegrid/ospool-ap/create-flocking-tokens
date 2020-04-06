@@ -8,10 +8,12 @@
 # The tokens don't expire and don't have extra priv restrictions on them.
 # Does not create tokens that already exist unless '-f' is passed.
 #
-# If keyid is not specified, will use the pool password (SEC_PASSWORD_FILE).
+# If keyid is not specified, will use $(SEC_PASSWORD_DIRECTORY)/flock_issuer.
 #
 # Does not create tokens if the key file doesn't exist, or if there are
 # no hosts in FLOCK_FROM.
+
+DEFAULT_KEY=flock_issuer
 
 
 force=false
@@ -27,12 +29,9 @@ if [[ ${#flock_from} -eq 0 ]]; then
     exit 0
 fi
 
-keyid_arg=
-key_file=$(condor_config_val SEC_PASSWORD_FILE)
-if [[ $1 ]]; then
-    keyid_arg=(-key "$1")
-    key_file=$(condor_config_val SEC_PASSWORD_DIRECTORY)/$1
-fi
+sec_password_directory=$(condor_config_val SEC_PASSWORD_DIRECTORY 2>/dev/null)
+key=${1:-$DEFAULT_KEY}
+key_file=$sec_password_directory/$key
 
 if [[ ! -e $key_file ]]; then
     echo "No key file at $key_file"
@@ -51,7 +50,7 @@ for host in $flock_from; do
     newfile=$sec_token_directory/$id
     if [[ ! -e $newfile ]] || $force; then
         echo -n "$id (new): "
-        condor_token_create ${keyid_arg[*]} -identity "$id" -token "$id"
+        condor_token_create -key "$key" -identity "$id" -token "$id"
         cat "$newfile"
     else
         echo -n "$id: "
