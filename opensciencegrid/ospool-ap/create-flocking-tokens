@@ -4,14 +4,14 @@
 #
 #    create-flocking-tokens [-f] [<keyid>]
 #
-# Creates tokens for all of the hosts in the FLOCK_FROM list.
+# Creates tokens for all of the hosts in the FLOCK_TO list.
 # The tokens don't expire and don't have extra priv restrictions on them.
 # Does not create tokens that already exist unless '-f' is passed.
 #
 # If keyid is not specified, will use $(SEC_PASSWORD_DIRECTORY)/flock_issuer.
 #
 # Does not create tokens if the key file doesn't exist, or if there are
-# no hosts in FLOCK_FROM.
+# no hosts in FLOCK_TO.
 
 DEFAULT_KEY=flock_issuer
 
@@ -22,9 +22,9 @@ if [[ $1 == -f ]]; then
     shift
 fi
 
-flock_from=$(condor_config_val FLOCK_FROM 2>/dev/null)
-if [[ ${#flock_from} -eq 0 ]]; then
-    echo "No flocking hosts"
+flock_to=$(condor_config_val FLOCK_TO 2>/dev/null)
+if [[ ${#flock_to} -eq 0 ]]; then
+    echo "Not flocking to any hosts"
     echo "Not generating tokens"
     exit 0
 fi
@@ -45,7 +45,7 @@ echo "*** Generating flocking tokens from $key_file ***"
 sec_token_directory=$(condor_config_val SEC_TOKEN_DIRECTORY 2>/dev/null || echo "$HOME/.condor/tokens.d")
 
 umask 077
-for host in $flock_from; do
+for host in $flock_to; do
     id=condor@$host
     newfile=$sec_token_directory/$id
     if [[ ! -e $newfile ]] || $force; then
