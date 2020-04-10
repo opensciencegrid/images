@@ -14,11 +14,14 @@ spec:
 
 ---
 kind: StatefulSet
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: csi-cvmfsplugin-provisioner
   namespace: cvmfs
 spec:
+  selector:
+    matchLabels:
+      app: csi-cvmfsplugin-provisioner
   serviceName: "csi-cvmfsplugin-provisioner"
   replicas: 1
   template:

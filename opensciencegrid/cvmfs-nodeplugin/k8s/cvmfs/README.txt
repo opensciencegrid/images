@@ -14,6 +14,7 @@ kubectl create -f csi-processes/
 kubectl create -f storageclasses/
 
 # Create the PersistentStorageClaims for both osg and osggpus namespaces
-kubectl create -n osg -f pvcs/
+# Only one namespace can use it right now
+#kubectl create -n osg -f pvcs/
 kubectl create -n osggpus -f pvcs/
-kubectl create -n osgcpus -f pvcs/
+#kubectl create -n osgcpus -f pvcs/
