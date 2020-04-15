@@ -11,4 +11,4 @@ RUN yum -y install --enablerepo=osg-contrib python-elasticsearch-dsl && \
 COPY apel_report.py normal_hepspec docker-run.sh /usr/libexec/apel/
 COPY sender.cfg /etc/apel/
 
-ENTRYPOINT /usr/libexec/apel/docker-run.sh
+ENTRYPOINT ["/usr/libexec/apel/docker-run.sh"]
