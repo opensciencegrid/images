@@ -1,8 +1,0 @@
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: csi-cvmfs-nova
-  namespace: cvmfs
-provisioner: csi-cvmfsplugin
-parameters:
-  repository: nova.opensciencegrid.org
