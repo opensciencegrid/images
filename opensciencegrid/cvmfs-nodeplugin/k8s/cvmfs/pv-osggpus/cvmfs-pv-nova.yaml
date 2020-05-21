@@ -1,0 +1,45 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: osggpus-cvmfs-nova
+# Local storage does not need a provisioner
+provisioner: kubernetes.io/no-provisioner
+# Give it out as-is
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: osggpus-cvmfs-nova
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: osggpus-cvmfs-nova
+  local:
+    path: /cvmfs-k8s/nova.opensciencegrid.org
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: NotIn
+          values:
+          -  fake
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cvmfs-nova
+  namespace: osggpus
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: osggpus-cvmfs-nova

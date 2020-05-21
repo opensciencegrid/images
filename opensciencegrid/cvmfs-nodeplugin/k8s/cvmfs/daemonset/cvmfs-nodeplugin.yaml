@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cvmfs-nodeplugin
+  namespace: cvmfs
+  labels: 
+    k8s-app: cvmfs-nodeplugin
+spec:
+  selector:
+    matchLabels:
+      k8s-app: cvmfs-nodeplugin
+  template:
+    metadata: 
+      labels:
+        k8s-app: cvmfs-nodeplugin
+    spec:
+      serviceAccount: cvmfs-nodeplugin
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/noceph
+        operator: Exists
+      - effect: NoSchedule
+        key: nautilus.io/chase-ci
+        operator: Exists
+      initContainers:
+      - name: create-mountpoint
+        image: busybox
+        command: ['sh', '-c', "mkdir -p /cvmfs-root/cvmfs-k8s"]
+        resources:
+           limits:
+             memory: 0.5Gi
+             cpu: 1
+           requests:
+             memory: 0.5Gi
+             cpu: 0.1
+        volumeMounts:
+        - mountPath: /cvmfs-root
+          name:  cvmfs-root
+      containers:
+      - name: cvmfs
+        image: sfiligoi/prp-osg-cvmfs:nodeplugin
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/local/sbin/unmount-and-terminate.sh"]
+        env:
+        - name: MOUNT_REPOS
+          value: "config-osg.opensciencegrid.org,icecube.opensciencegrid.org,oasis.opensciencegrid.org,connect.opensciencegrid.org,singularity.opensciencegrid.org,stash.osgstorage.org,xenon.opensciencegrid.org,ligo-containers.opensciencegrid.org,fermilab.opensciencegrid.org,nova.opensciencegrid.org,cms.cern.ch,cms-ib.cern.ch"
+        - name: SQUID_URI
+          value: "http://10.98.29.184:3128"
+        resources:
+           limits:
+             memory: 4Gi
+             cpu: 1
+           requests:
+             memory: 0.5Gi
+             cpu: 0.1
+        volumeMounts:
+        - mountPath: /cvmfs
+          name:  cvmfs-root
+          subPath: cvmfs-k8s
+          mountPropagation: Bidirectional
+      volumes:
+      - name: cvmfs-root
+        persistentVolumeClaim:
+          claimName: cvmfs-root
+
