@@ -22,6 +22,9 @@ spec:
       - effect: NoSchedule
         key: nautilus.io/chase-ci
         operator: Exists
+      - effect: NoSchedule
+        key: nautilus.io/haosu
+        operator: Exists
       initContainers:
       - name: create-mountpoint
         image: busybox
@@ -31,8 +34,8 @@ spec:
              memory: 0.5Gi
              cpu: 1
            requests:
-             memory: 0.5Gi
-             cpu: 0.1
+             memory: 0.2Gi
+             cpu: 0.01
         volumeMounts:
         - mountPath: /cvmfs-root
           name:  cvmfs-root
@@ -60,7 +63,7 @@ spec:
              cpu: 1
            requests:
              memory: 0.5Gi
-             cpu: 0.1
+             cpu: 0.01
         volumeMounts:
         - mountPath: /cvmfs
           name:  cvmfs-root
