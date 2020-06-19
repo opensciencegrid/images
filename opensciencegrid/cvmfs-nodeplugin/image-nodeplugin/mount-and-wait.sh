@@ -22,17 +22,46 @@ trap "/usr/local/sbin/force_unmount.sh" SIGTERM SIGINT
 
 mps=""
 for mp in `echo ${MOUNT_REPOS} |tr , ' '` ; do 
-
- if [ -d /cvmfs/${mp} ]; then
-   # force clean if already there
-   echo "WARNING: Found /cvmfs/${mp}. Unmounting." | tee -a /cvmfs/cvmfs-pod.log
-   umount -l /cvmfs/${mp}
-   rmdir /cvmfs/${mp}
- fi
+ echo "INFO: Processing /cvmfs/${mp}." | tee -a /cvmfs/cvmfs-pod.log
 
  mkdir -p /cvmfs/${mp}
+ rc=$?
+ if [ ${rc} -ne 0 ]; then
+   echo "INFO: Removing existing /cvmfs/${mp}." | tee -a /cvmfs/cvmfs-pod.log
+   rmdir /cvmfs/${mp}
+   # no error checking ... if it failed, we will catch below
+   mkdir -p /cvmfs/${mp}
+   rc=$?
+ fi
+
+ if [ ${rc} -ne 0 ]; then
+   # force clean if already there
+   echo "WARNING: Found /cvmfs/${mp}. Unmounting." | tee -a /cvmfs/cvmfs-pod.log
+   umount /cvmfs/${mp}
+   rc=$?
+   if [ $rc -ne 0 ]; then
+     echo "WARNING: Using lazy umount for /cvmfs/${mp}" | tee -a /cvmfs/cvmfs-pod.log
+     umount -l /cvmfs/${mp}
+     sleep 5 # give time for the system to catch up
+   fi
+   rmdir /cvmfs/${mp}
+
+   mkdir -p /cvmfs/${mp}
+   rc=$?
+ fi
+
+ # try without checking rc... will fail if mkdir failed
+ echo "INFO: Mounting /cvmfs/${mp}." | tee -a /cvmfs/cvmfs-pod.log
  mount -t cvmfs ${mp} /cvmfs/${mp}
  rc=$?
+ if [ ${rc} -ne 0 ] ; then
+   echo "WARNING: Failed to mount $mp, retrying"  | tee -a /cvmfs/cvmfs-pod.log
+   sleep 15
+   mkdir -p /cvmfs/${mp}
+   mount -t cvmfs ${mp} /cvmfs/${mp}
+   rc=$?
+ fi
+
  if [ ${rc} -eq 0 ] ; then
    echo "INFO: Mounted /cvmfs/${mp}" | tee -a /cvmfs/cvmfs-pod.log
    mps="$mp $mps" #save them in reverse order
