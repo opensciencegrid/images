@@ -4,7 +4,7 @@ FROM opensciencegrid/osg-wn:3.5-el7
 RUN yum -y install python-pip && \
   pip install elasticsearch-dsl
 
-RUN yum -y install https://github.com/apel/ssm/releases/download/2.4.1-1/apel-ssm-2.4.1-1.el7.noarch.rpm && \
+RUN yum -y install https://github.com/apel/ssm/releases/download/2.1.7-1/apel-ssm-2.1.7-1.el7.noarch.rpm && \
   mkdir /etc/grid-security/apel && \
   mkdir -p /var/spool/apel/outgoing/12345678 && \
   { fetch-crl -p10 -T10 || :; }
