@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: osgcpus-cvmfs-stash
   local:
-    path: /cvmfs-k8s/stash.osgstorage.org
+    path: /var/lib/cvmfs-k8s/stash.osgstorage.org
   nodeAffinity:
     required:
       nodeSelectorTerms:

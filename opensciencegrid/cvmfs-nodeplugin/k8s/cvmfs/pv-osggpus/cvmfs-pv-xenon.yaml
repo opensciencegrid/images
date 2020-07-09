@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: osggpus-cvmfs-xenon
   local:
-    path: /cvmfs-k8s/xenon.opensciencegrid.org
+    path: /var/lib/cvmfs-k8s/xenon.opensciencegrid.org
   nodeAffinity:
     required:
       nodeSelectorTerms:

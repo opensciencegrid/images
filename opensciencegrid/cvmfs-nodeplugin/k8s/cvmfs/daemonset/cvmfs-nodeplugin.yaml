@@ -25,20 +25,6 @@ spec:
       - effect: NoSchedule
         key: nautilus.io/haosu
         operator: Exists
-      initContainers:
-      - name: create-mountpoint
-        image: busybox
-        command: ['sh', '-c', "mkdir -p /cvmfs-root/cvmfs-k8s"]
-        resources:
-           limits:
-             memory: 0.5Gi
-             cpu: 1
-           requests:
-             memory: 0.2Gi
-             cpu: 0.01
-        volumeMounts:
-        - mountPath: /cvmfs-root
-          name:  cvmfs-root
       containers:
       - name: cvmfs
         image: sfiligoi/prp-osg-cvmfs:nodeplugin
@@ -66,11 +52,11 @@ spec:
              cpu: 0.01
         volumeMounts:
         - mountPath: /cvmfs
-          name:  cvmfs-root
-          subPath: cvmfs-k8s
+          name:  cvmfs-base
           mountPropagation: Bidirectional
       volumes:
-      - name: cvmfs-root
-        persistentVolumeClaim:
-          claimName: cvmfs-root
+      - name: cvmfs-base
+        hostPath:
+          path: /var/lib/cvmfs-k8s
+          type: DirectoryOrCreate
 

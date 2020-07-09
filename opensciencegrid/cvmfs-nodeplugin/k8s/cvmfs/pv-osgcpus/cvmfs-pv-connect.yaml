@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: osgcpus-cvmfs-connect
   local:
-    path: /cvmfs-k8s/connect.opensciencegrid.org
+    path: /var/lib/cvmfs-k8s/connect.opensciencegrid.org
   nodeAffinity:
     required:
       nodeSelectorTerms:

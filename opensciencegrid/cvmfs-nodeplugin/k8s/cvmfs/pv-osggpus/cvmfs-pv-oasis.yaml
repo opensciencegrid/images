@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: osggpus-cvmfs-oasis
   local:
-    path: /cvmfs-k8s/oasis.opensciencegrid.org
+    path: /var/lib/cvmfs-k8s/oasis.opensciencegrid.org
   nodeAffinity:
     required:
       nodeSelectorTerms:

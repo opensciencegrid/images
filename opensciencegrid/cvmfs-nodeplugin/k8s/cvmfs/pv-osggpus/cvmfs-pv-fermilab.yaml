@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: osggpus-cvmfs-fermilab
   local:
-    path: /cvmfs-k8s/fermilab.opensciencegrid.org
+    path: /var/lib/cvmfs-k8s/fermilab.opensciencegrid.org
   nodeAffinity:
     required:
       nodeSelectorTerms:

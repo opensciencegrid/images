@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: osggpus-cvmfs-singularity
   local:
-    path: /cvmfs-k8s/singularity.opensciencegrid.org
+    path: /var/lib/cvmfs-k8s/singularity.opensciencegrid.org
   nodeAffinity:
     required:
       nodeSelectorTerms:

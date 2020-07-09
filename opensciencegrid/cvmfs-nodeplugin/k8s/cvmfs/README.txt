@@ -7,7 +7,6 @@
 kubectl create -f  accounts/
 
 # create the cmvmfs supporting processes in default cvmfs namespace
-kubectl create -f pv-root/
 kubectl create -f daemonset/
 
 # Create the PersistentStorageClaims for both osggpus and osgcpus namespaces
