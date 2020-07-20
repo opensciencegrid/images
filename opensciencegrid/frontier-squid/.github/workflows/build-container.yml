@@ -1,6 +1,9 @@
 name: dispatched build-docker-image
 
 on:
+  push:
+    branches:
+      - master
   repository_dispatch:
     types:
       - dispatch-build
