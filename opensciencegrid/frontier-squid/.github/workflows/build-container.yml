@@ -6,7 +6,7 @@ on:
       - dispatch-build
 
 jobs:
-  dispatched-build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,4 +30,3 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: opensciencegrid/docker-frontier-squid
         tags: fresh,${{ steps.mkdatetag.outputs.dtag }}
-
