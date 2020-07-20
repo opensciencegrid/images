@@ -14,11 +14,6 @@ jobs:
     - name: checkout frontier-squid
       uses: actions/checkout@v2
 
-#     with:
-#       ref: ${{ github.event.client_payload.ref }}
-#
-#   - run: echo ${{ github.event.client_payload.sha }}
-
     - name: make date tag
       id: mkdatetag
       run: echo "::set-output name=dtag::$(date +%Y%m%d-%H%M)"
