@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    if: github.repository == 'opensciencegrid/docker-frontier-squid'
     steps:
 
     - name: checkout frontier-squid
