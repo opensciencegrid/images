@@ -1,4 +1,7 @@
-FROM opensciencegrid/software-base:fresh
+# Specify the opensciencegrid/software-base image tag
+ARG SW_BASE_TAG=fresh
+
+FROM opensciencegrid/software-base:$SW_BASE_TAG
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
