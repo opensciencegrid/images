@@ -12,8 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: github.repository == 'opensciencegrid/docker-frontier-squid'
-    matrix:
-      - dver: ['', 'el8-']
+    strategy:
+      matrix:
+        dver: ['', 'el8-']
     steps:
 
     - name: checkout frontier-squid
