@@ -193,22 +193,22 @@ def print_rk_recr(year, month, rk, rec):
     else:
         dn = rk.dn
 
-    print "Site:",                   rk.site
-    print "VO:",                     rk.vo
-    print "EarliestEndTime:",        rec.mintime
-    print "LatestEndTime:",          rec.maxtime + 60*60*24 - 1
-    print "Month:",                  "%02d" % month
-    print "Year:",                   year
-    print "Infrastructure:",         fixed_infrastructure
-    print "GlobalUserName:",         dn
-    print "Processors:",             rk.cores
-    print "NodeCount:",              fixed_nodecount
-    print "WallDuration:",           rec.walldur
-    print "CpuDuration:",            rec.cpudur
-    print "NormalisedWallDuration:", int(rec.walldur * rec.nf)
-    print "NormalisedCpuDuration:",  int(rec.cpudur  * rec.nf)
-    print "NumberOfJobs:",           rec.njobs
-    print fixed_separator
+    print("Site:",                   rk.site)
+    print("VO:",                     rk.vo)
+    print("EarliestEndTime:",        rec.mintime)
+    print("LatestEndTime:",          rec.maxtime + 60*60*24 - 1)
+    print("Month:",                  "%02d" % month)
+    print("Year:",                   year)
+    print("Infrastructure:",         fixed_infrastructure)
+    print("GlobalUserName:",         dn)
+    print("Processors:",             rk.cores)
+    print("NodeCount:",              fixed_nodecount)
+    print("WallDuration:",           rec.walldur)
+    print("CpuDuration:",            rec.cpudur)
+    print("NormalisedWallDuration:", int(rec.walldur * rec.nf))
+    print("NormalisedCpuDuration:",  int(rec.cpudur  * rec.nf))
+    print("NumberOfJobs:",           rec.njobs)
+    print(fixed_separator)
 
 def bkt_key_lower(bkt):
     return bkt.key.lower()
@@ -230,10 +230,9 @@ def main():
         year,month = auto_year_month()
     else:
         try:
-            year,month = map(int, sys.argv[1:])
+            year,month = list(map(int, sys.argv[1:]))
         except:
-            print >>sys.stderr, \
-                  "usage: %s [YEAR MONTH]" % os.path.basename(__file__)
+            print("usage: %s [YEAR MONTH]" % os.path.basename(__file__), file=sys.stderr)
             sys.exit(0)
 
     orig_stdout = sys.stdout
@@ -266,7 +265,7 @@ def main():
         print_rk_recr(year, month, rk, rec)
 
     sys.stdout = orig_stdout
-    print "wrote: %s" % outfile
+    print("wrote: %s" % outfile)
 
 if __name__ == '__main__':
     main()
