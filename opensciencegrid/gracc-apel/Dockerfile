@@ -1,8 +1,8 @@
 FROM opensciencegrid/osg-wn:3.5-el7
 
 # install dependencies
-RUN yum -y install python-pip && \
-  pip install elasticsearch-dsl
+RUN yum -y install python3 python3-pip && \
+  pip3 install elasticsearch-dsl
 
 RUN yum -y install https://github.com/apel/ssm/releases/download/2.1.7-1/apel-ssm-2.1.7-1.el7.noarch.rpm && \
   mkdir /etc/grid-security/apel && \

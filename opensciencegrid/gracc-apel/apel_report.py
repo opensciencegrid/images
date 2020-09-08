@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # GRACC-based APEL reporting script; run from docker-run.sh
 
