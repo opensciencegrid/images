@@ -21,7 +21,7 @@ es = elasticsearch.Elasticsearch(
 osg_raw_index = 'gracc.osg.raw-*'
 osg_summary_index = 'gracc.osg.summary'
 
-vo_list = ['atlas', 'alice', 'belle', 'cms', 'enmr.eu']
+vo_list = ['atlas', 'alice', 'belle', 'cms', 'enmr.eu', 'lhcb']
 
 MAXSZ=2**30
 MISSING='__MISSING__'
@@ -165,9 +165,18 @@ site_map = {
     'Tusker':    'Nebraska'
 }
 
+# Map a site + vo to a new site name
+# Added by Derek to support LHCb's usage of the shared MIT CMS site
+site_vo_map = {
+    ('MIT_CMS', 'lhcb'): 'MIT_LHCb'
+}
+
 def add_record(recs, vo, site, cores, dn, bkt):
     if site in site_map:
         site = site_map[site]
+
+    if (site, vo) in site_vo_map:
+        site = site_vo_map[(site, vo)]
 
     rk  = RecordKey(vo, site, cores, dn)
     rec = bkt_record(bkt, site)
@@ -175,7 +184,7 @@ def add_record(recs, vo, site, cores, dn, bkt):
     recs[rk] += rec
 
 def print_header():
-    print fixed_header
+    print(fixed_header)
 
 def print_rk_recr(year, month, rk, rec):
 
