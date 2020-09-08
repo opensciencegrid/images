@@ -230,7 +230,7 @@ def main():
         year,month = auto_year_month()
     else:
         try:
-            year,month = list(map(int, sys.argv[1:]))
+            year,month = map(int, sys.argv[1:])
         except:
             print("usage: %s [YEAR MONTH]" % os.path.basename(__file__), file=sys.stderr)
             sys.exit(0)
