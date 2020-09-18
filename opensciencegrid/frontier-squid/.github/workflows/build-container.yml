@@ -12,9 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: github.repository == 'opensciencegrid/docker-frontier-squid'
-    strategy:
-      matrix:
-        dver: ['', 'el8-']
     steps:
 
     - name: checkout frontier-squid
@@ -30,5 +27,5 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: opensciencegrid/frontier-squid
-        build_args: SW_BASE_TAG=${{ matrix.dver }}fresh
-        tags: ${{ matrix.dver }}fresh, ${{ matrix.dver }}${{ steps.mkdatetag.outputs.dtag }}
+        build_args: SW_BASE_TAG=el8-fresh
+        tags: fresh, ${{ steps.mkdatetag.outputs.dtag }}
