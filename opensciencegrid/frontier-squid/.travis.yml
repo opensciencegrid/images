@@ -1,8 +1,0 @@
-services:
-  - docker
-
-script: ./travis/build_docker.sh
-
-branches:
-  only:
-  - master

@@ -1,4 +1,4 @@
-Frontier Squid Container Image [![Build Status](https://travis-ci.org/opensciencegrid/docker-frontier-squid.svg?branch=master)](https://travis-ci.org/opensciencegrid/docker-frontier-squid)
+Frontier Squid Container Image [![Build Status](https://github.com/opensciencegrid/docker-frontier-squid/workflows/dispatched%20build-docker-image/badge.svg)](https://github.com/opensciencegrid/docker-frontier-squid/actions?query=workflow%3A%22dispatched+build-docker-image%22)
 ==============================
 
 A [Docker](https://hub.docker.com/r/opensciencegrid/frontier-squid) container image for
