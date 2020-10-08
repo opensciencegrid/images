@@ -14,9 +14,9 @@ RUN groupadd -o -g 10941 squid && \
     yum install -y frontier-squid --enablerepo=osg-development && \
     rm -rf /var/cache/yum/*
 
-ADD 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
-ADD squid-customize.sh /etc/squid/customize.sh
-ADD supervisor-frontier-squid.conf /etc/supervisord.d/40-frontier-squid.conf
+COPY 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
+COPY squid-customize.sh /etc/squid/customize.sh
+COPY supervisor-frontier-squid.conf /etc/supervisord.d/40-frontier-squid.conf
 
 EXPOSE 3128
 
