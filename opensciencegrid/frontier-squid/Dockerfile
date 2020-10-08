@@ -5,14 +5,13 @@ FROM opensciencegrid/software-base:$SW_BASE_TAG
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
-# Create the squid user with a fixed GID/UID
-RUN groupadd -o -g 10941 squid
-RUN useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid
-
-RUN yum update -y && \
-    rm -rf /var/cache/yum/*
-
-RUN yum install -y frontier-squid --enablerepo=osg-development && \
+# Create the squid user with a fixed GID/UID; do this first, so that the Squid
+# install does not do it.  Then do the installs.  All one instruction to reduce
+# image size, etc.
+RUN groupadd -o -g 10941 squid && \
+    useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid && \
+    yum update -y && \
+    yum install -y frontier-squid --enablerepo=osg-development && \
     rm -rf /var/cache/yum/*
 
 ADD 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
