@@ -16,6 +16,9 @@ while [ ! -f /etc/mount-and-wait.pid ]; do
      fi
 done
 
+echo "INFO: `date` Terminating on signal"  | tee -a /cvmfs/cvmfs-pod.log
+
+touch /dev/shm/unmounting.lck
 
 mps=`cat /etc/mount-and-wait.mps`
 
@@ -34,7 +37,7 @@ for mp1 in $mps; do
      fi
    done
    rmdir /cvmfs/${mp1}
-   echo "Unmounted ${mp1}"  | tee -a /cvmfs/cvmfs-pod.log
+   echo "INFO: `date` Unmounted ${mp1}"  | tee -a /cvmfs/cvmfs-pod.log
 done
 
 
@@ -42,7 +45,10 @@ pidk=`cat /etc/mount-and-wait.pid`
 if [ "x${pidk}" != "x" ]; then
   # hard kill the waiting process, should not be doing anything but sleep
   kill -9 "$pidk"
-  echo "Killed $pidk"   | tee -a /cvmfs/cvmfs-pod.log
+  echo "INFO: `date` Killed $pidk"   | tee -a /cvmfs/cvmfs-pod.log
 else
   echo "WARNING: /etc/mount-and-wait.pid not found"  | tee -a /cvmfs/cvmfs-pod.log
 fi
+
+rm -f /dev/shm/unmounting.lck
+

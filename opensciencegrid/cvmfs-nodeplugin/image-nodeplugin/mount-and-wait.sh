@@ -22,7 +22,7 @@ trap "/usr/local/sbin/force_unmount.sh" SIGTERM SIGINT
 
 mps=""
 for mp in `echo ${MOUNT_REPOS} |tr , ' '` ; do 
- echo "INFO: Processing /cvmfs/${mp}." | tee -a /cvmfs/cvmfs-pod.log
+ echo "INFO: `date` Processing /cvmfs/${mp}." | tee -a /cvmfs/cvmfs-pod.log
 
  mkdir -p /cvmfs/${mp}
  rc=$?
@@ -78,9 +78,9 @@ done
 
 echo "$mps" > /etc/mount-and-wait.mps
 
-echo "INFO: CVMFS mountpoints started: $mps"  | tee -a /cvmfs/cvmfs-pod.log
+echo "INFO: `date` CVMFS mountpoints started: $mps"  | tee -a /cvmfs/cvmfs-pod.log
 /usr/local/sbin/wait-only.sh
-echo "INFO: Terminating"   | tee -a /cvmfs/cvmfs-pod.log
+echo "INFO: `date` Terminating"   | tee -a /cvmfs/cvmfs-pod.log
 
 # cleanup
 
@@ -110,5 +110,5 @@ done
 # wait a tiny bit to make sure everything is cleaned up properly
 sleep 2
 
-echo "INFO: Bye"  | tee -a /cvmfs/cvmfs-pod.log
+echo "INFO: `date` Bye"  | tee -a /cvmfs/cvmfs-pod.log
 
