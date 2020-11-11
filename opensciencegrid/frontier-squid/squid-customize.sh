@@ -27,7 +27,7 @@ if [ -z "$SQUID_CACHE_DISK" ]; then
   exit 1
 fi
 
-if [-z "$SQUID_CACHE_DISK_LOCATION" ]; then
+if [ -z "$SQUID_CACHE_DISK_LOCATION" ]; then
   echo "ERROR: SQUID_CACHE_DISK_LOCATION undefined, aborting" 1>&2
   exit 1
 fi
