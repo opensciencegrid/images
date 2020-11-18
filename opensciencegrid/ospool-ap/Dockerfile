@@ -2,6 +2,8 @@ FROM opensciencegrid/software-base:fresh
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
+# Ensure that the 'condor' UID/GID matches across containers
+# Using the RedHat assigned UID/GID for the condor user
 RUN groupadd -g 64 -r condor
 RUN useradd -r -g condor -d /var/lib/condor -s /sbin/nologin \
     -u 64 -c "Owner of HTCondor Daemons" condor
