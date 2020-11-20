@@ -31,6 +31,14 @@ this repository.  It can be loaded with the following command:
 kubectl apply -k cvmfs-daemonset
 ```
 
+If you are using Kustomize at your site already, you can add incorporate these
+lines to your `kustomization.yaml`
+
+```
+bases:
+- github.com/opensciencegrid/osg-k8s-cvmfs/cvmfs-daemonset?ref=main
+```
+
 Note this additionally starts a Squid deployment to handle the caching
 of HTTP requests to the wider system.
 
@@ -67,7 +75,8 @@ namespace: namespace1
 namePrefix: namespace1-
 
 bases:
-  - ../cvmfs-pvcs
+- github.com/opensciencegrid/osg-k8s-cvmfs/cvmfs-pvcs?ref=main
+
 ```
 
 Then, CVMFS can be added to the namespace with the following command:
