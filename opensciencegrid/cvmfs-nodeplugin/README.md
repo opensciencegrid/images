@@ -75,3 +75,8 @@ Then, CVMFS can be added to the namespace with the following command:
 ```
 kubectl apply -k namespace1
 ```
+
+Original Author
+---------------
+
+This code was originally authored by Igor Sfiligoi for the Pacific Research Platform.

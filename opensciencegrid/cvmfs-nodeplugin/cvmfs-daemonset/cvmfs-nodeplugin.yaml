@@ -15,19 +15,9 @@ spec:
         k8s-app: cvmfs-nodeplugin
     spec:
       serviceAccount: cvmfs-nodeplugin
-      tolerations:
-      - effect: NoSchedule
-        key: nautilus.io/noceph
-        operator: Exists
-      - effect: NoSchedule
-        key: nautilus.io/chase-ci
-        operator: Exists
-      - effect: NoSchedule
-        key: nautilus.io/haosu
-        operator: Exists
       containers:
       - name: cvmfs
-        image: sfiligoi/prp-osg-cvmfs:nodeplugin
+        image: bbockelm/image-nodeplugin:latest
         imagePullPolicy: Always
         securityContext:
           privileged: true
@@ -40,9 +30,9 @@ spec:
               command: ["/usr/local/sbin/unmount-and-terminate.sh"]
         env:
         - name: MOUNT_REPOS
-          value: "config-osg.opensciencegrid.org,icecube.opensciencegrid.org,oasis.opensciencegrid.org,connect.opensciencegrid.org,singularity.opensciencegrid.org,stash.osgstorage.org,xenon.opensciencegrid.org,fermilab.opensciencegrid.org,nova.opensciencegrid.org,cms.cern.ch,cms-ib.cern.ch"
+          value: "config-osg.opensciencegrid.org,icecube.opensciencegrid.org,oasis.opensciencegrid.org,connect.opensciencegrid.org,singularity.opensciencegrid.org,xenon.opensciencegrid.org,fermilab.opensciencegrid.org,nova.opensciencegrid.org,cms.cern.ch,cms-ib.cern.ch"
         - name: SQUID_URI
-          value: "http://10.98.29.184:3128"
+          value: "http://frontier-squid:3128"
         resources:
            limits:
              memory: 4Gi
