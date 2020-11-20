@@ -36,6 +36,6 @@ jobs:
         context: ./image-nodeplugin
         file: ./image-nodeplugin/Dockerfile
         push: true
-        tags: >
-          opensciencegrid/cvmfs-nodeplugin:fresh,
+        tags: |
+          opensciencegrid/cvmfs-nodeplugin:fresh
           opensciencegrid/cvmfs-nodeplugin:${{ steps.mkdatetag.outputs.dtag }}
