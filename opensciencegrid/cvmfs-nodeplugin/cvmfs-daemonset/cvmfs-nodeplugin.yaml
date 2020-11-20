@@ -17,7 +17,7 @@ spec:
       serviceAccount: cvmfs-nodeplugin
       containers:
       - name: cvmfs
-        image: bbockelm/image-nodeplugin:latest
+        image: opensciencegrid/cvmfs-nodeplugin:fresh
         imagePullPolicy: Always
         securityContext:
           privileged: true
