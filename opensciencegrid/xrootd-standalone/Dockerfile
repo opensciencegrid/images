@@ -10,7 +10,7 @@ RUN yum update -y && \
     yum clean all && \
     rm -rf /var/cache/yum/*
 
-RUN yum install -y osg-xrootd-standalone --enablerepo=osg-development && \
+RUN yum install -y osg-xrootd-standalone --enablerepo=osg-testing && \
     yum clean all && \
     rm -rf /var/cache/yum/*
 
