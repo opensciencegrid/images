@@ -14,7 +14,7 @@ RUN \
  rm -rf /var/cache/yum/*
 
 RUN \
- yum -y install --enablerepo=osg-upcoming-rolling osg-flock \
+ yum -y install --enablerepo=osg-upcoming-testing osg-flock \
  openssh-clients && \
  yum clean all  && \
  rm -rf /var/cache/yum/*
