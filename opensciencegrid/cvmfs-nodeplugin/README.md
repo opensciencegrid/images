@@ -85,6 +85,27 @@ Then, CVMFS can be added to the namespace with the following command:
 kubectl apply -k namespace1
 ```
 
+Deployment Notes for Rancher
+----------------------------
+
+This solution requires the `kubelet` process to have access to a specific directory
+on the host (so the CVMFS pod can mount the FUSE filesystem as read-only and the
+other pods can mount this filesystem).  Some distributions of Kubernetes, like
+[Rancher](https://rancher.com/), launch `kubelet` itself inside a Docker container,
+breaking the underlying assumption.
+
+To make `/var/lib/cvmfs-k8s` available to Rancher, from Rancher's web UI, add the
+following kubelet configuration:
+
+```
+kubelet:
+    image: ""
+    extra_args: {}
+    extra_binds:
+      - "/var/lib/cvmfs-k8s:/var/lib/cvmfs-k8s:rshared"
+```
+
+
 Original Author
 ---------------
 
