@@ -31,6 +31,8 @@ SQUID_IPRANGE       | Limits the incoming connections to the provided whitelist.
 SQUID_CACHE_DISK    | Sets the cache_dir option which determines the disk size squid uses. Must be an integer value, and its unit is MBs. Note: The cache disk area is located at /var/cache/squid. | Defaults to 10000. |
 SQUID_CACHE_MEM     | Sets the cache_mem option which regulates the size squid reserves for caching small objects in memory. | Defaults to "128 MB". |
 
+Additional configuration changes may be made by files in `/etc/squid/customize.d`.  See the documentation for that in [squid-customize.sh](squid-customize.sh).
+
 Moreover, be aware that in order to preserve the cache between redeployments, you should map the following areas to persistent storage outside the container:
 
 Mountpoint       | Description                                                          | Example docker mount               |

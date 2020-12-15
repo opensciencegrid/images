@@ -1,44 +1,38 @@
 #!/bin/bash
 #
-# This file provides a parametrized version of
+# This file provides a parameterized version of
 #  /etc/squid/customize.sh
 # that comes from the OSG RPM.
 # Note:
 #   It will not be overwritten by upgrades.
+# This can be further customized by adding pre-awk shell scripts in
+#  customize.d/[0-4]*.sh, awk function calls (which may include shell
+#  variable substitutions) in customize.d/*.awk, and/or post-awk shell
+#  scripts in customize.d/[5-9]*.sh.  The "print" awk function is in
+#  customize.d/90-print.awk so begin the filenames of awk function calls
+#  with a lower number than that if you want them to run before the print
+#  or a higher number if you want them after the print.  Generally only
+#  "insertline" function calls makes sense after the print, if you want
+#  to insert after the given line instead of before.
 # See customhelps.awk for information on predefined edit functions.
-# Avoid single quotes in the awk source or you have to protect them from bash.
+# Quotes in the awk sources have to protected from bash.
 #
 
-# If some of the variables are not defined, set them to their default values
-# These values should reflect what is in the RPM
+cd `dirname $0`/customize.d
 
-if [ -z "$SQUID_IPRANGE" ]; then
-  echo "ERROR: SQUID_IPRANGE undefined, aborting" 1>&2
-  exit 1
-fi
-
-if [ -z "$SQUID_CACHE_MEM" ]; then
-  echo "ERROR: SQUID_CACHE_MEM undefined, aborting" 1>&2
-  exit 1
-fi
-
-if [ -z "$SQUID_CACHE_DISK" ]; then
-  echo "ERROR: SQUID_CACHE_DISK undefined, aborting" 1>&2
-  exit 1
-fi
-
-if [ -z "$SQUID_CACHE_DISK_LOCATION" ]; then
-  echo "ERROR: SQUID_CACHE_DISK_LOCATION undefined, aborting" 1>&2
-  exit 1
-fi
+for f in [0-4]*.sh; do
+    if [ -f "$f" ]; then
+        . $f
+    fi
+done
 
 
-# Now actually run the config command
-
-awk --file `dirname $0`/customhelps.awk --source "{
-setoption(\"acl NET_LOCAL src\", \"$SQUID_IPRANGE\")
-setoption(\"cache_mem\", \"$SQUID_CACHE_MEM\")
-setoptionparameter(\"cache_dir\", 3, \"$SQUID_CACHE_DISK\")
-setoptionparameter(\"cache_dir\", 2, \"$SQUID_CACHE_DISK_LOCATION\")
-print
+awk --file ../customhelps.awk --source "{
+$(for f in *.awk; do eval "echo \"$(cat $f)\""; done)
 }"
+
+for f in [5-9]*.sh; do
+    if [ -f "$f" ]; then
+        . $f
+    fi
+done
