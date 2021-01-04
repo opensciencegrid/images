@@ -31,6 +31,8 @@ RUN \
  install -m 0700 -o root -g root -d /root/config && \
  install -m 0700 -o root -g root -d /root/secrets
 
+RUN touch /var/lock/subsys/gratia-probes-cron
+
 COPY supervisord.conf /etc/supervisord.conf
 COPY condor/*.conf /etc/condor/config.d/
 COPY start.sh update-config update-secrets create-flocking-tokens /
