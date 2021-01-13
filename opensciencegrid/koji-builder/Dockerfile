@@ -11,5 +11,4 @@ RUN : \
 && :
 
 COPY kojid-supervisord.conf  /etc/supervisord.d/kojid.conf
-RUN find /etc/pki/tls -ls | sort
 COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
