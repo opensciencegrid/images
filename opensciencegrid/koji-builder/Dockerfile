@@ -12,5 +12,6 @@ RUN : \
 
 COPY kojid-supervisord.conf  /etc/supervisord.d/kojid.conf
 COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
-
 RUN touch /var/log/kojid.log
+COPY healthcheck /sbin/healthcheck
+RUN chmod +x /sbin/healthcheck
