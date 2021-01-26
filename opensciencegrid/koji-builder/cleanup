@@ -1,0 +1,4 @@
+#!/bin/bash
+# Delete old "bootstrap" directories that mock leaves behind.
+# (Will no longer be needed after Koji 1.22.)
+find /var/lib/mock -maxdepth 1 -name \*-bootstrap -type d -mtime +7 -exec rm -rf {} +
