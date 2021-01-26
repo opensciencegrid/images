@@ -1,0 +1,2 @@
+#!/bin/bash
+find /var/lib/mock -maxdepth 1 -name \*-bootstrap -type d -mtime +7 -exec rm -rf {} +
