@@ -15,5 +15,5 @@ COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
 RUN touch /var/log/kojid.log
 COPY healthcheck /sbin/healthcheck
 RUN chmod +x /sbin/healthcheck
-COPY cleanup /etc/cron.daily
-RUN chmod +x /etc/cron.daily/cleanup
+COPY cleanup /etc/cron.hourly
+RUN chmod +x /etc/cron.hourly/cleanup
