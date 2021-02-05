@@ -1,4 +1,6 @@
 #!/bin/bash
 # Delete old "bootstrap" directories that mock leaves behind.
 # (Will no longer be needed after Koji 1.22.)
-find /var/lib/mock -maxdepth 1 -name \*-bootstrap -type d -mtime +2 -exec rm -rf {} +
+find /var/lib/mock -maxdepth 1 -name \*-bootstrap -type d -mtime +0 -exec rm -rf {} +
+#    +0 means _greater_ than 0 days, i.e. only delete stuff older than 24 hours
+# This matches the code implemented in Koji 1.22.
