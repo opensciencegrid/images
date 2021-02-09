@@ -2,6 +2,9 @@ FROM opensciencegrid/software-base:fresh
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
+# Default root dir
+ENV XC_ROOTDIR /xorigin-standalone
+
 # Create the xrootd user with a fixed GID/UID
 RUN groupadd -o -g 10940 xrootd
 RUN useradd -o -u 10940 -g 10940 -s /bin/sh xrootd
@@ -16,3 +19,4 @@ RUN yum install -y osg-xrootd-standalone --enablerepo=osg-upcoming-testing && \
 
 ADD supervisord.d/* /etc/supervisord.d/
 ADD image-config.d/* /etc/osg/image-config.d/
+ADD xrootd/* /etc/xrootd/config.d/
