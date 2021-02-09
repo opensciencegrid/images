@@ -3,7 +3,7 @@ FROM opensciencegrid/software-base:fresh
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Default root dir
-ENV XC_ROOTDIR /xorigin-standalone
+ENV XC_ROOTDIR /xrootd-standalone
 
 # Create the xrootd user with a fixed GID/UID
 RUN groupadd -o -g 10940 xrootd
