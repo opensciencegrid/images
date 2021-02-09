@@ -9,7 +9,7 @@ user=xrootd
 autorestart=true
 EOF
 
-    # Configure XCache to point to the local redirector(s)
+    # Configure XrootD server to point to the local redirector(s)
     # To specify redirector(s), users should set XC_LOCAL_REDIRECTORS
     # to a comma-delimited list of <FQDN>:<PORT> for each redirector
     XROOTD_CONFIG=/etc/xrootd/config.d/50-generated-cmsd.conf
