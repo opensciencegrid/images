@@ -1,7 +1,7 @@
 # Specify the opensciencegrid/software-base image tag
-ARG SW_BASE_TAG=fresh
+ARG YUM_BASE_REPO=testing
 
-FROM opensciencegrid/software-base:$SW_BASE_TAG
+FROM opensciencegrid/software-base:el8-$YUM_BASE_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
@@ -11,7 +11,7 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 RUN groupadd -o -g 10941 squid && \
     useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid && \
     yum update -y && \
-    yum install -y frontier-squid --enablerepo=osg-testing && \
+    yum install -y frontier-squid && \
     rm -rf /var/cache/yum/* && \
     mkdir /etc/squid/customize.d
 
