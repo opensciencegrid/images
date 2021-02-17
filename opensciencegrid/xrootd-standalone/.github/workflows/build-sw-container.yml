@@ -1,4 +1,4 @@
-name: Build Docker images
+name: Build container images
 
 on:
   push:
@@ -55,20 +55,3 @@ jobs:
         push: true
         build-args: BASE_YUM_REPO=${{ matrix.repo }}
         tags: "${{ steps.generate-tag-list.outputs.taglist }}"
-
-  dispatch:
-    runs-on: ubuntu-latest
-    if: startsWith(github.repository, 'opensciencegrid/')
-    needs: build
-    strategy:
-      matrix:
-        dispatch-repo:
-        - docker-osg-ce-condor
-    steps:
-
-    - name: dispatch build ${{ matrix.dispatch-repo }}
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: opensciencegrid/${{ matrix.dispatch-repo }}
-        event-type: dispatch-build
