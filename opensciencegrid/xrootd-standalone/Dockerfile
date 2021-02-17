@@ -1,6 +1,10 @@
-FROM opensciencegrid/software-base:fresh
+ARG BASE_YUM_REPO=release
+
+FROM opensciencegrid/software-base:$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
+
+ARG BASE_YUM_REPO=release
 
 # Default root dir
 ENV XC_ROOTDIR /xrootd-standalone
@@ -13,7 +17,10 @@ RUN yum update -y && \
     yum clean all && \
     rm -rf /var/cache/yum/*
 
-RUN yum install -y osg-xrootd-standalone --enablerepo=osg-upcoming && \
+RUN if [[ $BASE_YUM_REPO = release ]]; then \
+       yumrepo=osg-upcoming; else \
+       yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
+    yum install -y --enablerepo=$yumrepo && \
     yum clean all && \
     rm -rf /var/cache/yum/*
 
