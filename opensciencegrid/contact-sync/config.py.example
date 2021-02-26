@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+# Save this file as config.py, and update the values of api_key and page_id 
+api_key = ''
+page_id = ''
