@@ -16,6 +16,7 @@ RUN groupadd -o -g 10941 squid && \
     mkdir /etc/squid/customize.d
 
 COPY 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
+COPY start-frontier-squid.sh /usr/sbin/
 COPY squid-customize.sh /etc/squid/customize.sh
 COPY customize.d/* /etc/squid/customize.d/
 COPY supervisor-frontier-squid.conf /etc/supervisord.d/40-frontier-squid.conf
