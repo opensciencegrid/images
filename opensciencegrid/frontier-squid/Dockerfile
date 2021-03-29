@@ -15,6 +15,20 @@ RUN groupadd -o -g 10941 squid && \
     rm -rf /var/cache/yum/* && \
     mkdir /etc/squid/customize.d
 
+RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
+    > /etc/yum.repos.d/elastic-7.x.repo \
+        printf "%s\n" \
+        "[elastic-7.x]" \
+        "name=Elastic repository for 7.x packages" \
+        "baseurl=https://artifacts.elastic.co/packages/7.x/yum" \
+        "gpgcheck=1" \
+        "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" \
+        "enabled=1" \
+        "autorefresh=1" \
+        "type=rpm-md" && \
+    yum install -y filebeat && \
+    rm -rf /var/cache/yum/*
+
 COPY 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
 COPY start-frontier-squid.sh /usr/sbin/
 COPY squid-customize.sh /etc/squid/customize.sh
