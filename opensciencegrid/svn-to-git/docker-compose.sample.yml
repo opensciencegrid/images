@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  svn-to-git:
+    build: .
+    environment:
+      SVN_SRC: https://svn.example.edu/svn/repo
+      AUTHORS_URL: https://svn.example.edu/svn-authors.txt
+      GIT_DEST: git@github.com:user/repo.git
+      WORK_DIR: /data/repo
+      GIT_SSH_COMMAND: ssh -i /rsa
+    volumes:
+      - /home/user/.ssh/id_rsa:/rsa:ro
+      - data:/data
+
+volumes:
+  data:
