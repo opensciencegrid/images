@@ -15,4 +15,4 @@ Mirror a repo from Subversion to Git using git-svn-mirror
 ## Optional
 
 * `GIT_SSH_COMMAND` - Allow SSH key path to be specified. Ex. `ssh -i /secrets/id_rsa`
-* `SLEEP` - Sleep after container is complete for easy CronJob debugging. Ex. `15m`
+* `SLEEP_ERR` - Sleep on error for easier CronJob debugging. Ex. `15m`

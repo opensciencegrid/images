@@ -3,13 +3,13 @@
 # Show errors, but allow a sleep for container debugging
 err_exit() {
     echo "Error on line $(caller)" >&2
-    sleep "$sleep_time"
+    sleep "$sleep_err"
     exit 1
 }
 trap 'err_exit' ERR
 
 authors_file=/tmp/authors.txt
-sleep_time="${SLEEP:-0}"
+sleep_err="${SLEEP_ERR:-0}"
 
 # Exit if unset variables are expanded
 set -u
@@ -45,6 +45,4 @@ else
     git-svn-mirror update "$WORK_DIR"
 fi
 
-# Allow a sleep for container debugging
 echo "Completed OK"
-sleep "$sleep_time"
