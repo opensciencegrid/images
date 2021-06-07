@@ -40,9 +40,13 @@ if [ ! -f "$WORK_DIR/config" ] ; then
     git config svn-remote.svn.url      "$SVN_BASE"
     git config svn-remote.svn.fetch    "$SVN_PATH/trunk:refs/heads/trunk"
     git config svn-remote.svn.branches "$SVN_PATH/branches/*:refs/heads/*"
+    git config svn-remote.svn.tags     "$SVN_PATH/tags/*:refs/tags/*"
+    popd
 fi
 
+pushd "$WORK_DIR"
 git svn fetch
 git push --all
+git push --tags
 
 echo "Completed OK"
