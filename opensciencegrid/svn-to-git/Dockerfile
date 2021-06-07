@@ -10,14 +10,12 @@ RUN \
   && yum install -y \
        git224 \
        git224-svn \
-       rubygems \
        subversion \
   && yum clean all && rm -rf /var/cache/yum/*
 
 # Install gems and get SSH keys
 RUN \
-     gem install git-svn-mirror \
-  && ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts
+     ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts
 
 COPY svn-to-git.sh /usr/bin
 

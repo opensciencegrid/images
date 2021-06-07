@@ -15,14 +15,15 @@ sleep_err="${SLEEP_ERR:-0}"
 set -u
 # And expand all our required variables
 : "$AUTHORS_URL"
-: "$SVN_SRC"
+: "$SVN_BASE"
+: "$SVN_PATH"
 : "$GIT_DEST"
 : "$WORK_DIR"
 
 set -x
 
 # Confirm SVN server is up
-svn info "$SVN_SRC"
+svn info "$SVN_BASE"
 
 # Ensure workbench directory exists
 mkdir -p "$WORK_DIR"
@@ -31,18 +32,17 @@ mkdir -p "$WORK_DIR"
 curl "$AUTHORS_URL" -o "$authors_file"
 
 if [ ! -f "$WORK_DIR/config" ] ; then
-    # Make a new workbench
-    git-svn-mirror init --from         "$SVN_SRC" \
-                        --to           "$GIT_DEST" \
-                        --workbench    "$WORK_DIR" \
-                        --authors-file "$authors_file"
+    # Make a new working directory
+    git clone --bare "$GIT_DEST" "$WORK_DIR"
 
-    cd "$WORK_DIR"
-    git fetch || :
-    git push
-else
-    # Update existing workbench
-    git-svn-mirror update "$WORK_DIR"
+    pushd "$WORK_DIR"
+    git config svn.authorsfile         "$authors_file"
+    git config svn-remote.svn.url      "$SVN_BASE"
+    git config svn-remote.svn.fetch    "$SVN_PATH/trunk:refs/heads/trunk"
+    git config svn-remote.svn.branches "$SVN_PATH/branches/*:refs/heads/*"
 fi
+
+git svn fetch
+git push --all
 
 echo "Completed OK"

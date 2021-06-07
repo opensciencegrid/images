@@ -3,7 +3,8 @@ services:
   svn-to-git:
     build: .
     environment:
-      SVN_SRC: https://svn.example.edu/svn/repo
+      SVN_BASE: https://svn.example.edu/svn/repo
+      SVN_PATH: native/redhat
       AUTHORS_URL: https://svn.example.edu/svn-authors.txt
       GIT_DEST: git@github.com:user/repo.git
       WORK_DIR: /data/repo
