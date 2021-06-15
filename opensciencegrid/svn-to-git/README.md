@@ -1,7 +1,7 @@
 svn-to-git
 ==========
 
-Mirror a repo from Subversion to Git using git-svn-mirror
+Mirror a repo from Subversion to Git using `git svn`
 
 # Environment variables
 
