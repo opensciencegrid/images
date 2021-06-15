@@ -1,4 +1,5 @@
 FROM opensciencegrid/software-base:fresh
+LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Install dependencies
 # Install git from IUS (Rackspace) repo for a modern version (without SCL setup headache)
