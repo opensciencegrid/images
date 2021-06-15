@@ -1,4 +1,4 @@
-FROM opensciencegrid/software-base:fresh
+FROM opensciencegrid/software-base:3.5-el7-release
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Install dependencies
