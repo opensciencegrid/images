@@ -23,21 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: [make-date-tag]
     if: startsWith(github.repository, 'opensciencegrid/')
-    strategy:
-      fail-fast: False
-      matrix:
-        repo: ['development', 'testing', 'release']
     steps:
     - uses: actions/checkout@v2
 
     - name: Generate tag list
       id: generate-tag-list
       env:
-        REPO: ${{ matrix.repo }}
         TIMESTAMP: ${{ needs.make-date-tag.outputs.dtag }}
       run: |
         docker_repo=${GITHUB_REPOSITORY/opensciencegrid\/docker-/opensciencegrid/}
-        tag_list=$docker_repo:$REPO,$docker_repo:$REPO-$TIMESTAMP
+        tag_list=$docker_repo:$release,$docker_repo:$release-$TIMESTAMP
         echo "::set-output name=taglist::$tag_list"
 
     - name: Set up Docker Buildx
