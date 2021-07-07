@@ -32,7 +32,7 @@ jobs:
         TIMESTAMP: ${{ needs.make-date-tag.outputs.dtag }}
       run: |
         docker_repo=${GITHUB_REPOSITORY/opensciencegrid\/docker-/opensciencegrid/}
-        tag_list=$docker_repo:$release,$docker_repo:$release-$TIMESTAMP
+        tag_list=$docker_repo:release,$docker_repo:release-$TIMESTAMP
         echo "::set-output name=taglist::$tag_list"
 
     - name: Set up Docker Buildx
