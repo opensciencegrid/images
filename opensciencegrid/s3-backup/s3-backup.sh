@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ENCRYPTION_KEY=/encryption.key
 
 usage () {
