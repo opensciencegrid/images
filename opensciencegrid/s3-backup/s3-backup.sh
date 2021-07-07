@@ -39,7 +39,7 @@ tar -cvf $backup /input/*
 # $ENCRYPTION_KEY
 gpg --batch \
     --passphrase-file $ENCRYPTION_KEY \
-    --output "$backup.enc"
+    --output "$backup.enc" \
     --symmetric \
     --cipher-algo AES256 \
     $backup
@@ -47,5 +47,5 @@ gpg --batch \
 # Copy 
 mc cp \
    --preserve \
-   $backup
+   $backup \
    "dest/$S3_BUCKET/$S3_DEST_DIR/"
