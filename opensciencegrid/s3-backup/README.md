@@ -5,15 +5,19 @@ A container that can [encrypt and backup](#creating-backups) contents to an S3 b
 [view](#viewing-backups) the contents of an S3 bucket,
 and [restore and decrypt backups](#restoring-backups) from an S3 bucket.
 
-The following environment variables are required for all sub-commands:
+Requirements
+------------
 
-- `S3_BUCKET`: S3 bucket
-- `S3_URL`: S3 URL including credentials. Must start with `https://`. Ex. `https://<access-key>:<secret-key>@<s3-endpoint>`.
+1.  S3 credentials of the form `access-key:secret-key` must be mounted to `/s3.creds`
 
-Required for `backup` and `restore` operations:
+1.  The following environment variables are required for all sub-commands:
 
-- `S3_DEST_DIR`: target directory relative to `S3_BUCKET` for creating/restoring backups and `ls` operations
+    - `S3_BUCKET`: S3 bucket
+    - `S3_ENDPOINT`: S3 endpoint
 
+1.  The following environment variable is required for `backup` and `restore` operations:
+
+    - `S3_DEST_DIR`: target directory relative to `S3_BUCKET` for creating/restoring backups and `ls` operations
 
 Creating Backups
 ----------------
