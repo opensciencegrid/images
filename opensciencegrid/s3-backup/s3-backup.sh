@@ -25,25 +25,17 @@ Subcommands:
 
 Required environment variables:
 
-- S3_ACCESS_KEY
 - S3_BUCKET
 - S3_DEST_DIR (optional for the 'ls' subcommand)
-- S3_SECRET_KEY
 - S3_URL (must start with https://)"
 }
 
 
-mc_init_config () {
-    # Create an alias for the S3 endpoint/credentials
-    # S3_URL must start with "https://"
-    mc alias set dest "$S3_URL" "$S3_ACCESS_KEY" "$S3_SECRET_KEY"
-}
-
-
 mc_backup () {
-    [[ -d $INPUT_DIR ]] || fail "ERROR: Missing /input dir"
-    [[ -n $(ls $INPUT_DIR) ]] || fail "ERROR: no contents to backup in /input"
-    [[ -f $ENCRYPTION_KEY ]] || fail "ERROR: Missing encryption key, /encryption.key"
+    [[ -d $INPUT_DIR ]] || fail "ERROR: Missing $INPUT_DIR dir"
+    [[ -n $(ls $INPUT_DIR) ]] || fail "ERROR: no contents to backup in $INPUT_DIR"
+    [[ -f $ENCRYPTION_KEY ]] || fail "ERROR: Missing encryption key, $ENCRYPTION_KEY"
+    [[ -n $S3_DEST_DIR ]] || fail "ERROR: \$S3_DEST_DIR is required"
 
     tmpdir=$(mktemp -d)
     chmod 700 $tmpdir
@@ -53,6 +45,7 @@ mc_backup () {
     # Encrypt the tarball contents using a key mounted to
     # $ENCRYPTION_KEY
     gpg --batch \
+        --quiet \
         --passphrase-file $ENCRYPTION_KEY \
         --output "$BACKUP.enc" \
         --symmetric \
@@ -60,6 +53,7 @@ mc_backup () {
         $BACKUP
 
     mc cp \
+       --quiet \
        $BACKUP.enc \
        "$S3_ALIAS/$S3_BUCKET/$S3_DEST_DIR/"
 }
@@ -74,15 +68,14 @@ mc_ls () {
         S3_DEST_DIR="$1"
     fi
 
-    [[ -n $S3_DEST_DIR ]] || usage
-
     mc ls "$S3_ALIAS/$S3_BUCKET/$S3_DEST_DIR"
 }
 
 
 mc_restore () {
-    [[ -d $OUTPUT_DIR ]] || fail "ERROR: Missing /output dir"
-    [[ -f $ENCRYPTION_KEY ]] || fail "ERROR: Missing decryption key, /encryption.key"
+    [[ -d $OUTPUT_DIR ]] || fail "ERROR: Missing $OUTPUT_DIR dir"
+    [[ -f $ENCRYPTION_KEY ]] || fail "ERROR: Missing decryption key, $ENCRYPTION_KEY"
+    [[ -n $S3_DEST_DIR ]] || fail "ERROR: \$S3_DEST_DIR is required"
 
     if [[ $1 =~ [0-9]{8}+-[0-9]{4}+ ]]; then
         BACKUP="backup-$1.tar.enc"
@@ -98,11 +91,13 @@ mc_restore () {
 
     src_tmpfile=$(mktemp)
     mc cp \
+       --quiet \
        "$S3_ALIAS/$S3_BUCKET/$BACKUP_PATH" \
        $src_tmpfile
 
     dcrypt_tmpfile=$(mktemp)
     gpg --batch \
+        --quiet \
         --yes \
         --passphrase-file $ENCRYPTION_KEY \
         --output $dcrypt_tmpfile \
@@ -124,12 +119,12 @@ case $# in
 esac
 
 # Bail if commonly required S3_* env vars aren't set
-if [[ -z $S3_ACCESS_KEY$S3_BUCKET$S3_SECRET_KEY$S3_URL ]] ||
-       [[ $S3_URL != https://* ]]; then
+if [[ -z $S3_BUCKET ]] || [[ $S3_URL != https://* ]]; then
     usage
 fi
 
-mc_init_config
+# Configure alias
+export MC_HOST_${S3_ALIAS}="$S3_URL"
 
 # Run subcommands
 case "$subcommand" in

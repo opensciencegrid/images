@@ -7,10 +7,8 @@ and [restore and decrypt backups](#restoring-backups) from an S3 bucket.
 
 The following environment variables are required for all sub-commands:
 
-- `S3_ACCESS_KEY`: S3 access key
 - `S3_BUCKET`: S3 bucket
-- `S3_SECRET_KEY`: S3 secret key
-- `S3_URL`: S3 endpoint URL. Must start with `https://`.
+- `S3_URL`: S3 URL including credentials. Must start with `https://`. Ex. `https://<access-key>:<secret-key>@<s3-endpoint>`.
 
 Required for `backup` and `restore` operations:
 
