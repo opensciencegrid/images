@@ -2,6 +2,7 @@
 
 set -e
 
+S3_CREDENTIALS=/s3.creds
 ENCRYPTION_KEY=/encryption.key
 INPUT_DIR=/input
 OUTPUT_DIR=/output
@@ -27,7 +28,9 @@ Required environment variables:
 
 - S3_BUCKET
 - S3_DEST_DIR (optional for the 'ls' subcommand)
-- S3_URL (must start with https://)"
+- S3_ENDPOINT
+
+S3 credentials of the form 'access-key:secret-key' must be mounted to '/s3.creds'"
 }
 
 
@@ -119,12 +122,12 @@ case $# in
 esac
 
 # Bail if commonly required S3_* env vars aren't set
-if [[ -z $S3_BUCKET ]] || [[ $S3_URL != https://* ]]; then
+if [[ -z $S3_BUCKET ]] || [[ ! -f $S3_CREDENTIALS ]] || [[ -z $S3_ENDPOINT ]]; then
     usage
 fi
 
 # Configure alias
-export MC_HOST_${S3_ALIAS}="$S3_URL"
+export MC_HOST_${S3_ALIAS}="https://$(tr -d < S3_CREDENTIALS)@${S3_ENDPOINT#https://}"
 
 # Run subcommands
 case "$subcommand" in
