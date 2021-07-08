@@ -30,7 +30,7 @@ Required environment variables:
 - S3_DEST_DIR (optional for the 'ls' subcommand)
 - S3_ENDPOINT
 
-S3 credentials of the form 'access-key:secret-key' must be mounted to '/s3.creds'"
+S3 credentials of the form 'access-key:secret-key' must be mounted to '$S3_CREDENTIALS'"
 }
 
 
@@ -127,7 +127,7 @@ if [[ -z $S3_BUCKET ]] || [[ ! -f $S3_CREDENTIALS ]] || [[ -z $S3_ENDPOINT ]]; t
 fi
 
 # Configure alias
-export MC_HOST_${S3_ALIAS}="https://$(tr -d < S3_CREDENTIALS)@${S3_ENDPOINT#https://}"
+export MC_HOST_${S3_ALIAS}="https://$(head -1 $S3_CREDENTIALS)@${S3_ENDPOINT#https://}"
 
 # Run subcommands
 case "$subcommand" in
