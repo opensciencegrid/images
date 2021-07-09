@@ -53,6 +53,7 @@ mc_backup () {
         --output "$BACKUP.enc" \
         --symmetric \
         --cipher-algo AES256 \
+        --compress-algo bzip2 \
         $BACKUP
 
     mc cp \
