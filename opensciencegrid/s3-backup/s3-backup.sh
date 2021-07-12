@@ -43,7 +43,7 @@ mc_backup () {
     tmpdir=$(mktemp -d)
     chmod 700 $tmpdir
     BACKUP=$tmpdir/backup-$(date +%Y%m%d-%H%M).tar
-    tar -cvf $BACKUP -C $INPUT_DIR .
+    XZ_OPT=-9e tar -cJvf $BACKUP -C $INPUT_DIR .
 
     # Encrypt the tarball contents using a key mounted to
     # $ENCRYPTION_KEY
@@ -53,8 +53,6 @@ mc_backup () {
         --output "$BACKUP.enc" \
         --symmetric \
         --cipher-algo AES256 \
-        --compress-algo bzip2 \
-        --bzip2-compress-level 9 \
         $BACKUP
 
     mc cp \
@@ -109,7 +107,7 @@ mc_restore () {
         --decrypt \
         $src_tmpfile
 
-    tar -xvf \
+    tar -xJvf \
         $dcrypt_tmpfile \
         -C $OUTPUT_DIR
 }
