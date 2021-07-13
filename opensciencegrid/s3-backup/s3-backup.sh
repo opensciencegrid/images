@@ -42,7 +42,7 @@ mc_backup () {
 
     tmpdir=$(mktemp -d)
     chmod 700 $tmpdir
-    BACKUP=$tmpdir/backup-$(date +%Y%m%d-%H%M).tar
+    BACKUP=$tmpdir/backup-$(date +%Y%m%d-%H%M).tar.xz
     XZ_OPT=-9e tar -cJvf $BACKUP -C $INPUT_DIR .
 
     # Encrypt the tarball contents using a key mounted to
@@ -81,7 +81,7 @@ mc_restore () {
     [[ -n $S3_DEST_DIR ]] || fail "ERROR: \$S3_DEST_DIR is required"
 
     if [[ $1 =~ [0-9]{8}+-[0-9]{4}+ ]]; then
-        BACKUP="backup-$1.tar.enc"
+        BACKUP="backup-$1.tar.xz.enc"
     else
         echo "Datetime not specified, finding latest backup..."
         BACKUP=$(mc_ls | awk 'END{print $NF}')
