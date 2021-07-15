@@ -3,7 +3,8 @@ S3 Backup
 
 A container that can [encrypt and backup](#creating-backups) contents to an S3 bucket,
 [view](#viewing-backups) the contents of an S3 bucket,
-and [restore and decrypt backups](#restoring-backups) from an S3 bucket.
+[restore and decrypt backups](#restoring-backups) from an S3 bucket,
+and mirror data from an S3 bucket to an S3 bucket, replacing the target contents.
 
 Requirements
 ------------
@@ -12,12 +13,17 @@ Requirements
 
 1.  The following environment variables are required for all sub-commands:
 
-    - `S3_BUCKET`: S3 bucket
-    - `S3_ENDPOINT`: S3 endpoint
+    - `S3_BUCKET`: S3 target bucket
+    - `S3_ENDPOINT`: S3 target endpoint, including protocol (e.g. https://play.min.io)
 
-1.  The following environment variable is required for `backup` and `restore` operations:
+1.  The following environment variable is required for `backup`, `restore`, and `mirror` operations:
 
     - `S3_DEST_DIR`: target directory relative to `S3_BUCKET` for creating/restoring backups and `ls` operations
+
+1.  For `mirror` operations, S3 source credentials must be mounted to `/s3.src.creds` and the following environment variables are required:
+
+    - `S3_SRC_BUCKET`: S3 source bucket
+    - `S3_SRC_ENDPOINT`: S3 source endpoint, including protocol
 
 Creating Backups
 ----------------
