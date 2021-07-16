@@ -139,6 +139,11 @@ mc_create_alias () {
     local url=$2
     local keyfile=$3
 
+    # If URL doesn't contain '://' indicating scheme, prepend 'https://'
+    if [[ $url != *"://"* ]]; then
+        url="https://$url"
+    fi
+
     # Load colon-separated username:password from keyfile
     local keys
     IFS=':'; keys=($(head -1 $keyfile)); unset IFS;

@@ -14,7 +14,7 @@ Requirements
 1.  The following environment variables are required for all sub-commands:
 
     - `S3_BUCKET`: S3 target bucket
-    - `S3_ENDPOINT`: S3 target endpoint, including protocol (e.g. https://play.min.io)
+    - `S3_ENDPOINT`: S3 target endpoint, optionally including scheme, with a default of HTTPS. (e.g. https://play.min.io)
 
 1.  The following environment variable is required for `backup`, `restore`, and `mirror` operations:
 
@@ -23,7 +23,7 @@ Requirements
 1.  For `mirror` operations, S3 source credentials must be mounted to `/s3.src.creds` and the following environment variables are required:
 
     - `S3_SRC_BUCKET`: S3 source bucket
-    - `S3_SRC_ENDPOINT`: S3 source endpoint, including protocol
+    - `S3_SRC_ENDPOINT`: S3 source endpoint, optionally including scheme
 
 Creating Backups
 ----------------
