@@ -3,10 +3,12 @@
 set -e
 
 S3_CREDENTIALS=/s3.creds
+S3_SRC_CREDENTIALS=/s3.src.creds
 ENCRYPTION_KEY=/encryption.key
 INPUT_DIR=/input
 OUTPUT_DIR=/output
 S3_ALIAS=dest
+S3_SRC_ALIAS=src
 
 fail () {
     echo "$1"
@@ -21,6 +23,7 @@ Subcommands:
   backup                 Encrypts and backs up data to S3
   ls [path]              Show contents of S3_DEST_DIR or 'path'
                          ('/' shows the contents of the S3_BUCKET root)
+  mirror                 Sync S3 source to S3 destination, replacing contents
   restore [datetime]     Restore latest backup from S3 or backup corresponding to
                          'datetime' (format YYYYMMDD-hhmm)
 
@@ -30,7 +33,14 @@ Required environment variables:
 - S3_DEST_DIR (optional for the 'ls' subcommand)
 - S3_ENDPOINT
 
-S3 credentials of the form 'access-key:secret-key' must be mounted to '$S3_CREDENTIALS'"
+S3 credentials of the form 'access-key:secret-key' must be mounted to '$S3_CREDENTIALS'
+
+Additional requirements for 'mirror' subcommand:
+
+- S3_SRC_BUCKET
+- S3_SRC_ENDPOINT
+- S3 credentials mounted to '$S3_SRC_CREDENTIALS'
+"
 }
 
 
@@ -112,6 +122,34 @@ mc_restore () {
         -C $OUTPUT_DIR
 }
 
+mc_mirror() {
+    [[ -n $S3_DEST_DIR ]] || fail "ERROR: \$S3_DEST_DIR is required"
+
+    mc mirror \
+       --fake `# FIXME: For initial testing` \
+       --quiet \
+       --overwrite \
+       --remove \
+       "$S3_SRC_ALIAS/$S3_SRC_BUCKET" \
+       "$S3_ALIAS/$S3_BUCKET/$S3_DEST_DIR/"
+}
+
+mc_create_alias () {
+    local alias=$1
+    local url=$2
+    local keyfile=$3
+
+    # If URL doesn't contain '://' indicating scheme, prepend 'https://'
+    if [[ $url != *"://"* ]]; then
+        url="https://$url"
+    fi
+
+    # Load colon-separated username:password from keyfile
+    local keys
+    IFS=':'; keys=($(head -1 $keyfile)); unset IFS;
+
+    mc alias set "$alias" "$url" "${keys[0]}" "${keys[1]}"
+}
 
 # Capture the subcommand
 case $# in
@@ -127,7 +165,12 @@ if [[ -z $S3_BUCKET ]] || [[ ! -f $S3_CREDENTIALS ]] || [[ -z $S3_ENDPOINT ]]; t
 fi
 
 # Configure alias
-export MC_HOST_${S3_ALIAS}="https://$(head -1 $S3_CREDENTIALS)@${S3_ENDPOINT#https://}"
+mc_create_alias $S3_ALIAS $S3_ENDPOINT $S3_CREDENTIALS
+# Configure source alias if defined
+if [[ -n $S3_SRC_BUCKET ]] && [[ -f $S3_SRC_CREDENTIALS ]] && [[ -n $S3_SRC_ENDPOINT ]]; then
+    mc_create_alias $S3_SRC_ALIAS $S3_SRC_ENDPOINT $S3_SRC_CREDENTIALS
+    mirror_cfg=true
+fi
 
 # Run subcommands
 case "$subcommand" in
@@ -135,6 +178,13 @@ case "$subcommand" in
         mc_backup ;;
     ls)
         shift; mc_ls "$@" ;;
+    mirror)
+        if [ "$mirror_cfg" = true ]; then
+            mc_mirror
+        else
+           usage
+        fi
+        ;;
     restore)
         shift; mc_restore "$@" ;;
     *)
