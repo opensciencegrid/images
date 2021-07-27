@@ -126,10 +126,8 @@ mc_mirror() {
     [[ -n $S3_DEST_DIR ]] || fail "ERROR: \$S3_DEST_DIR is required"
 
     mc mirror \
-       --fake `# FIXME: For initial testing` \
        --quiet \
        --overwrite \
-       --remove \
        "$S3_SRC_ALIAS/$S3_SRC_BUCKET" \
        "$S3_ALIAS/$S3_BUCKET/$S3_DEST_DIR/"
 }
