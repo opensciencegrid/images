@@ -1,6 +1,10 @@
-FROM opensciencegrid/software-base:release
+ARG BASE_YUM_REPO=release
+
+FROM opensciencegrid/software-base:3.5-el7-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
+
+ARG BASE_YUM_REPO=release
 
 RUN yum update -y && \
     yum clean all && \
