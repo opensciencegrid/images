@@ -44,6 +44,7 @@ jobs:
             tag_list+=("$registry/$docker_repo":"$image_tag")
           done
         done
+        IFS=,  # tags must be comma-separated for build-push-action below
         echo "::set-output name=taglist::${tag_list[*]}"
 
     - name: Set up Docker Buildx
