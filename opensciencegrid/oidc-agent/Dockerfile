@@ -13,4 +13,4 @@ RUN yum update -y && \
     
 COPY bin/* /usr/local/bin
 
-ENTRYPOINT ["/usr/local/bin/runme"]
+ENTRYPOINT ["/usr/local/bin/runme.sh"]
