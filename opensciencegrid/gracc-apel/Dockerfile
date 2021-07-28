@@ -4,7 +4,8 @@ FROM opensciencegrid/osg-wn:3.5-el7
 RUN yum -y install python3 python3-pip && \
   pip3 install elasticsearch-dsl && \
   pip3 install argo-ams-library
-RUN yum -y install http://rpm-repo.argo.grnet.gr/ARGO/prod/centos7/argo-ams-library-0.4.2-1.el7.noarch.rpm
+RUN yum -y install http://rpm-repo.argo.grnet.gr/ARGO/devel/centos7/python-argo-ams-library-0.5.5-20210415071520.ff0c536.el7.noarch.rpm
+
 RUN yum -y install python-dirq
 
 # install ca-policy-egi-core
@@ -14,7 +15,6 @@ RUN cd /etc/yum.repos.d/ && \
   yum -y install ca-policy-egi-core
 
 
-#RUN yum -y install https://github.com/apel/ssm/releases/download/2.1.7-1/apel-ssm-2.1.7-1.el7.noarch.rpm && \
 RUN yum -y install https://github.com/apel/ssm/releases/download/3.2.1-1/apel-ssm-3.2.1-1.el7.noarch.rpm  && \
   mkdir /etc/grid-security/apel && \
   mkdir -p /var/spool/apel/outgoing/12345678 && \
