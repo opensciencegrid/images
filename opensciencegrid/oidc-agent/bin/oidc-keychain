@@ -1,4 +1,4 @@
 #!/bin/bash
 source /tmp/oidc-agent.env
 
-exec oidc-keychain "$@"
+exec /usr/bin/oidc-keychain "$@"

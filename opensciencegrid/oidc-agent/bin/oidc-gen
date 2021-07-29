@@ -1,4 +1,4 @@
 #!/bin/bash
 source /tmp/oidc-agent.env
 
-exec oidc-gen "$@"
+exec /usr/bin/oidc-gen "$@"
