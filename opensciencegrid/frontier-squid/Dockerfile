@@ -11,7 +11,11 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 RUN groupadd -o -g 10941 squid && \
     useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid && \
     yum update -y && \
-    yum install -y frontier-squid && \
+    yum install -y
+                --disablerepo=osg-upcoming \
+                --disablerepo=osg-upcoming-testing \
+                --disablerepo=osg-upcoming-development \
+                frontier-squid && \
     rm -rf /var/cache/yum/* && \
     mkdir /etc/squid/customize.d
 
@@ -26,7 +30,11 @@ RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
         "enabled=1" \
         "autorefresh=1" \
         "type=rpm-md" && \
-    yum install -y filebeat && \
+    yum install -y
+                --disablerepo=osg-upcoming \
+                --disablerepo=osg-upcoming-testing \
+                --disablerepo=osg-upcoming-development \
+                filebeat && \
     rm -rf /var/cache/yum/*
 
 COPY 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
