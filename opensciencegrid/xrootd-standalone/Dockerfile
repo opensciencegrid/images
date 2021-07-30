@@ -17,11 +17,7 @@ RUN yum update -y && \
     yum clean all && \
     rm -rf /var/cache/yum/*
 
-RUN if [[ $BASE_YUM_REPO = release ]]; then \
-       yumrepo=osg-upcoming; else \
-       yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
-    yum install -y --enablerepo=$yumrepo \
-                osg-xrootd-standalone && \
+RUN yum install -y osg-xrootd-standalone && \
     yum clean all && \
     rm -rf /var/cache/yum/*
 
