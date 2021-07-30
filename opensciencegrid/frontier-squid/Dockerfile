@@ -11,10 +11,11 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 RUN groupadd -o -g 10941 squid && \
     useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid && \
     yum update -y && \
+    if [[ $BASE_YUM_REPO = release ]]; then \
+       yumrepo=osg-upcoming; else \
+       yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
     yum install -y
-                --disablerepo=osg-upcoming \
-                --disablerepo=osg-upcoming-testing \
-                --disablerepo=osg-upcoming-development \
+                --disablerepo=$yumrepo \
                 frontier-squid && \
     rm -rf /var/cache/yum/* && \
     mkdir /etc/squid/customize.d
@@ -30,10 +31,11 @@ RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
         "enabled=1" \
         "autorefresh=1" \
         "type=rpm-md" && \
+    if [[ $BASE_YUM_REPO = release ]]; then \
+       yumrepo=osg-upcoming; else \
+       yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
     yum install -y
-                --disablerepo=osg-upcoming \
-                --disablerepo=osg-upcoming-testing \
-                --disablerepo=osg-upcoming-development \
+                --disablerepo=$yumrepo \
                 filebeat && \
     rm -rf /var/cache/yum/*
 
