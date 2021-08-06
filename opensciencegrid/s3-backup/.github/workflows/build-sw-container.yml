@@ -29,6 +29,7 @@ jobs:
     - name: Generate tag list
       id: generate-tag-list
       env:
+        REPO: ${{ matrix.repo }}
         TIMESTAMP: ${{ needs.make-date-tag.outputs.dtag }}
       run: |
         docker_repo=${GITHUB_REPOSITORY/opensciencegrid\/docker-/opensciencegrid/}
