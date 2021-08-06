@@ -23,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [make-date-tag]
     if: startsWith(github.repository, 'opensciencegrid/')
+    strategy:
+      matrix:
+        repo: ['development', 'testing', 'release']
     steps:
     - uses: actions/checkout@v2
 
