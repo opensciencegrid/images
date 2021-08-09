@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: False
       matrix:
-        repo: ['devops', 'devops-itb']
+        repo: ['release']
     steps:
     - uses: actions/checkout@v2
 
