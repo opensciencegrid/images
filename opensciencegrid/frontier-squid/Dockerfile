@@ -14,7 +14,7 @@ RUN groupadd -o -g 10941 squid && \
     if [[ $BASE_YUM_REPO = release ]]; then \
        yumrepo=osg-upcoming; else \
        yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
-    yum install -y
+    yum install -y \
                 --disablerepo=$yumrepo \
                 frontier-squid && \
     rm -rf /var/cache/yum/* && \
@@ -34,7 +34,7 @@ RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
     if [[ $BASE_YUM_REPO = release ]]; then \
        yumrepo=osg-upcoming; else \
        yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
-    yum install -y
+    yum install -y \
                 --disablerepo=$yumrepo \
                 filebeat && \
     rm -rf /var/cache/yum/*
