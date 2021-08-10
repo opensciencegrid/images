@@ -1,6 +1,7 @@
-docker-submit-host
-==================
-An OSG flocking submit host.
+docker-access-point
+===================
+
+An Open Science Pool access point
 
 Instructions
 ------------
