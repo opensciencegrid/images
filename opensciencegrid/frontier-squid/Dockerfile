@@ -39,7 +39,6 @@ RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
                 filebeat && \
     rm -rf /var/cache/yum/*
 
-COPY 60-image-post-init.sh /etc/osg/image-config.d/60-image-post-init.sh
 COPY start-frontier-squid.sh /usr/sbin/
 COPY squid-customize.sh /etc/squid/customize.sh
 COPY customize.d/* /etc/squid/customize.d/
