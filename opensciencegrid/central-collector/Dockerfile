@@ -3,6 +3,8 @@ LABEL maintainer "OSG Software <help@opensciencegrid.org>"
 
 RUN    yum install -y htcondor-ce-collector \
                       htcondor-ce-view \
+                      mod_ssl \
+                      # ^^^ Doing SSL termination in the pod
                       perl-LWP-Protocol-https \
                       # ^^^ for fetch-crl, in the rare case that the CA forces HTTPS
                       https://kojipkgs.fedoraproject.org/repos-dist/epel7-infra/latest/x86_64/Packages/m/mod_auth_openidc-2.3.5-2.el7.x86_64.rpm \
