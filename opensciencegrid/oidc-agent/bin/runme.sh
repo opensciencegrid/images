@@ -1,5 +1,5 @@
 #!/bin/bash
 
-oidc-agent > /tmp/oidc-agent.env
+oidc-agent | grep -vw "echo" > /tmp/oidc-agent.env
 
 sleep infinity
