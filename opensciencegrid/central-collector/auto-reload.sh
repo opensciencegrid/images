@@ -2,7 +2,8 @@
 
 # Reload httpd on certificate change
 
-inotifywait --monitor --event modify --recursive --timefmt %FT%T%z --format %T \
+# Wait for the move of the ..data symlink
+inotifywait --monitor --event moved_to --timefmt %FT%T%z --format %T \
       /certs \
     | while read timestamp ; do
 
