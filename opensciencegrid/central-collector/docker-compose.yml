@@ -9,8 +9,7 @@ services:
       # apache
       - ./etc/httpd/conf.d/htcondorce_registry.conf:/etc/httpd/conf.d/htcondorce_registry.conf:ro
       # grid-security
-      - ./certs/tls.crt:/certs/tls.crt:ro
-      - ./certs/tls.key:/certs/tls.key:ro
+      - ./certs/:/certs/:ro
     ports:
       - "8080:80"
       - "8443:443"
