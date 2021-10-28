@@ -13,10 +13,6 @@ ENV XC_ROOTDIR /xrootd-standalone
 RUN groupadd -o -g 10940 xrootd
 RUN useradd -o -u 10940 -g 10940 -s /bin/sh xrootd
 
-RUN yum update -y && \
-    yum clean all && \
-    rm -rf /var/cache/yum/*
-
 RUN yum install -y osg-xrootd-standalone && \
     yum clean all && \
     rm -rf /var/cache/yum/*
