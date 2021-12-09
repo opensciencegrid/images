@@ -13,5 +13,18 @@ RUN yum update -y
 RUN yum install epel-release -y
 RUN yum install yum-plugin-priorities -y
 RUN yum install -y osg-ca-certs
-RUN yum install -y gfal2-all osg-gridftp gfal2-util fts-server fts-client fts-rest fts-monitoring fts-mysql fts-server-selinux fts-rest-selinux fts-monitoring-selinux fts-msg fts-infosys cronie crontabs supervisor
+RUN yum install -y fts-server-3.9.5 \
+                   fts-client-3.9.5 \ 
+                   fts-rest-3.9.4 \ 
+                   fts-monitoring-3.9.1 \
+                   fts-mysql-3.9.5 \
+                   fts-server-selinux-3.9.5 \ 
+                   fts-rest-selinux-3.9.4 \ 
+                   fts-monitoring-selinux-3.9.1 \
+                   fts-msg-3.9.5 \
+                   fts-infosys-3.9.5
+RUN yum install -y gfal2-all osg-gridftp gfal2-util cronie crontabs supervisor vo-client
+# clean up
+RUN yum clean all && \
+    rm -rf /var/cache/yum
 ENTRYPOINT sh tmp/docker-entrypoint.sh
