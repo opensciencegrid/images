@@ -1,0 +1,31 @@
+FROM centos:7
+ARG VERSION=3.10.2
+COPY crontab /etc/crontab
+COPY supervisord.conf etc/supervisord.conf
+COPY fts3config etc/fts3/fts3config
+COPY fts-msg-monitoring.conf etc/fts3/fts-msg-monitoring.conf
+COPY docker-entrypoint.sh tmp/docker-entrypoint.sh 
+RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RUN rpm -Uvh https://repo.opensciencegrid.org/osg/3.6/osg-3.6-el7-release-latest.rpm
+#ADD "https://dmc-repo.web.cern.ch/dmc-repo/dmc-rc-el7.repo" "/etc/yum.repos.d/"
+ADD "http://fts-repo.web.cern.ch/fts-repo/fts3-prod-el7.repo" "/etc/yum.repos.d/"
+#ADD "http://fts-repo.web.cern.ch/fts-repo/fts3-rc-el7.repo" "/etc/yum.repos.d/"
+RUN yum update -y
+RUN yum install epel-release -y
+RUN yum install yum-plugin-priorities -y
+RUN yum install -y osg-ca-certs cronie crontabs supervisor fetch-crl
+RUN yum install -y fts-server-$VERSION \
+                   fts-client-$VERSION \
+                   fts-rest-3.10.1 \
+                   fts-monitoring-3.10.0 \
+                   fts-mysql-$VERSION \
+                   fts-server-selinux-$VERSION \
+                   fts-rest-selinux-3.10.1 \
+                   fts-monitoring-selinux-3.10.0 \
+                   fts-msg-$VERSION \
+                   fts-infosys-$VERSION
+RUN yum install -y vo-client 
+# clean up
+RUN yum clean all && \
+    rm -rf /var/cache/yum
+ENTRYPOINT sh tmp/docker-entrypoint.sh
