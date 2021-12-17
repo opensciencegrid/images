@@ -28,7 +28,7 @@ Additional configuration is needed to make XrootD Standalone production-ready.
     ```
     $ docker run --rm --publish <HOST PORT>:1094 \
              --volume /baremetalPartition:/data
-             opensciencegrid/xrootd-standalone:stable &
+             opensciencegrid/xrootd-standalone:release &
     ```
 
 1. Create a configuration file and place it inside the container `/etc/xrootd/config.d/10-common-site-local.cfg` with the name of the resource that matches topology.
