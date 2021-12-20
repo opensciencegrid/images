@@ -6,6 +6,6 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 # the web-area
 RUN groupadd -o -g 996 gfactory && useradd -o -u 996 -g 996 -s /bin/sh gfactory
 
-RUN yum -y install glideinwms-factory vo-client git
+RUN yum -y install glideinwms-factory vo-client git python3-PyYAML
 
 ADD etc /etc

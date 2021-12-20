@@ -1,6 +1,32 @@
 #!/bin/sh
 
+pushd /var/lib/gwms-factory/condor/
+if [ $? -ne 0 ]; then
+    echo "Unable to chdir to /var/lib/gwms-factory/condor"
+    exit 1
+fi
+
 platforms="${GWMS_SUPPORTED_PLATFORMS:-CentOS7 CentOS8 Debian10 Ubuntu18 Ubuntu20}"
+
+condor_to_gwms_platform() {
+case $1 in
+  CentOS7)
+    echo "rhel7,linux-rhel7,default"
+    ;;
+  CentOS8)
+    echo "rhel8,linux-rhel8"
+    ;;
+  Debian10)
+    echo "debian10,linux-debian10"
+    ;;
+  Ubuntu18)
+    echo "ubuntu18,linux-ubuntu18"
+    ;;
+  Ubuntu20)
+    echo "ubuntu20,linux-ubuntu20"
+    ;;
+esac
+}
 
 cat > condor_pubkeys << EOF
 # curl 'https://research.cs.wisc.edu/htcondor/tarball/keys/HTCondor-9.0-Key'
@@ -183,9 +209,10 @@ download_release_tarballs () {
 
             echo "Repacking tarball to strip directory prefix."
             tar zxf $filename
-            pushd condor-$release-*-x86_64_$platform-stripped
+            pushd condor-$release-*-x86_64_$platform-stripped >/dev/null
             tar zcf ../gfactory-$prefix.tar.gz.new *
-            popd
+            popd >/dev/null
+            rm -rf condor-$release-*-x86_64_$platform-stripped
             mv gfactory-$prefix.tar.gz.new gfactory-$prefix.tar.gz
             echo "Done!  HTCondor $release / $platform available at gfactory-$prefix.tar.gz"
 
@@ -195,4 +222,42 @@ download_release_tarballs () {
 }
 
 download_release_tarballs "stable"
+
+lateststablerelease=$(ls gfactory-condor-*.tar.gz | grep $platform | sed 's|gfactory-condor-||' | tr '-' ' ' | awk '{print $1}' | tr '.' ' ' | grep '^. 0' | sort -k 3 -n | sort -k 2 -n | sort -k 1 -n | tail -n 1 | tr ' ' '.')
+
 download_release_tarballs "feature"
+
+output_file=/etc/gwms-factory/config.d/01-condor-tarballs.xml
+echo "<glidein><condor_tarballs>" > $output_file
+for platform in $platforms; do
+    major=$(ls gfactory-condor-*.tar.gz | grep $platform | sed 's|gfactory-condor-||' | tr '-' ' ' | awk '{print $1}' | tr '.' ' ' | sort -k 3 -n | sort -k 2 -n | sort -k 1 -n | awk '{print $1}' | tail -n 1 | tr ' ' '.')
+    latestmajorrelease=$(ls gfactory-condor-*.tar.gz | grep $platform | sed 's|gfactory-condor-||' | tr '-' ' ' | awk '{print $1}' | tr '.' ' ' | grep "^$major" | sort -k 3 -n | sort -k 2 -n | sort -k 1 -n | tail -n 1 | tr ' ' '.')
+    gwms_platform=$(condor_to_gwms_platform $platform)
+
+    for majorminorpatch in $(ls gfactory-condor-*.tar.gz | grep $platform | sed 's|gfactory-condor-||' | tr '-' ' ' | awk '{print $1}' | uniq | tr ' ' '.'); do
+        latest_release=0
+        for majorminor in $(ls gfactory-condor-*.tar.gz | grep $platform | sed 's|gfactory-condor-||' | tr '-' ' ' | awk '{print $1}' | tr '.' ' ' | sort -k 3 -n | sort -k 2 -n | sort -k 1 -n | awk '{print $1 " " $2}' | uniq | tr ' ' '.'); do
+            latestmajorminorrelease=$(ls gfactory-condor-*.tar.gz | grep $platform | sed 's|gfactory-condor-||' | tr '-' ' ' | awk '{print $1}' | tr '.' ' ' | sort -k 3 -n | sort -k 2 -n | sort -k 1 -n | grep "^$majorminor" | tail -n 1 | tr ' ' '.')
+            if [ "$lateststablerelease" == "$latestmajorminorrelease" -a "$majorminorpatch" == "$latestmajorminorrelease" ]; then
+                echo "      <condor_tarball arch=\"default\" os=\"$gwms_platform\" tar_file=\"$PWD/gfactory-condor-$latestmajorminorrelease-x86_64_$platform-stripped.tar.gz\" version=\"default,$latestmajorminorrelease,$majorminor.x\"/>" >> $output_file
+                latest_release=1
+                break
+            elif [ "$latestmajorrelease" == "$latestmajorminorrelease" -a "$majorminorpatch" == "$latestmajorminorrelease" ]; then
+                echo "      <condor_tarball arch=\"default\" os=\"$gwms_platform\" tar_file=\"$PWD/gfactory-condor-$latestmajorminorrelease-x86_64_$platform-stripped.tar.gz\" version=\"$latestmajorminorrelease,$majorminor.x,$major.x.x\"/>" >> $output_file
+                latest_release=1
+                break
+            elif [ "$majorminorpatch" == "$latestmajorminorrelease" ]; then 
+                echo "      <condor_tarball arch=\"default\" os=\"$gwms_platform\" tar_file=\"$PWD/gfactory-condor-$latestmajorminorrelease-x86_64_$platform-stripped.tar.gz\" version=\"$latestmajorminorrelease,$majorminor.x\"/>" >> $output_file
+                latest_release=1
+                break
+            fi
+        done
+        if [ $latest_release -eq 0 ]; then
+            echo "      <condor_tarball arch=\"default\" os=\"$gwms_platform\" tar_file=\"$PWD/gfactory-condor-$majorminorpatch-x86_64_$platform-stripped.tar.gz\" version=\"$majorminorpatch\"/>" >> $output_file
+        fi
+
+    done
+done
+echo "</condor_tarballs></glidein>" >> $output_file
+
+popd

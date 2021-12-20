@@ -5,8 +5,9 @@
 # GWMS_FACTORY_BRANCH_[0-9]+ specifies the branch. If the later is not found
 # the default "master" branch is used instead
 
-cd /opt/
+pushd /opt/
 
+echo "Cloning repos..."
 for i in `printenv | grep GWMS_FACTORY_REPO`;
 do
         REPO=`echo $i | awk -F "=" '{print $2}'`;
@@ -23,3 +24,6 @@ do
                 git clone --single-branch --branch "$BRANCH" "$REPO";
         fi;
 done
+echo "Done cloning repos..."
+
+popd

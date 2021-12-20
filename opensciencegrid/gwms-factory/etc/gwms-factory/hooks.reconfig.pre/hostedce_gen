@@ -1,24 +1,26 @@
 #!/bin/sh
 
-AUTOCONF_FILE="${AUTOCONF_FILE:-/opt/osg-gfactory/OSG_autoconf/etc/config.yaml}"
-FACTORY_XMLDIR="/etc/glideinWMS/config.d"
+FACTORY_XMLDIR="/etc/gwms-factory/config.d"
 GENERATED_XMLFILE="10-hosted-ces.auto.xml"
 
 AUTOCONF_WORKDIR=$(mktemp -p /tmp -d OSG_autoconf.XXXXXXXXXX)
 trap 'rm -rf "$AUTOCONF_WORKDIR"' EXIT
 
-echo > $AUTOCONF_WORKDIR/$GENERATED_XMLFILE << EOF
-MISSING_YAML: "/opt/osg-gfactory/OSG_autoconf/missing.yml"
+cp /opt/osg-gfactory/OSG_autoconf/missing.yml $AUTOCONF_WORKDIR/missing.yml
+echo "{}" > $AUTOCONF_WORKDIR/OSG.yml
+cp /opt/osg-gfactory/OSG_autoconf/10-hosted-ces.auto.yml $AUTOCONF_WORKDIR/10-hosted-ces.auto.yml
+
+cat > $AUTOCONF_WORKDIR/config.yaml << EOF
 OSG_COLLECTOR: "collector.opensciencegrid.org:9619"
 OSG_YAML: "$AUTOCONF_WORKDIR/OSG.yml" # Automatically generated
 OSG_DEFAULT: "/opt/osg-gfactory/OSG_autoconf/etc/default.yml" # Default file
-MISSING_YAML: "/etc/osg-gfactory/OSG_autoconf/missing.yml" # File used to put CEs that are in the whitelist, but disappear from the OSG collector
+MISSING_YAML: "$AUTOCONF_WORKDIR/missing.yml"
 OSG_WHITELISTS: # Operator's whitelist/override files
-  - "/opt/osg-gfactory/OSG_autoconf/10-hosted-ces.auto.yml"
+  - "$AUTOCONF_WORKDIR/10-hosted-ces.auto.yml"
 EOF
 
 pushd /tmp
-OSG_autoconf "$AUTOCONF_FILE"
+python3 /usr/bin/OSG_autoconf "$AUTOCONF_WORKDIR/config.yaml"
 if [ $? -ne 0 ]; then
   echo "WARNING: OSG_autoconf failed to generate a new configuration."
   exit $?
