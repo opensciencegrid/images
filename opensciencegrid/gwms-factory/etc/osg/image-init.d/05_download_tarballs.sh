@@ -1,5 +1,6 @@
 #!/bin/sh
 
+mkdir -p /var/lib/gwms-factory/condor
 pushd /var/lib/gwms-factory/condor/
 if [ $? -ne 0 ]; then
     echo "Unable to chdir to /var/lib/gwms-factory/condor"
