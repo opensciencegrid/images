@@ -1,0 +1,64 @@
+---
+name: Build and push container images
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [dispatch-build]
+  workflow_dispatch:
+
+jobs:
+  make-date-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      dtag: ${{ steps.mkdatetag.outputs.dtag }}
+    steps:
+      - name: make date tag
+        id: mkdatetag
+        run: echo "::set-output name=dtag::$(date +%Y%m%d-%H%M)"
+
+  build-image-list:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.image-list.outputs.json }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: image-list
+        run: |
+          ./.github/bin/gen-image-list.sh opensciencegrid
+          echo "::set-output name=json::$(.github/bin/gen-image-list.sh opensciencegrid)"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: build-image-list
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
+        yum_repo: ['development', 'testing', 'release']
+        osg_series: ['3.5', '3.6']
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v2.2.0
+        with:
+          push: false
+          context: ./opensciencegrid/${{ matrix.image }}
+          file: ./opensciencegrid/${{ matrix.image }}/Dockerfile
+          build-args: |
+            BASE_YUM_REPO=${{ matrix.yum_repo }}
+            BASE_OSG_SERIES=${{ matrix.osg_series }}
+          tags: latest
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+
+      - name: Cache Docker images
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ matrix.image }}-${{ matrix.osg_series}}-${{ matrix.yum_repo}}-buildx-${{ github.sha }}-${{ github.run_id }}
