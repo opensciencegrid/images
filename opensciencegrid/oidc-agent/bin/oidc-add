@@ -1,0 +1,4 @@
+#!/bin/bash
+source /tmp/oidc-agent.env
+
+exec /usr/bin/oidc-add "$@"
