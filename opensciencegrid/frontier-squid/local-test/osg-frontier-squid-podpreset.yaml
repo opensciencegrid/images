@@ -1,0 +1,11 @@
+apiVersion: settings.k8s.io/v1alpha1
+kind: PodPreset
+metadata:
+  name: osg-frontier-squid-configure
+spec:
+  selector:
+    matchLabels:
+      proxy: using
+  env:
+   - name: http_proxy
+     value: "http://osg-frontier-squid:3128"
