@@ -30,22 +30,28 @@ jobs:
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
              [[ $GITHUB_EVENT_NAME == 'push' ]]; then
                git fetch origin "${GITHUB_BASE_REF:=${{ github.event.before}}}" --depth=1
-               images=$(git diff --name-only "$GITHUB_BASE_REF" "$GITHUB_SHA")
+               image_dirs=$(git diff --name-only "$GITHUB_BASE_REF" "$GITHUB_SHA")
           else
-               images=$(find . -type d -printf "%P\n")
+               image_dirs=$(find . -type d -printf "%P\n")
           fi
-          image_json=$(echo "$images" |
-                       fgrep opensciencegrid/ |
-                       cut -d/ -f -2 |
-                       sort |
-                       uniq |
-                       head -c -1 |
-                       jq -Rcs '.|split("\n")')
+
+          images=$(echo "$images" |
+                   fgrep opensciencegrid/ |
+                   cut -d/ -f -2 |
+                   sort |
+                   uniq |
+                   head -c -1)
+
+          # Ensure that the generated JSON array has a member,
+          # otherwise GHA will throw an error about an empty matrix
+          # vector in subsequent steps
+          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "::set-output name=json::$image_json"
 
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
+    if: needs.build-image-list.outputs.images != '["dummy"]'
     # Prevent a single build failure from killing the workflow.
     # This is safe since subsequent pushes should fail on cache load
     continue-on-error: true
@@ -67,7 +73,8 @@ jobs:
     if: >-
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
-      github.repository_owner == 'opensciencegrid'
+      github.repository_owner == 'opensciencegrid' &&
+      needs.build-image-list.outputs.images != '["dummy"]'
     needs: [make-date-tag, build-image-list, build]
     strategy:
       fail-fast: false
