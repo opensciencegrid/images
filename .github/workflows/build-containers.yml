@@ -70,7 +70,7 @@ jobs:
             username: DOCKER_USERNAME
             password: DOCKER_PASSWORD
     steps:
-      - uses: opensciencegrid/push-container-action@v0.4.2
+      - uses: opensciencegrid/push-container-action@v0.4.3
         with:
           repo: ${{ matrix.yum_repo}}
           osg_series: ${{ matrix.osg_series }}
