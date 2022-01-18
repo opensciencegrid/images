@@ -33,6 +33,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
+    # Prevent a single build failure from killing the workflow.
+    # This is safe since subsequent pushes should fail on cache load
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
