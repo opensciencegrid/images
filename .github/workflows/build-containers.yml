@@ -40,25 +40,8 @@ jobs:
         yum_repo: ['development', 'testing', 'release']
         osg_series: ['3.5', '3.6']
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v2.2.0
+      - uses: opensciencegrid/build-container-action@v0.3.0
         with:
-          push: false
-          context: ./opensciencegrid/${{ matrix.image }}
-          file: ./opensciencegrid/${{ matrix.image }}/Dockerfile
-          build-args: |
-            BASE_YUM_REPO=${{ matrix.yum_repo }}
-            BASE_OSG_SERIES=${{ matrix.osg_series }}
-          tags: latest
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
-
-      - name: Cache Docker images
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ matrix.image }}-${{ matrix.osg_series}}-${{ matrix.yum_repo}}-buildx-${{ github.sha }}-${{ github.run_id }}
+          osg_series: ${{ matrix.osg_series }}
+          repo: ${{ matrix.yum_repo }}
+          context: opensciencegrid/${{ matrix.image }}
