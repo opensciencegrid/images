@@ -2,11 +2,11 @@
 name: Build and push container images
 
 on:
-  push:
-    branches: [main]
+  push: true
+  pull_request: true
   repository_dispatch:
     types: [dispatch-build]
-  workflow_dispatch:
+  workflow_dispatch: true
 
 jobs:
   make-date-tag:
