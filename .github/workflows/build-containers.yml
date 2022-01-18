@@ -27,8 +27,21 @@ jobs:
 
       - id: image-list
         run: |
-          ./.github/bin/gen-image-list.sh opensciencegrid
-          echo "::set-output name=json::$(.github/bin/gen-image-list.sh opensciencegrid)"
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
+             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+               git fetch origin "${GITHUB_BASE_REF:=${{ github.event.before}}}" --depth=1
+               images=$(git diff --name-only "$GITHUB_BASE_REF" "$GITHUB_SHA")
+          else
+               images=$(find . -type d -printf "%P\n")
+          fi
+          image_json=$(echo "$images" |
+                       fgrep opensciencegrid/ |
+                       cut -d/ -f -2 |
+                       sort |
+                       uniq |
+                       head -c -1 |
+                       jq -Rcs '.|split("\n")')
+          echo "::set-output name=json::$image_json"
 
   build:
     runs-on: ubuntu-latest
@@ -47,7 +60,7 @@ jobs:
         with:
           osg_series: ${{ matrix.osg_series }}
           repo: ${{ matrix.yum_repo }}
-          context: opensciencegrid/${{ matrix.image }}
+          context: ${{ matrix.image }}
 
   push:
     runs-on: ubuntu-latest
@@ -74,7 +87,7 @@ jobs:
         with:
           repo: ${{ matrix.yum_repo}}
           osg_series: ${{ matrix.osg_series }}
-          context: opensciencegrid/${{ matrix.image }}
+          context: ${{ matrix.image }}
           registry_url: ${{ matrix.registry.url }}
           registry_user: ${{ secrets[matrix.registry.username] }}
           registry_pass: ${{ secrets[matrix.registry.password] }}
