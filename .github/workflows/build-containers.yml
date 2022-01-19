@@ -24,15 +24,16 @@ jobs:
       images: ${{ steps.image-list.outputs.json }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - id: image-list
         run: |
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
              [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-               # Only fetch what we need instead of a deep repo in the
-               # checkout step above to avoid in case this repo gets large
-               git fetch origin "${GITHUB_BASE_REF:=${{ github.event.before}}}" --depth=1
-               image_dirs=$(git diff --name-only origin/"$GITHUB_BASE_REF" "$GITHUB_SHA")
+               image_dirs=$(git diff --name-only \
+                                     origin/"${GITHUB_BASE_REF:-${{ github.event.before}}}" \
+                                     "$GITHUB_SHA")
           else
                image_dirs=$(find . -type d -printf "%P\n")
           fi
