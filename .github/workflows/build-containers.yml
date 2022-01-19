@@ -29,10 +29,26 @@ jobs:
 
       - id: image-list
         run: |
+          # Get the list of files changed based on the type of event
+          # kicking off the GHA:
+          # 1. For the main branch, diff the previous state of main vs
+          #    the current commit
+          # 2. For other branches (i.e., on someone's fork), diff main
+          #    vs the current commit
+          # 3. For PRs, diff the base ref vs the current commit
+          # 4. For everything else (e.g., dispatches), build all images
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
              [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+               if [[ -n $GITHUB_BASE_REF ]]; then
+                   # GITHUB_BASE_REF is only set for PRs
+                   BASE=origin/$GITHUB_BASE_REF
+               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+                   BASE=${{github.event.before}}
+               else
+                   BASE=origin/main
+               fi
                image_dirs=$(git diff --name-only \
-                                     origin/"${GITHUB_BASE_REF:-${{ github.event.before}}}" \
+                                     "$BASE" \
                                      "$GITHUB_SHA")
           else
                image_dirs=$(find . -type d -printf "%P\n")
