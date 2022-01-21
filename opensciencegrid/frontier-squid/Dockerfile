@@ -1,7 +1,8 @@
 # Specify the opensciencegrid/software-base image tag
+ARG BASE_OSG_SERIES=3.5
 ARG BASE_YUM_REPO=testing
 
-FROM opensciencegrid/software-base:3.5-el8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 

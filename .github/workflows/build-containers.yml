@@ -37,7 +37,7 @@ jobs:
                image_dirs=$(find . -type d -printf "%P\n")
           fi
 
-          images=$(echo "$images" |
+          images=$(echo "$image_dirs" |
                    fgrep opensciencegrid/ |
                    cut -d/ -f -2 |
                    sort |
