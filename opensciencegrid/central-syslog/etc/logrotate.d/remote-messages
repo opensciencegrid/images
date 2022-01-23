@@ -3,7 +3,7 @@
     missingok
     daily
     compress
-    maxage 91
+    rotate 91
     postrotate
         /usr/bin/supervisorctl signal HUP rsyslogd >/dev/null 2>&1 || true
     endscript
