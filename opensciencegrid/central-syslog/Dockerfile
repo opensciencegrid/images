@@ -4,7 +4,7 @@ FROM hub.opensciencegrid.org/opensciencegrid/software-base:3.6-el8-$IMAGE_BASE_T
 
 LABEL maintainer OSG Software <support@opensciencegrid.org>
 
-RUN yum -y install rsyslog rsyslog-gnutls
+RUN yum -y install rsyslog rsyslog-gnutls && mkdir /data/
 
 ADD etc /etc
 
