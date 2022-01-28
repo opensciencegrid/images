@@ -8,5 +8,5 @@ RUN yum -y install rsyslog \
                    rsyslog-gnutls \
     && mkdir /data/
 
-ADD etc /etc
+COPY etc /etc
 
