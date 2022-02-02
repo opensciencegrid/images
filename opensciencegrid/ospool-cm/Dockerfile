@@ -2,14 +2,20 @@
 ARG BASE_OSG_SERIES=3.6
 ARG BASE_YUM_REPO=release
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el7-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
+# base packages
 RUN yum -y upgrade && \
     yum -y install \
-      condor \
       git \
       lsof \
       vim \
+    && \
+    yum clean all
+
+# we want a newer HTCondor
+RUN yum -y install --enablerepo=osg-upcoming-testing \
+      condor \
     && \
     yum clean all
 
