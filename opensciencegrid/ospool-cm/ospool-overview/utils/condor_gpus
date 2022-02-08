@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "  Count  Resource                                GPU                           CUDAVersion  CUDACapability"
+echo " ======  ======================================  ============================  ===========  =============="
+condor_status -const 'GPUs > 0' -format " %-40s" GLIDEIN_Site -format "%-30s" CUDADeviceName -format "%-13s" CUDADriverVersion -format "%-10s\n" CUDACapability | sort | uniq -c
+

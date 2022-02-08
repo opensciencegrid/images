@@ -1,0 +1,153 @@
+#!/usr/bin/python
+
+import os
+import re
+import sys
+import tempfile
+import subprocess
+
+
+def ad_compare(a1, a2):
+
+    m1 = re.sub(r'.+@', '', a1['machine'])
+    m2 = re.sub(r'.+@', '', a2['machine'])
+    
+    if m1 < m2:
+        return -1
+    if m1 > m2:
+        return 1
+
+    # same machine, compare queues and then usernames
+    m1 = a1['machine']
+    if not re.search(r'.+@', m1):
+        m1 = "0@" + m1
+    m2 = a2['machine']
+    if not re.search(r'.+@', m2):
+        m2 = "0@" + m2
+    if m1 < m2:
+        return -1
+    if m1 > m2:
+        return 1
+
+    if a1['username'] < a2['username']:
+        return -1
+    if a1['username'] > a2['username']:
+        return 1
+    return 0
+
+def stdout_w(s, width, align):
+    if align == 'l':
+        sys.stdout.write(str(s).ljust(width))
+    if align == 'r':
+        sys.stdout.write(str(s).rjust(width))
+
+ads = []
+c_fields =   ['username', 'runningjobs', 'idlejobs', 'heldjobs']
+c_headings = ['User', 'R', 'I', 'H']
+c_align =    ['l', 'r', 'r', 'r']
+c_width =    [10, 4, 4, 4]
+
+cmd = "condor_status -submitters -l"
+p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+stdoutdata, stderrdata = p.communicate()
+rc = p.returncode
+if rc != 0:
+    raise RuntimeError("Command '%s' failed with error code %s" % (cmd, rc))
+
+ad = {}
+for line in stdoutdata.split('\n'):
+    line = line.strip(" \r\n")
+    if line == "":
+        if len(ad) > 1:
+            ads.append(ad)
+        ad = {}
+    elif line.find("=") > 0:
+        (key, value) = line.split("=", 1)
+        key = key.strip(" ").lower()
+        value = value.strip(" \"")
+        ad[key] = value
+
+# extract user/group/machine/... for each ad
+for ad in ads:
+
+    # machine
+    if 'scheddname' in ad:
+        ad['machine'] = ad['scheddname']
+
+    # group
+    ad['group'] = ""
+    result = re.search('^group_([a-zA-Z0-9_-]+)', ad['name'])
+    if result:
+        ad['group'] = result.group(1)
+
+    # username
+    username = re.sub('group_([a-zA-Z0-9_-]+)\.', '', ad['name'])
+    username = re.sub('@.*', '', username)
+    ad['username'] = username
+
+    # column widths
+    for i in range(len(c_fields)):
+        if not c_fields[i] in ad:
+            ad[c_fields[i]] = "N/A"
+        if len(ad[c_fields[i]]) >= c_width[i]:
+            c_width[i] = len(ad[c_fields[i]]) + 1
+
+# sort by machine, username
+ads = sorted(ads, cmp=ad_compare)
+
+# heading
+sys.stdout.write("  ")
+for i in range(len(c_fields)):
+    stdout_w(c_headings[i], c_width[i], c_align[i])
+    sys.stdout.write(" ")
+sys.stdout.write("\n")
+sys.stdout.write("--")
+for i in range(len(c_fields)):
+    stdout_w("-" * c_width[i], c_width[i], c_align[i])
+    sys.stdout.write(" ")
+sys.stdout.write("\n")
+
+machine = ""
+user = ""
+total_running = 0
+total_idle = 0
+total_held = 0
+for ad in ads:
+
+    if ad['runningjobs'] == "0" and \
+       ad['idlejobs'] == "0" and \
+       ad['heldjobs'] == "0":
+        continue
+
+    if ad['machine'] != machine:
+        sys.stdout.write("\n")
+        sys.stdout.write(ad['machine'])
+        sys.stdout.write(":\n")
+        machine = ad['machine']
+        user = ""
+
+    if ad['username'] != user:
+        sys.stdout.write("  ")
+        for i in range(len(c_fields)):
+            stdout_w(ad[c_fields[i]], c_width[i], c_align[i])
+            sys.stdout.write(" ")
+        sys.stdout.write("\n")
+        total_running += int(ad['runningjobs'])
+        total_idle += int(ad['idlejobs'])
+        total_held += int(ad['heldjobs'])
+        user = ad['username']
+
+sys.stdout.write("\n")
+stdout_w("Total:", c_width[0], c_align[0])
+sys.stdout.write("   ")
+stdout_w(str(total_running), c_width[1], c_align[1])
+sys.stdout.write(" ")
+stdout_w(str(total_idle), c_width[2], c_align[2])
+sys.stdout.write(" ")
+stdout_w(str(total_held), c_width[3], c_align[3])
+
+sys.stdout.write("\n")
+
+sys.stdout.write("\n")
+
+

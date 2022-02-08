@@ -2,14 +2,16 @@
 ARG BASE_OSG_SERIES=3.6
 ARG BASE_YUM_REPO=release
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el7-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
 RUN yum -y upgrade && \
     yum -y install \
       condor \
       git \
       lsof \
+      rrdtool \
       vim \
+      wget \
     && \
     yum clean all
 
@@ -20,4 +22,7 @@ RUN chmod 755 /usr/sbin/condor_master_wrapper
 COPY supervisord.conf /etc/supervisord.conf
 
 COPY 10-htcondor.conf /etc/supervisord.d/
+
+COPY ospool-overview /opt/ospool-overview
+
 

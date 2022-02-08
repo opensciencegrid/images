@@ -1,0 +1,183 @@
+#!/bin/bash
+
+if [ ! -e data/condor.rrd ]; then
+    rrdtool create data/condor.rrd \
+        --step 300 \
+        DS:jobs:GAUGE:600:0:10000000 \
+        DS:idle:GAUGE:600:0:10000000 \
+        DS:running:GAUGE:600:0:10000000 \
+        DS:held:GAUGE:600:0:10000000 \
+        RRA:AVERAGE:0.5:1:8928 \
+        RRA:AVERAGE:0.5:12:8760
+fi
+
+
+#DATA=`condor_status -schedd -total | grep " Total "`
+DATA=`./utils/condor_submitters | egrep "^Total:"`
+IDLE=`echo $DATA | awk '{print $3;}'`
+RUNNING=`echo $DATA | awk '{print $2;}'`
+HELD=`echo $DATA | awk '{print $4;}'`
+JOBS=$(($IDLE + $RUNNING + $HELD))
+
+CMD="rrdtool update data/condor.rrd N:$JOBS:$IDLE:$RUNNING:$HELD"
+echo $CMD
+$CMD
+
+for TIME in 3hour 1day 7day 31day 365day; do
+    rrdtool graph data/tmp.png \
+        --start -$TIME \
+        --title "OSPool HTCondor" --width 1000 --height 500 \
+        --lower-limit 0 \
+        'DEF:jobs=data/condor.rrd:jobs:AVERAGE' \
+        'DEF:idle=data/condor.rrd:idle:AVERAGE' \
+        'DEF:running=data/condor.rrd:running:AVERAGE' \
+        'DEF:held=data/condor.rrd:held:AVERAGE' \
+        'VDEF:idle_current=idle,LAST' \
+        'VDEF:idle_avg=idle,AVERAGE' \
+        'VDEF:idle_min=idle,MINIMUM' \
+        'VDEF:idle_max=idle,MAXIMUM' \
+        'VDEF:running_current=running,LAST' \
+        'VDEF:running_avg=running,AVERAGE' \
+        'VDEF:running_min=running,MINIMUM' \
+        'VDEF:running_max=running,MAXIMUM' \
+        'VDEF:held_current=held,LAST' \
+        'VDEF:held_avg=held,AVERAGE' \
+        'VDEF:held_min=held,MINIMUM' \
+        'VDEF:held_max=held,MAXIMUM' \
+        'VDEF:jobs_current=jobs,LAST' \
+        'VDEF:jobs_avg=jobs,AVERAGE' \
+        'VDEF:jobs_min=jobs,MINIMUM' \
+        'VDEF:jobs_max=jobs,MAXIMUM' \
+        'AREA:running#009900:Running  ' \
+        'GPRINT:running_current:  Current\: %6.0lf' \
+        'GPRINT:running_avg:  Avg\: %6.0lf' \
+        'GPRINT:running_max:  Max\: %6.0lf\n' \
+        'STACK:idle#aaffff:idle   ' \
+        'GPRINT:idle_current:    Current\: %6.0lf' \
+        'GPRINT:idle_avg:  Avg\: %6.0lf' \
+        'GPRINT:idle_max:  Max\: %6.0lf\n' \
+        'STACK:held#FF6666:Held     ' \
+        'GPRINT:held_current:  Current\: %6.0lf' \
+        'GPRINT:held_avg:  Avg\: %6.0lf' \
+        'GPRINT:held_max:  Max\: %6.0lf\n' \
+        'LINE1:jobs#000000:Total    ' \
+        'GPRINT:jobs_current:  Current\: %6.0lf' \
+        'GPRINT:jobs_avg:  Avg\: %6.0lf' \
+        'GPRINT:jobs_max:  Max\: %6.0lf\n' \
+
+    mv data/tmp.png data/condor_$TIME.png
+done
+    
+rrdtool graph data/tmp.png \
+    --slope-mode \
+    --start -7day \
+    --title "OSPool running jobs - 1 week" --width 600 --height 300 \
+    --lower-limit 0 \
+    'DEF:jobs=data/condor.rrd:jobs:AVERAGE' \
+    'DEF:running=data/condor.rrd:running:AVERAGE' \
+    'VDEF:running_current=running,LAST' \
+    'VDEF:running_avg=running,AVERAGE' \
+    'VDEF:running_min=running,MINIMUM' \
+    'VDEF:running_max=running,MAXIMUM' \
+    'AREA:running#009900:Running  ' \
+    'GPRINT:running_current:  Current\: %6.0lf' \
+    'GPRINT:running_avg:  Avg\: %6.0lf' \
+    'GPRINT:running_max:  Max\: %6.0lf\n' \
+
+mv data/tmp.png data/display.png
+
+rrdtool graph data/tmp.png \
+    --slope-mode \
+    --start -1day \
+    --title "OSPool running jobs - 1 week" --width 600 --height 300 \
+    --lower-limit 0 \
+    'DEF:jobs=data/condor.rrd:jobs:AVERAGE' \
+    'DEF:running=data/condor.rrd:running:AVERAGE' \
+    'VDEF:running_current=running,LAST' \
+    'VDEF:running_avg=running,AVERAGE' \
+    'VDEF:running_min=running,MINIMUM' \
+    'VDEF:running_max=running,MAXIMUM' \
+    'AREA:running#009900:Running  ' \
+    'GPRINT:running_current:  Current\: %6.0lf' \
+    'GPRINT:running_avg:  Avg\: %6.0lf' \
+    'GPRINT:running_max:  Max\: %6.0lf\n' \
+
+mv data/tmp.png data/display-1day.png
+
+rrdtool graph data/tmp.png \
+    --slope-mode \
+    --start -7day \
+    --title "OSPool idle/held jobs - 1 week" --width 600 --height 300 \
+    --lower-limit 0 \
+    'DEF:idle=data/condor.rrd:idle:AVERAGE' \
+    'DEF:held=data/condor.rrd:held:AVERAGE' \
+    'VDEF:idle_current=idle,LAST' \
+    'VDEF:idle_avg=idle,AVERAGE' \
+    'VDEF:idle_min=idle,MINIMUM' \
+    'VDEF:idle_max=idle,MAXIMUM' \
+    'VDEF:held_current=held,LAST' \
+    'VDEF:held_avg=held,AVERAGE' \
+    'VDEF:held_min=held,MINIMUM' \
+    'VDEF:held_max=held,MAXIMUM' \
+    'AREA:idle#0099FF:Idle     ' \
+    'GPRINT:idle_current:  Current\: %6.0lf' \
+    'GPRINT:idle_avg:  Avg\: %6.0lf' \
+    'GPRINT:idle_max:  Max\: %6.0lf\n' \
+    'STACK:held#FF6666:Held     ' \
+    'GPRINT:held_current:  Current\: %6.0lf' \
+    'GPRINT:held_avg:  Avg\: %6.0lf' \
+    'GPRINT:held_max:  Max\: %6.0lf\n' \
+
+mv data/tmp.png data/idle.png
+
+./utils/condor_submitters >data/submitters.txt
+
+./utils/condor_gpus >data/gpus.txt
+
+condor_status -schedd >data/schedds.txt
+
+condor_userprio -most | sed 's/</[/g' | sed 's/>/]/g' >data/userprio.txt
+
+# last negotiation cycle
+tac /var/log/condor/NegotiatorLog \
+    | grep -m 1 -A 10000 ' ---------- Finished Negotiation Cycle ----------' \
+    | grep -m 1 -B 2000 ' ---------- Started Negotiation Cycle ----------' \
+    | tac \
+    | sed 's/</[/g' | sed 's/>/]/g' \
+    > data/negotiation.txt
+
+# site stats
+mkdir -p data/sites
+condor_status -af GLIDEIN_ResourceName | sed 's/.*= "//' | sed 's/"//g' | sed 's/ //g' | sort | uniq -c >data/sites/current.txt
+while read COUNT SITE
+do
+    echo "$SITE"
+    RRD="data/sites/$SITE.rrd"
+    if [ ! -e "$RRD" ]; then
+        rrdtool create "$RRD" \
+            --step 300 \
+            DS:glideins:GAUGE:600:0:100000 \
+            RRA:AVERAGE:0.5:1:8928 \
+            RRA:AVERAGE:0.5:12:8760
+    fi
+    CMD="rrdtool update $RRD N:$COUNT"
+    echo $CMD
+    $CMD
+done < data/sites/current.txt
+
+# create graphs for all RRDS
+for RRD in `ls data/sites/*.rrd`; do
+    SITE=`basename $RRD .rrd`
+    for TIME in 3hour 1day 7day 31day 365day; do
+        rrdtool graph data/sites/tmp.png \
+            --start -$TIME \
+            --title "$SITE Glideins Registered" --width 1000 --height 500 \
+            --lower-limit 0 \
+            "DEF:glideins=data/sites/$RRD:glideins:AVERAGE" \
+            'VDEF:glideins_avg=glideins,AVERAGE' \
+            'AREA:glideins#009900:Glideins  '
+    	mv data/sites/tmp.png data/sites/${SITE}_${TIME}.png || /bin/true
+    done
+done
+	
+
