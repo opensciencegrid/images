@@ -14,6 +14,9 @@ ENV XC_ROOTDIR /xrootd-standalone
 RUN groupadd -o -g 10940 xrootd
 RUN useradd -o -u 10940 -g 10940 -s /bin/sh xrootd
 
+# Create an empty macaroon-secret now so RPM installs won't create one, adding it to a layer.
+RUN mkdir -p /etc/xrootd && touch /etc/xrootd/macaroon-secret
+
 RUN yum install -y osg-xrootd-standalone && \
     yum clean all && \
     rm -rf /var/cache/yum/*
@@ -21,3 +24,5 @@ RUN yum install -y osg-xrootd-standalone && \
 ADD supervisord.d/* /etc/supervisord.d/
 ADD image-config.d/* /etc/osg/image-config.d/
 ADD xrootd/* /etc/xrootd/config.d/
+
+RUN rm -f /etc/xrootd/macaroon-secret
