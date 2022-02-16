@@ -1,4 +1,6 @@
-FROM opensciencegrid/software-base:3.6-el8-release
+ARG BASE_OSG_SERIES=3.6
+
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-release
 # OSG kojid container
 # Requires CAP_SYS_ADMIN for chroot(1), unshare(1), and mounting tmpfs
 
