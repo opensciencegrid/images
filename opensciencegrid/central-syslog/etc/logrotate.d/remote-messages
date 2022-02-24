@@ -1,9 +1,10 @@
 /data/messages
 {
     missingok
-    daily
+    hourly
     compress
-    rotate 91
+    # Keep 91 days of logs
+    rotate 2184
     postrotate
         /usr/bin/supervisorctl signal HUP rsyslogd >/dev/null 2>&1 || true
     endscript
