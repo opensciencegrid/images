@@ -1,4 +1,6 @@
-FROM opensciencegrid/software-base:fresh
+ARG BASE_OSG_SERIES=3.5
+
+FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-el7-release
 
 # OSG RPMs
 RUN \
