@@ -1,0 +1,6 @@
+
+resources:
+- cvmfs-nodeplugin.yaml
+- cvmfs-user.yaml
+- frontier.yaml
+- service-frontier.yaml

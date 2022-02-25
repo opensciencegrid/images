@@ -1,0 +1,12 @@
+
+resources:
+- cvmfs-pv-config-osg.yaml
+- cvmfs-pv-fermilab.yaml
+- cvmfs-pv-oasis.yaml
+# - cvmfs-pv-stash.yaml
+- cvmfs-pv-connect.yaml
+- cvmfs-pv-icecube.yaml
+- cvmfs-pv-nova.yaml
+- cvmfs-pv-singularity.yaml
+- cvmfs-pv-xenon.yaml
+

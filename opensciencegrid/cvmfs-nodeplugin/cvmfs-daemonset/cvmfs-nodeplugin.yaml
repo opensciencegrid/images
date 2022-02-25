@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cvmfs-nodeplugin
+  namespace: cvmfs
+  labels: 
+    k8s-app: cvmfs-nodeplugin
+spec:
+  selector:
+    matchLabels:
+      k8s-app: cvmfs-nodeplugin
+  template:
+    metadata: 
+      labels:
+        k8s-app: cvmfs-nodeplugin
+    spec:
+      serviceAccount: cvmfs-nodeplugin
+      containers:
+      - name: cvmfs
+        image: opensciencegrid/cvmfs-nodeplugin:fresh
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/local/sbin/unmount-and-terminate.sh"]
+        env:
+        - name: MOUNT_REPOS
+          value: "config-osg.opensciencegrid.org,icecube.opensciencegrid.org,oasis.opensciencegrid.org,connect.opensciencegrid.org,singularity.opensciencegrid.org,xenon.opensciencegrid.org,fermilab.opensciencegrid.org,nova.opensciencegrid.org,cms.cern.ch,cms-ib.cern.ch"
+        - name: SQUID_URI
+          value: "http://frontier-squid:3128"
+        resources:
+           limits:
+             memory: 4Gi
+             cpu: 1
+           requests:
+             memory: 0.5Gi
+             cpu: 0.25
+        volumeMounts:
+        - mountPath: /cvmfs
+          name:  cvmfs-base
+          mountPropagation: Bidirectional
+      volumes:
+      - name: cvmfs-base
+        hostPath:
+          path: /var/lib/cvmfs-k8s
+          type: DirectoryOrCreate
+
