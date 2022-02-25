@@ -1,0 +1,19 @@
+version: "3.3"
+
+services:
+
+  osg-redirector:
+    build: .
+    image: hub.opensciencegrid.org/jthiltges/osgstorage-redirector:latest
+    volumes:
+      # grid-security
+      - ./certs/:/certs/:ro
+    ports:
+      - "1094:1094"
+      - "1213:1213"
+      - "8443:8443"
+    environment:
+      #- XRD_REDIR_HOSTNAME=redirector.osgstorage.org
+      - XRD_REDIR_HOSTNAME=redirector-itb.osgstorage.org
+      #- XRD_SITENAME=OSG-StashCache-Redirector
+      - XRD_SITENAME=OSG-StashCache-ITB-Redirector
