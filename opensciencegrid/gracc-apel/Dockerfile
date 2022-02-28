@@ -1,4 +1,6 @@
-FROM opensciencegrid/osg-wn:3.5-el7
+ARG BASE_OSG_SERIES=3.5
+
+FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-el7-release
 
 # install dependencies
 RUN yum -y install python3 python3-pip && \
