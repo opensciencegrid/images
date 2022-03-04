@@ -10,4 +10,4 @@ RUN yum -y install rsyslog \
     && mkdir /data/
 
 COPY etc /etc
-
+RUN mv /etc/cron.daily/logrotate /etc/cron.hourly/logrotate
