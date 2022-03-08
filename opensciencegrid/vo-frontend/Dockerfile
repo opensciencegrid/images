@@ -28,7 +28,7 @@ RUN yum -y install --enablerepo=osg-testing \
            javascriptrrd
 
 # pull gwms from upcoming
-RUN yum -y install --enablerepo=osg-upcoming \
+RUN yum -y install \
            glideinwms-vofrontend-standalone \
     || \
     yum -y install --enablerepo=osg-contrib \
