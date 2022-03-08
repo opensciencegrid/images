@@ -18,13 +18,19 @@ RUN yum -y install \
     rsyslog-gnutls \
     vo-client
 
-# temp - javascriptrrd
+# javascriptrrd - different location in OSG 3.5 and 3.6
 RUN yum -y install --enablerepo=osg-testing \
-    javascriptrrd
+           javascriptrrd \
+    || \
+    yum -y install --enablerepo=osg-minefield \
+           javascriptrrd
 
 # pull gwms from upcoming
 RUN yum -y install --enablerepo=osg-upcoming \
-    glideinwms-vofrontend-standalone
+           glideinwms-vofrontend-standalone \
+    || \
+    yum -y install --enablerepo=osg-development \
+           glideinwms-vofrontend-standalone
 
 ADD image-config.d/*    /etc/osg/image-config.d/
 ADD cron.d/*            /etc/cron.d/
