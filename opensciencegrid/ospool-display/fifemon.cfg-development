@@ -16,7 +16,7 @@ publish_metrics = true
 # enable output to graphite
 enable = true
 # graphite host
-host = graphite.mwt2.org
+host = graphite.grid.uchicago.edu
 # graphite pickle port
 port = 2004
 # base namespace for metrics
