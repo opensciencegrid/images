@@ -166,7 +166,7 @@ do
 done < data/sites/current.txt
 
 # create graphs for all RRDS
-for RRD in `ls data/sites/*.rrd`; do
+for RRD in $(cd data/sites && ls *.rrd); do
     SITE=`basename $RRD .rrd`
     for TIME in 3hour 1day 7day 31day 365day; do
         rrdtool graph data/sites/tmp.png \
