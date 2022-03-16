@@ -7,7 +7,9 @@ This is typically a bind-mounted shell script, which takes three arguments
 example script:
 
 ```
-#!/bin/bash -x
+#!/bin/bash
+
+set -e
 
 SUBJECT="vofrontend-$2"
 AUDIENCE="$1"
