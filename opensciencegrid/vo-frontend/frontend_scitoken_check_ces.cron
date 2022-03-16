@@ -1,0 +1,3 @@
+
+48 * * * *  root  /usr/sbin/frontend_scitoken_check_ces >> /var/log/frontend_scitoken_check_ces.log 2>&1
+
