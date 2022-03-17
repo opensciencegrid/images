@@ -40,9 +40,8 @@ jobs:
           # 4. For everything else (e.g., dispatches), build all images
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
              [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-               if [[ -n $GITHUB_BASE_REF ]]; then
-                   # GITHUB_BASE_REF is only set for PRs
-                   BASE=origin/$GITHUB_BASE_REF
+               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+                   BASE=$(git merge-base $GITHUB_BASE_REF HEAD)
                elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
                    BASE=${{github.event.before}}
                else
