@@ -29,6 +29,7 @@ jobs:
 
       - id: image-list
         run: |
+          ORG_DIR=opensciencegrid
           # Get the list of files changed based on the type of event
           # kicking off the GHA:
           # 1. For the main branch, diff the previous state of main vs
@@ -47,19 +48,25 @@ jobs:
                else
                    BASE=origin/main
                fi
-               image_dirs=$(git diff --name-only \
-                                     "$BASE" \
-                                     "$GITHUB_SHA")
+               # List image root dirs where files have changed and the
+               # root dir exists. Example value:
+               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
+               images=$(git diff --name-only \
+                                 "$BASE" \
+                                 "$GITHUB_SHA" |
+                        egrep "^$ORG_DIR/" |
+                        cut -d/ -f -2 |
+                        xargs -I {} find . -type d \
+                                           -wholename ./{} \
+                                           -printf "%P\n")
           else
-               image_dirs=$(find . -type d -printf "%P\n")
+               # List all image root dirs. Example value:
+               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
+               images=$(find $ORG_DIR -mindepth 2
+                                      -maxdepth 2
+                                      -type d
+                                      -printf "$ORG_DIR%P\n")
           fi
-
-          images=$(echo "$image_dirs" |
-                   fgrep opensciencegrid/ |
-                   cut -d/ -f -2 |
-                   sort |
-                   uniq |
-                   head -c -1)
 
           # Ensure that the generated JSON array has a member,
           # otherwise GHA will throw an error about an empty matrix
