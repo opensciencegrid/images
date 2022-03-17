@@ -1,0 +1,62 @@
+#!/bin/bash
+
+set -e
+
+# web-area is a persistent volume - good place for our cache
+BASE_DIR=/var/lib/gwms-frontend/web-area/scitoken-testing
+mkdir -p $BASE_DIR
+
+# Make sure the container has the frontend_scitoken script before going any further
+test -f /usr/sbin/frontend_scitoken || {
+    echo "This frontend is not yet patched to use scitokens" > $BASE_DIR/error.txt
+    exit 1
+}
+
+ALL=$BASE_DIR/all.txt
+ALLOW=$BASE_DIR/allow.txt
+DENY=$BASE_DIR/deny.txt
+
+GFACTORY_FRONTEND_NAME=$(python3 -c 'import xml.etree.ElementTree as ET; print(ET.parse("/etc/gwms-frontend/frontend.xml").getroot().attrib["frontend_name"])')
+
+echo "Querying factory for frontend $GFACTORY_FRONTEND_NAME"
+
+# Query the factory for our ads
+if [ "x$GFACTORY_FRONTEND_NAME" != "x" ]; then
+    (condor_status -pool gfactory-2.opensciencegrid.org -any -const 'MyType=?="glidefactoryclient" && GLIDEIN_GridType=?="condor"' -af GLIDEIN_Gatekeeper ReqClientName | grep " $GFACTORY_FRONTEND_NAME" | awk '{print $1 " " $2;}' | sort | uniq)>$ALL.tmp
+else
+    (condor_status -pool gfactory-2.opensciencegrid.org -any -const 'MyType=?="glidefactoryclient" && GLIDEIN_GridType=?="condor"' -af GLIDEIN_Gatekeeper ReqClientName | awk '{print $2;}' | sort | uniq)>$ALL.tmp
+fi
+
+# Augment the factory information with the CE collectors
+(condor_status -pool collector.opensciencegrid.org:9619 -schedd -const '!isundefined(OSG_resource)' -af grid_resource | awk '{print $2 " " $3}' | sort | uniq)>>$ALL.tmp
+
+cat $ALL.tmp | sort | uniq > $ALL.tmp2
+
+COUNT=$(cat $ALL.tmp2 | wc -l)
+if [[ $COUNT -gt 0 ]]; then
+    mv $ALL.tmp2 $ALL
+fi
+rm -f $ALL.tmp $ALL.tmp2
+
+mkdir -p /tmp/ce-check
+chmod 0700 /tmp/ce-check
+cd /tmp/ce-check
+rm -f *.scitoken
+rm -f $ALLOW.tmp
+rm -f $DENY.tmp
+while IFS= read -r LINE; do
+    CE=$(echo "$LINE" | awk '{print $2}') 
+    CE_HOST=$(echo "$LINE" | awk '{print $1;}')
+    echo
+    echo "Checking $CE / $CE_HOST ..."
+    set -x
+    /usr/sbin/frontend_scitoken $CE $CE main >$CE.scitoken
+    if _condor_SCITOKENS_FILE=$CE.scitoken _condor_SEC_CLIENT_AUTHENTICATION_METHODS=SCITOKENS _condor_TOOL_DEBUG=D_FULLDEBUG,D_SECURITY condor_ping -pool $CE -name $CE_HOST -type SCHEDD WRITE -verbose; then
+        echo $CE | tr ':' ' ' | awk '{print $1;}' >>$ALLOW.tmp
+    else
+        echo $CE | tr ':' ' ' | awk '{print $1;}' >>$DENY.tmp
+    fi
+    set +x
+done <$ALL
+mv $ALLOW.tmp $ALLOW
+mv $DENY.tmp $DENY

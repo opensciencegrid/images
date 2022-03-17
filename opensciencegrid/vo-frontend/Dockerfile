@@ -14,6 +14,8 @@ RUN useradd -o -u 996 -g 993 -s /bin/sh frontend
 RUN yum -y install \
     git \
     jq \
+    patch \
+    python3-scitokens \
     rsyslog \
     rsyslog-gnutls \
     vo-client
@@ -31,6 +33,16 @@ RUN yum -y install --enablerepo=osg-upcoming \
     || \
     yum -y install --enablerepo=osg-development \
            glideinwms-vofrontend-standalone
+
+# clean log dirs
+RUN rm -rf /var/log/gwms-frontend/*
+
+# patch gwms
+ADD patch_gwms.sh /tmp/patch_gwms.sh
+RUN /tmp/patch_gwms.sh
+
+ADD frontend_scitoken_check_ces /usr/sbin/frontend_scitoken_check_ces
+ADD frontend_scitoken_check_ces.cron /etc/cron.d/frontend_scitoken_check_ces.cron
 
 ADD image-config.d/*    /etc/osg/image-config.d/
 ADD cron.d/*            /etc/cron.d/
