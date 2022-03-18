@@ -41,7 +41,7 @@ jobs:
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
              [[ $GITHUB_EVENT_NAME == 'push' ]]; then
                if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-                   BASE=$(git merge-base $GITHUB_BASE_REF HEAD)
+                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
                elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
                    BASE=${{github.event.before}}
                else
