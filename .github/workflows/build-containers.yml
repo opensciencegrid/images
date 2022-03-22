@@ -55,6 +55,8 @@ jobs:
                                  "$GITHUB_SHA" |
                         egrep "^$ORG_DIR/" |
                         cut -d/ -f -2 |
+                        sort |
+                        uniq |
                         xargs -I {} find . -type d \
                                            -wholename ./{} \
                                            -printf "%P\n")
