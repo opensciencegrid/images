@@ -55,11 +55,11 @@ jobs:
                                  "$GITHUB_SHA" |
                         egrep "^$ORG_DIR/" |
                         cut -d/ -f -2 |
+                        sort |
+                        uniq |
                         xargs -I {} find . -type d \
                                            -wholename ./{} \
-                                           -printf "%P\n" |
-                        sort |
-                        uniq)
+                                           -printf "%P\n")
           else
                # List all image root dirs. Example value:
                # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
