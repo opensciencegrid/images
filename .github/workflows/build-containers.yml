@@ -57,7 +57,9 @@ jobs:
                         cut -d/ -f -2 |
                         xargs -I {} find . -type d \
                                            -wholename ./{} \
-                                           -printf "%P\n")
+                                           -printf "%P\n" |
+                        sort |
+                        uniq)
           else
                # List all image root dirs. Example value:
                # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
