@@ -1,0 +1,5 @@
+# Overrides the cron job from the fetch-crl package to always run.
+# We don't have a way of enabling/disabling the "service" since it's a systemd
+# service.
+
+45 */6 * * * root /usr/sbin/fetch-crl -q -r 360
