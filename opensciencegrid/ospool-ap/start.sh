@@ -14,15 +14,6 @@ add_values_to () {
     printf "%s=%s\n" >> "/etc/condor/config.d/$config" "$@"
 }
 
-# Create a config file from the environment.
-# The config file needs to be on disk instead of referencing the env
-# at run time so condor_config_val can work.
-echo "# This file was created by $prog" > /etc/condor/config.d/01-env.conf
-add_values_to 01-env.conf \
-    CONDOR_HOST "${CONDOR_HOST:-\$(FULL_HOSTNAME)}" \
-    USE_POOL_PASSWORD "${USE_POOL_PASSWORD:-no}"
-
-
 bash -x "$progdir/update-config" || fail "Failed to update config"
 bash -x "$progdir/update-secrets" || fail "Failed to update secrets"
 
