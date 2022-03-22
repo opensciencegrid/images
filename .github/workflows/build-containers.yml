@@ -61,9 +61,9 @@ jobs:
           else
                # List all image root dirs. Example value:
                # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
-               images=$(find $ORG_DIR -mindepth 2
-                                      -maxdepth 2
-                                      -type d
+               images=$(find $ORG_DIR -mindepth 2 \
+                                      -maxdepth 2 \
+                                      -type d \
                                       -printf "$ORG_DIR%P\n")
           fi
 
