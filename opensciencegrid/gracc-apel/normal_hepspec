@@ -1,0 +1,39 @@
+##--- CMS Tier 1 -----
+USCMS-FNAL-WC1     10.264
+##--- CMS Tier 2 -----
+CIT_CMS_T2         12.944
+GLOW                9.632
+MIT_CMS            10.800
+Nebraska           10.412
+Purdue-Hadoop      12.370
+Purdue-Rossmann    11.240
+Purdue-Hansen       8.680
+Purdue-Carter      16.400
+Purdue-Conte       10.250 
+UCSDT2             13.240
+SPRACE             13.480
+UFlorida-HPC       10.940
+UERJ               10.486
+#GridUNESP_CENTRAL  14.688
+# 
+###############################
+###############################
+#--- ATLAS Tier 2 -----
+BNL-ATLAS           10.050
+#--- ATLAS Tier 2 -----  
+AGLT2               9.670
+BU_ATLAS_Tier2      9.320
+HU_ATLAS_Tier2      9.440
+LUCILLE             9.100
+MWT2                9.480
+OU_OCHEP_SWT2       8.820
+OU_OSCER_ATLAS     14.220
+WT2                11.060
+SWT2_CPB            8.560
+UTA_SWT2            9.670
+# 
+####################################
+####################################
+#--- ALICE Tier 2 ----
+NERSC-PDSF         16.614
+LC-glcc            15.680
