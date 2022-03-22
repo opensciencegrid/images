@@ -14,15 +14,6 @@ add_values_to () {
     printf "%s=%s\n" >> "/etc/condor/config.d/$config" "$@"
 }
 
-# Create a config file from the environment.
-# The config file needs to be on disk instead of referencing the env
-# at run time so condor_config_val can work.
-echo "# This file was created by $prog" > /etc/condor/config.d/01-env.conf
-add_values_to 01-env.conf \
-    CONDOR_HOST "${CONDOR_HOST:-\$(FULL_HOSTNAME)}" \
-    USE_POOL_PASSWORD "${USE_POOL_PASSWORD:-no}"
-
-
 bash -x "$progdir/update-config" || fail "Failed to update config"
 bash -x "$progdir/update-secrets" || fail "Failed to update secrets"
 
@@ -49,8 +40,9 @@ done
 [[ -s /etc/condor/config.d/01-fdfix.conf ]] && \
     echo "# This file was created by $prog" >> /etc/condor/config.d/01-fdfix.conf
 
+# Gratia probe is a SCHEDD_CRON in OSG 3.6
 # This isn't a real service, I can't start it via supervisor
-/etc/init.d/gratia-probes-cron start
+pkg-comp-lt osg-release 3.6 && /etc/init.d/gratia-probes-cron start
 
 /usr/sbin/fetch-crl -p 20 -T 10
 
