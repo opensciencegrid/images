@@ -40,8 +40,9 @@ done
 [[ -s /etc/condor/config.d/01-fdfix.conf ]] && \
     echo "# This file was created by $prog" >> /etc/condor/config.d/01-fdfix.conf
 
+# Gratia probe is a SCHEDD_CRON in OSG 3.6
 # This isn't a real service, I can't start it via supervisor
-/etc/init.d/gratia-probes-cron start
+pkg-comp-lt osg-release 3.6 && /etc/init.d/gratia-probes-cron start
 
 /usr/sbin/fetch-crl -p 20 -T 10
 
