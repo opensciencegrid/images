@@ -87,11 +87,18 @@ jobs:
       matrix:
         image: ${{ fromJson(needs.build-image-list.outputs.images) }}
         yum_repo: ['development', 'testing', 'release']
-        osg_series: ['3.5', '3.6']
     steps:
-      - uses: opensciencegrid/build-container-action@v0.3.0
+      - name: Build ${{ matrix.image }}:3.5-${{ matrix.yum_repo }}
+        uses: opensciencegrid/build-container-action@v0.3.0
         with:
-          osg_series: ${{ matrix.osg_series }}
+          osg_series: 3.5
+          repo: ${{ matrix.yum_repo }}
+          context: ${{ matrix.image }}
+
+      - name: Build ${{ matrix.image }}:3.6-${{ matrix.yum_repo }}
+        uses: opensciencegrid/build-container-action@v0.3.0
+        with:
+          osg_series: 3.6
           repo: ${{ matrix.yum_repo }}
           context: ${{ matrix.image }}
 
