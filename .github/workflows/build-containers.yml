@@ -89,6 +89,7 @@ jobs:
         yum_repo: ['development', 'testing', 'release']
     steps:
       - name: Build ${{ matrix.image }}:3.5-${{ matrix.yum_repo }}
+        continue-on-error: ${{ matrix.yum_repo == 'development' }}
         uses: opensciencegrid/build-container-action@v0.3.0
         with:
           osg_series: 3.5
@@ -96,6 +97,7 @@ jobs:
           context: ${{ matrix.image }}
 
       - name: Build ${{ matrix.image }}:3.6-${{ matrix.yum_repo }}
+        continue-on-error: ${{ matrix.yum_repo == 'development' }}
         uses: opensciencegrid/build-container-action@v0.3.0
         with:
           osg_series: 3.6
