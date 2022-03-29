@@ -39,7 +39,7 @@ IFS=$SAVEIFS
 echo
 echo "Excluded glideins based on MIPS/GLIDEIN_ResourceName/...:"
 echo
-(echo "Name Mips GLIDEIN_ResourceName" ; condor_status -const 'Mips < 11800 || isUndefined(GLIDEIN_ResourceName) || GLIDEIN_ResourceName == "UNKNOWN"' -af Name Mips GLIDEIN_ResourceName) | column -t  | sed 's/^/    /'
+condor_status -const 'Mips < 11800 || isUndefined(GLIDEIN_ResourceName) || GLIDEIN_ResourceName == "UNKNOWN"' -af:ht Name Mips GLIDEIN_ResourceName
 echo
 
 echo
