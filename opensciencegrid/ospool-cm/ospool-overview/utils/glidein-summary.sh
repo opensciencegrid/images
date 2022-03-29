@@ -16,11 +16,6 @@ echo
 condor_status -const HAS_SINGULARITY -af GLIDEIN_ResourceName | sed 's/ /_/g' | sort | uniq -c | sort -n -r | perl -ane 'printf("    %-30s %5d\n", $F[1], $F[0])'
 
 echo
-echo "Singularity version counts:"
-echo
-condor_status -const HAS_SINGULARITY -af OSG_SINGULARITY_VERSION | sort | uniq -c
-
-echo
 echo "Percentage of sites which has Singularity support:"
 echo
 SUBSET=`condor_status -const 'HAS_SINGULARITY' -af Name | wc -l`
@@ -40,6 +35,12 @@ for OSGVO_OS_STRING in `condor_status -af OSGVO_OS_STRING | sort | uniq`; do
     printf "  %-10s  %5d  %5d\n" "$OSGVO_OS_STRING" $COUNT $ZERO_JOBS
 done 
 IFS=$SAVEIFS
+
+echo
+echo "Excluded glideins based on MIPS/GLIDEIN_ResourceName/...:"
+echo
+(echo "Name Mips GLIDEIN_ResourceName" ; condor_status -const 'Mips < 11800 || isUndefined(GLIDEIN_ResourceName) || GLIDEIN_ResourceName == "UNKNOWN"' -af Name Mips GLIDEIN_ResourceName) | column -t  | sed 's/^/    /'
+echo
 
 echo
 echo
