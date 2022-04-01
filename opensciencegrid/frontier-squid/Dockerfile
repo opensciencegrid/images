@@ -4,6 +4,8 @@ ARG BASE_YUM_REPO=testing
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
+ARG BASE_YUM_REPO=testing
+
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Create the squid user with a fixed GID/UID; do this first, so that the Squid
