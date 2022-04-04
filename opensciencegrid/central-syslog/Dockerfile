@@ -1,7 +1,7 @@
 ARG BASE_OSG_SERIES=3.6
-ARG IMAGE_BASE_TAG=release
+ARG BASE_YUM_REPO=release
 
-FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$IMAGE_BASE_TAG
+FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <support@opensciencegrid.org>
 
