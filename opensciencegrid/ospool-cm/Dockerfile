@@ -6,12 +6,14 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
 RUN yum -y upgrade && \
     yum -y install \
-      condor \
       git \
       lsof \
       rrdtool \
       vim \
       wget \
+    && \
+    yum -y install --enablerepo=osg-upcoming-testing \
+      condor \
     && \
     yum clean all
 
