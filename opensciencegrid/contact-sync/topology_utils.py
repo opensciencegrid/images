@@ -338,14 +338,14 @@ def filter_contacts(args, ori_results):
 
     if getattr(args, 'name_filter', None):
         # filter out undesired names
-        for name in ori_results.keys():
+        for name in ori_results:
         #for name in results.keys():
             if not fnmatch.fnmatch(name, args.name_filter) and \
                     args.name_filter not in name:
                 del results[name]
     elif getattr(args, 'fqdn_filter', None):
         # filter out undesired FQDNs
-        for fqdn in results.keys():
+        for fqdn in results:
             if not fnmatch.fnmatch(fqdn, args.fqdn_filter) and \
                     args.fqdn_filter not in fqdn:
                 del results[fqdn]
@@ -353,7 +353,7 @@ def filter_contacts(args, ori_results):
     if args.contact_type != 'all':
         # filter out undesired contact types
         #for name in results.keys():
-        for name in ori_results.keys():
+        for name in ori_results:
             contact_list = []
             for contact in results[name]:
                 contact_type = contact['ContactType'].lower()
@@ -365,7 +365,7 @@ def filter_contacts(args, ori_results):
                 results[name] = contact_list
 
     if getattr(args, 'contact_emails', None):
-        for name in results.keys():
+        for name in results:
             contact_list = [contact for contact in results[name] if contact['Email'] in args.contact_emails]
             if not contact_list:
                 del results[name]

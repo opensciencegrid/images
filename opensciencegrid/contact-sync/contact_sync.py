@@ -84,13 +84,10 @@ def get_contact_emails(args):
     results = topology_utils.filter_contacts(args, results)
     #print(len(results))
     #pp.pprint(results)
-    emails = set()
-    for name in results.keys():
-        for contact in results[name]:
-            if 'Email' in contact:
-                emails.add(contact['Email'].lower())
-    emails = list(emails)
-    emails.sort()
+    emails = set( contact['Email'].lower() 
+                  for contact in results.values()
+                  if 'Email' in contact )
+    emails = sorted(emails)
     #print(emails)
     print(len(emails))
         
@@ -109,7 +106,7 @@ def main():
             args.name_filter = args.filter.strip()
 
     try:
-        with open(args.email_file, 'r') as f:
+        with open(args.email_file) as f:
             contents = f.read()
             args.contact_emails = contents.split('\n')
     except TypeError:
@@ -118,15 +115,10 @@ def main():
         sys.exit("Failed to read email file: %s" % exc)
     
     subscribed = status_api.get_subscribers(is_subscribed = True)
-    subscribed_email_id_list = {}
-    subscribed_emails = []
-    for item in subscribed: 
-        subscribed_email_id_list[item['email']]=item['id']
-        subscribed_emails.append(item['email'])
+    subscribed_email_id_list = { i['email']]: i['id'] for i in subscribed }
+    subscribed_emails = [ i['email'] for i in subscribed ]
     unsubscribed = status_api.get_subscribers(is_subscribed = False)
-    unsubscribed_emails = []
-    for item in unsubscribed: 
-        unsubscribed_emails.append(item['email'])
+    unsubscribed_emails = [ i['email'] for i in unsubscribed ]
     contact_emails = get_contact_emails(args)
     
     syslog.openlog("contact_sync")
