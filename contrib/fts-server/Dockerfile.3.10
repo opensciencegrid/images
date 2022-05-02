@@ -5,7 +5,7 @@ COPY fts3config etc/fts3/fts3config
 COPY fts-msg-monitoring.conf etc/fts3/fts-msg-monitoring.conf
 COPY docker-entrypoint.sh tmp/docker-entrypoint.sh 
 RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN rpm -Uvh https://repo.opensciencegrid.org/osg/3.5/osg-3.5-el7-release-latest.rpm
+RUN rpm -Uvh https://repo.opensciencegrid.org/osg/3.6/osg-3.6-el7-release-latest.rpm
 #ADD "https://dmc-repo.web.cern.ch/dmc-repo/dmc-rc-el7.repo" "/etc/yum.repos.d/"
 ADD "http://fts-repo.web.cern.ch/fts-repo/fts3-prod-el7.repo" "/etc/yum.repos.d/"
 #ADD "http://fts-repo.web.cern.ch/fts-repo/fts3-rc-el7.repo" "/etc/yum.repos.d/"
