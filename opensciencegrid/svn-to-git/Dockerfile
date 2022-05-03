@@ -1,4 +1,4 @@
-ARG BASE_OSG_SERIES=3.5
+ARG BASE_OSG_SERIES=3.6
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el7-release
 LABEL maintainer OSG Software <help@opensciencegrid.org>
