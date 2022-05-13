@@ -27,9 +27,9 @@ RUN yum -y install \
 # clean log dirs
 RUN rm -rf /var/log/gwms-frontend/*
 
-# patch gwms
+# patch gwms (but only 3.9.4)
 ADD patch_gwms.sh /tmp/patch_gwms.sh
-RUN /tmp/patch_gwms.sh
+RUN if rpm -qa | grep glideinwms-libs-3.9.4; then /tmp/patch_gwms.sh; fi
 
 ADD frontend_scitoken_check_ces /usr/sbin/frontend_scitoken_check_ces
 ADD frontend_scitoken_check_ces.cron /etc/cron.d/frontend_scitoken_check_ces.cron
