@@ -28,7 +28,7 @@ diff --git a/frontend/glideinFrontendElement.py b/frontend/glideinFrontendElemen
 index 64acd9e1..912fad63 100755
 --- a/frontend/glideinFrontendElement.py
 +++ b/frontend/glideinFrontendElement.py
-@@ -809,40 +809,13 @@ class glideinFrontendElement:
+@@ -809,40 +809,12 @@ class glideinFrontendElement:
                      logSupport.log.debug("found condor token: %s" % entry_token_name)
                      gp_encrypt[entry_token_name] = ctkn
                  # now see if theres a scitoken for this site
@@ -63,10 +63,9 @@ index 64acd9e1..912fad63 100755
 -                    except Exception as err:
 -                        logSupport.log.exception("failed to read scitoken: %s" % err)
 -
-+                if self.scitoken_ok(glidein_el['attrs'].get('GLIDEIN_Gatekeeper')):
-+                    stkn = self.refresh_entry_scitoken(glidein_el)
-+                    if stkn:
-+                        gp_encrypt['frontend_scitoken'] =  stkn
++                stkn = self.refresh_entry_scitoken(glidein_el)
++                if stkn:
++                    gp_encrypt['frontend_scitoken'] =  stkn
  
                  # now advertise
 -                logSupport.log.info('advertising tokens %s' % gp_encrypt.keys())

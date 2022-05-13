@@ -20,20 +20,8 @@ RUN yum -y install \
     rsyslog-gnutls \
     vo-client
 
-# TODO: Once SOFTWARE-5078 is released, remove this layer:
-# glideinwms-vo-frontend should handle this dependency for us.
-# javascriptrrd - different location in OSG 3.5 and 3.6
-RUN yum -y install --enablerepo=osg-testing \
-           javascriptrrd \
-    || \
-    yum -y install --enablerepo=osg-contrib \
-           javascriptrrd
-
 # pull gwms from upcoming
 RUN yum -y install \
-           glideinwms-vofrontend-standalone \
-    || \
-    yum -y install --enablerepo=osg-contrib \
            glideinwms-vofrontend-standalone
 
 # clean log dirs
