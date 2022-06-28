@@ -27,7 +27,7 @@ if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
      images=$(git diff --name-only \
                        "$BASE" \
                        "$GITHUB_SHA" |
-              egrep "^$ORG_DIR/" |
+              egrep -e "^$ORG_DIR/" -e "^$CONTRIB/" |
               cut -d/ -f -2 |
               sort |
               uniq |
@@ -37,7 +37,7 @@ if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
 else
      # List all image root dirs. Example value:
      # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
-     images=$(find $ORG_DIR -mindepth 1 \
+     images=$(find $ORG_DIR $CONTRIB \
                             -mindepth 1 \
                             -maxdepth 1 \
                             -type d \
