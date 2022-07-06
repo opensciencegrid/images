@@ -11,18 +11,17 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 RUN groupadd -o -g 993 frontend
 RUN useradd -o -u 996 -g 993 -s /bin/sh frontend
 
-RUN yum -y install \
-    git \
-    jq \
-    patch \
-    python3-scitokens \
-    rsyslog \
-    rsyslog-gnutls \
-    vo-client
-
-# pull gwms from upcoming
-RUN yum -y install \
-           glideinwms-vofrontend-standalone
+RUN yum -y clean all && \
+    yum -y install \
+      git \
+      glideinwms-vofrontend-standalone \
+      jq \
+      patch \
+      python3-scitokens \
+      rsyslog \
+      rsyslog-gnutls \
+      vim \
+      vo-client
 
 # clean log dirs
 RUN rm -rf /var/log/gwms-frontend/*
@@ -31,6 +30,7 @@ RUN rm -rf /var/log/gwms-frontend/*
 ADD patch_gwms.sh /tmp/patch_gwms.sh
 RUN if rpm -qa | grep glideinwms-libs-3.9.4; then /tmp/patch_gwms.sh; fi
 
+ADD healthy.sh /healthy.sh
 ADD frontend_scitoken_check_ces /usr/sbin/frontend_scitoken_check_ces
 ADD frontend_scitoken_check_ces.cron /etc/cron.d/frontend_scitoken_check_ces.cron
 
