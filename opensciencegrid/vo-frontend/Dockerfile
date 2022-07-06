@@ -11,8 +11,7 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 RUN groupadd -o -g 993 frontend
 RUN useradd -o -u 996 -g 993 -s /bin/sh frontend
 
-RUN yum -y clean all && \
-    yum -y install \
+RUN yum -y install \
       git \
       glideinwms-vofrontend-standalone \
       jq \
@@ -21,7 +20,8 @@ RUN yum -y clean all && \
       rsyslog \
       rsyslog-gnutls \
       vim \
-      vo-client
+      vo-client && \
+    yum -y clean all
 
 # clean log dirs
 RUN rm -rf /var/log/gwms-frontend/*
