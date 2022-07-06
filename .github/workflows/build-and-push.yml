@@ -1,16 +1,34 @@
 
+on:
+  workflow_call:
+    inputs:
+      images:
+        required: true
+        type: string
+      dtag:
+        required: true
+        type: string
+    secrets:
+      OSG_HARBOR_ROBOT_USER:
+        required: true
+      OSG_HARBOR_ROBOT_PASSWORD:
+        required: true
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    needs: build-image-list
-    if: needs.build-image-list.outputs.images != '["dummy"]'
+    if: inputs.images != '["dummy"]'
     # Prevent a single build failure from killing the workflow.
     # This is safe since subsequent pushes should fail on cache load
     continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
+        image: ${{ fromJson(inputs.images) }}
         yum_repo: ['development', 'testing', 'release']
     steps:
       - name: Build ${{ matrix.image }}:3.6-${{ matrix.yum_repo }}
@@ -27,12 +45,12 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       github.repository_owner == 'opensciencegrid' &&
-      needs.build-image-list.outputs.images != '["dummy"]'
-    needs: [make-date-tag, build-image-list, build]
+      inputs.images != '["dummy"]'
+    needs: build
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
+        image: ${{ fromJson(inputs.images) }}
     steps:
       - name: Push to Harbor (3.6-development)
         if: always()
