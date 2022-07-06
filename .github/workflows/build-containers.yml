@@ -29,148 +29,18 @@ jobs:
 
       - id: image-list
         run: |
-          ORG_DIR=opensciencegrid
-          # Get the list of files changed based on the type of event
-          # kicking off the GHA:
-          # 1. For the main branch, diff the previous state of main vs
-          #    the current commit
-          # 2. For other branches (i.e., on someone's fork), diff main
-          #    vs the current commit
-          # 3. For PRs, diff the base ref vs the current commit
-          # 4. For everything else (e.g., dispatches), build all images
-          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
-             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-                   BASE=${{github.event.before}}
-               else
-                   BASE=origin/main
-               fi
-               # List image root dirs where files have changed and the
-               # root dir exists. Example value:
-               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
-               images=$(git diff --name-only \
-                                 "$BASE" \
-                                 "$GITHUB_SHA" |
-                        egrep "^$ORG_DIR/" |
-                        cut -d/ -f -2 |
-                        sort |
-                        uniq |
-                        xargs -I {} find . -type d \
-                                           -wholename ./{} \
-                                           -printf "%P\n")
-          else
-               # List all image root dirs. Example value:
-               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
-               images=$(find $ORG_DIR -mindepth 1 \
-                                      -maxdepth 1 \
-                                      -type d \
-                                      -printf "$ORG_DIR/%P\n")
-          fi
+          export GITHUB_EVENT_BEFORE=${{github.event.before}}
+          ./build-image-list.sh
 
-          # Ensure that the generated JSON array has a member,
-          # otherwise GHA will throw an error about an empty matrix
-          # vector in subsequent steps
-          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
-          echo "::set-output name=json::$image_json"
+  call-workflow-build-and-push:
+    uses: ./.github/workflows/build-and-push.yml
+    needs: [make-date-tag, build-image-list]
+    with:
+      dtag: ${{ needs.make-date-tag.outputs.dtag }}
+      images: ${{ needs.build-image-list.outputs.images }}
+    secrets:
+      OSG_HARBOR_ROBOT_USER: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
+      OSG_HARBOR_ROBOT_PASSWORD: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
-  build:
-    runs-on: ubuntu-latest
-    needs: build-image-list
-    if: needs.build-image-list.outputs.images != '["dummy"]'
-    # Prevent a single build failure from killing the workflow.
-    # This is safe since subsequent pushes should fail on cache load
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
-        yum_repo: ['development', 'testing', 'release']
-    steps:
-      - name: Build ${{ matrix.image }}:3.6-${{ matrix.yum_repo }}
-        continue-on-error: ${{ matrix.yum_repo == 'development' }}
-        uses: opensciencegrid/build-container-action@v0.3.0
-        with:
-          osg_series: 3.6
-          repo: ${{ matrix.yum_repo }}
-          context: ${{ matrix.image }}
-
-  push:
-    runs-on: ubuntu-latest
-    if: >-
-      github.ref == 'refs/heads/main' &&
-      github.event_name != 'pull_request' &&
-      github.repository_owner == 'opensciencegrid' &&
-      needs.build-image-list.outputs.images != '["dummy"]'
-    needs: [make-date-tag, build-image-list, build]
-    strategy:
-      fail-fast: false
-      matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
-    steps:
-      - name: Push to Harbor (3.6-development)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
-        with:
-          repo: development
-          osg_series: 3.6
-          context: ${{ matrix.image }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
-
-      - name: Push to Harbor (3.6-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
-        with:
-          repo: testing
-          osg_series: 3.6
-          context: ${{ matrix.image }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
-
-      - name: Push to Harbor (3.6-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
-        with:
-          repo: release
-          osg_series: 3.6
-          context: ${{ matrix.image }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
-
-      - name: Push to Docker Hub (3.6-development)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
-        with:
-          repo: development
-          osg_series: 3.6
-          context: ${{ matrix.image }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push to Docker Hub (3.6-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
-        with:
-          repo: testing
-          osg_series: 3.6
-          context: ${{ matrix.image }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push to Docker Hub (3.6-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
-        with:
-          repo: release
-          osg_series: 3.6
-          context: ${{ matrix.image }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
