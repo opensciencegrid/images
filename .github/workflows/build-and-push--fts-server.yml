@@ -1,0 +1,105 @@
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      dtag:
+        required: true
+        type: string
+    secrets:
+      OSG_HARBOR_ROBOT_USER:
+        required: true
+      OSG_HARBOR_ROBOT_PASSWORD:
+        required: true
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: inputs.images != '["dummy"]'
+    # Prevent a single build failure from killing the workflow.
+    # This is safe since subsequent pushes should fail on cache load
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['3.10', '3.11']
+    steps:
+      - name: Build ${{ inputs.image }}:${{ matrix.version }}
+        uses: opensciencegrid/build-container-action@v0.3.0
+        with:
+          osg_series: 3.6
+          repo: release
+          context: ${{ inputs.image }}
+          dockerfile: Dockerfile.${{ matrix.version }}-osg36
+
+  push:
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      github.repository_owner == 'opensciencegrid' &&
+      inputs.images != '["dummy"]'
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['3.10', '3.11']
+    steps:
+      - name: Push to Harbor
+        if: always()
+        uses: opensciencegrid/push-container-action@v0.5.0
+        with:
+          repo: release
+          osg_series: 3.6
+          context: ${{ inputs.image }}
+          registry_url: hub.opensciencegrid.org
+          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
+          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+
+      - name: Push to Docker Hub
+        if: always()
+        uses: opensciencegrid/push-container-action@v0.5.0
+        with:
+          repo: release
+          osg_series: 3.6
+          context: ${{ inputs.image }}
+          registry_url: docker.io
+          registry_user: ${{ secrets.DOCKER_USERNAME }}
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+
+
+
+  - name: Import Docker images from cache
+    uses: actions/cache@v2
+    with:
+      path: /tmp/.buildx-cache
+      key: ${{ steps.generate-image-name.outputs.image }}_${{ inputs.osg_series}}_${{ inputs.repo }}_buildx_${{ github.sha }}_${{ github.run_id }}
+
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v1
+
+  - name: Log in to ${{ inputs.registry_url }}
+    uses: docker/login-action@v1
+    with:
+      registry: ${{ inputs.registry_url }}
+      username: ${{ inputs.registry_user }}
+      password: ${{ inputs.registry_pass }}
+
+  - name: Build image
+    uses: docker/build-push-action@v2.8.0
+    with:
+      push: true
+      context: ${{ inputs.context }}
+      build-args: |
+        BASE_YUM_REPO=${{ inputs.repo }}
+        BASE_OSG_SERIES=${{ inputs.osg_series }}
+        TIMESTAMP_TAG=${{ inputs.timestamp_tag }}
+      tags: "${{ steps.generate-tag-list.outputs.taglist }}"
+      cache-from: type=local,src=/tmp/.buildx-cache
+

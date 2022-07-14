@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       images: ${{ steps.image-list.outputs.json }}
+      custom_images: ${{ steps.image-list.outputs.custom_json }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -38,6 +39,18 @@ jobs:
     with:
       dtag: ${{ needs.make-date-tag.outputs.dtag }}
       images: ${{ needs.build-image-list.outputs.images }}
+    secrets:
+      OSG_HARBOR_ROBOT_USER: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
+      OSG_HARBOR_ROBOT_PASSWORD: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  call-custom-workflows-build-and-push:
+    uses: ./.github/workflows/build-and-push--custom.yml
+    needs: [make-date-tag, build-image-list]
+    with:
+      dtag: ${{ needs.make-date-tag.outputs.dtag }}
+      images: ${{ needs.build-image-list.outputs.custom_images }}
     secrets:
       OSG_HARBOR_ROBOT_USER: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
       OSG_HARBOR_ROBOT_PASSWORD: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}

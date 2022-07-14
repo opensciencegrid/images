@@ -44,8 +44,25 @@ else
                             -printf "%p\n")
 fi
 
+standard_images=$(
+  IFS=$'\n'
+  for i in $images; do
+    [[ -e $i/.osg_build.json ]] || echo "$i"
+  done
+)
+
+custom_images=$(
+  IFS=$'\n'
+  for i in $images; do
+    [[ -e $i/.osg_build.json ]] && echo "$i"
+  done
+)
+
 # Ensure that the generated JSON array has a member,
 # otherwise GHA will throw an error about an empty matrix
 # vector in subsequent steps
-image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
+image_json=$(echo -n "${standard_images:-dummy}" | jq -Rcs '.|split("\n")')
+custom_image_json=$(echo -n "${custom_images:-dummy}" | jq -Rcs '.|split("\n")')
 echo "::set-output name=json::$image_json"
+echo "::set-output name=custom_json::$custom_image_json"
+
