@@ -1,0 +1,44 @@
+FROM centos:7
+ARG VERSION=3.12.0
+COPY crontab /etc/crontab
+COPY supervisord.conf etc/supervisord.conf
+COPY fts3config etc/fts3/fts3config
+COPY fts-msg-monitoring.conf etc/fts3/fts-msg-monitoring.conf
+COPY docker-entrypoint.sh tmp/docker-entrypoint.sh 
+# Update the base image
+RUN yum update -y
+# Add various repos
+RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RUN rpm -Uvh https://repo.opensciencegrid.org/osg/3.6/osg-3.6-el7-release-latest.rpm
+ADD "http://fts-repo.web.cern.ch/fts-repo/fts3-prod-el7.repo" "/etc/yum.repos.d/"
+
+# Add the DMC repo but make it disabled by default lest it conflict with OSG/EPEL
+ADD "https://dmc-repo.web.cern.ch/dmc-repo/dmc-rc-el7.repo" "/etc/yum.repos.d/"
+RUN sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/dmc-rc-el7.repo
+
+# FTS release candidate repo - disabled
+#ADD "http://fts-repo.web.cern.ch/fts-repo/fts3-rc-el7.repo" "/etc/yum.repos.d/"
+
+RUN yum install epel-release -y
+RUN yum install yum-plugin-priorities -y
+RUN yum install centos-release-scl -y
+
+
+# Install the FTS packages and dependencies
+RUN yum install --enablerepo=dmc-rc-el7 gfal2-all-2.21.0 -y gfal2-plugin-mock
+RUN yum install -y osg-ca-certs cronie crontabs supervisor fetch-crl
+RUN yum install -y fts-server-$VERSION \
+                   fts-client-$VERSION \
+                   fts-rest-server-$VERSION \
+                   fts-monitoring-$VERSION \
+                   fts-mysql-$VERSION \
+                   fts-server-selinux-$VERSION \
+                   fts-rest-server-selinux-$VERSION \
+                   fts-monitoring-selinux-$VERSION \
+                   fts-msg-$VERSION \
+                   fts-infosys-$VERSION
+RUN yum install -y vo-client x509-scitokens-issuer-client
+# Clean up
+RUN yum clean all && \
+    rm -rf /var/cache/yum
+ENTRYPOINT sh tmp/docker-entrypoint.sh
