@@ -19,7 +19,7 @@ on:
         required: true
 
 jobs:
-  custom-b-and-p:
+  run-custom-workflows:
     runs-on: ubuntu-latest
     if: inputs.images != '["dummy"]'
     # Prevent a single build failure from killing the workflow.
@@ -36,19 +36,14 @@ jobs:
           uses=$(jq .uses ${{inputs.images}}/.osg_build.json)
           echo "::set-output name=workflow::$uses"
 
-
-
-
-      - name: Build ${{ matrix.image }}:3.6-${{ matrix.yum_repo }}
-        uses: opensciencegrid/build-container-action@v0.3.0
+      - name: Call custom workflow
+        id: call-custom-workflow
+        uses: ${{ steps.workflow-path.outputs.workflow }}
         with:
-          osg_series: 3.6
-          repo: ${{ matrix.yum_repo }}
-          context: ${{ matrix.image }}
-
-      - id: image-list
-        run: |
-          export GITHUB_EVENT_BEFORE=${{github.event.before}}
-          ./build-image-list.sh
-
+          dtag: ${{ inputs.dtag }}
+        secrets:
+          OSG_HARBOR_ROBOT_USER: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
+          OSG_HARBOR_ROBOT_PASSWORD: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
