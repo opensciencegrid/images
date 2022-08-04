@@ -1,18 +1,16 @@
 ARG BASE_OSG_SERIES=3.6
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el7-release
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-release
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Install dependencies
-# Install git from IUS (Rackspace) repo for a modern version (without SCL setup headache)
 RUN \
      yum update -y \
   && yum install -y \
        epel-release \
-       https://repo.ius.io/ius-release-el7.rpm \
   && yum install -y \
-       git224 \
-       git224-svn \
+       git \
+       git-svn \
        subversion \
   && yum clean all && rm -rf /var/cache/yum/*
 
