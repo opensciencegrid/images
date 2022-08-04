@@ -1,1 +1,0 @@
-Dockerfile.3.10-osg36
