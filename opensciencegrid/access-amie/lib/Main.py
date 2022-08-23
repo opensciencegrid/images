@@ -450,7 +450,7 @@ OSG User Facilitation
             #    log.error(e)
 
             # update the liveness file - k8s will use this to make sure we are still looping
-            fname = config.get('main', 'statedir') + '/liveness.state'
+            fname = self.config.get('main', 'statedir') + '/liveness.state'
             with open(fname, "w") as fp:
                 fp.write(str(datetime.utcnow()))                
 
