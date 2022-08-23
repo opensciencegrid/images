@@ -1,0 +1,8 @@
+#!/bin/bash
+
+INSTALL_DIR=$(dirname $0)"/.."
+INSTALL_DIR=$(cd $INSTALL_DIR && pwd)
+export INSTALL_DIR
+
+cd $INSTALL_DIR/lib
+exec python3 CLI.py "$@"
