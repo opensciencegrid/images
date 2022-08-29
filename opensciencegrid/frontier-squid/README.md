@@ -40,6 +40,8 @@ Mountpoint       | Description                                                  
 /var/cache/squid | This directory contains the cache for squid. See also SQUID_CACHE_DISK above. | -v /tmp/squid:/var/cache/squid |
 /var/log/squid   | This directory contains the squid logs.                              | -v /tmp/log:/var/log/squid         |
 
+For production deployments, OSG recommends allocating at least 50 to 100 GB (50000 to 100000 MB) to SQUID_CACHE_DISK.
+
 For more details, see the [Frontier Squid documentation](https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Configuration).
 
 
