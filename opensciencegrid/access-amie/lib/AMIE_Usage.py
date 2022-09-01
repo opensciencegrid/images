@@ -25,6 +25,8 @@ class AMIE_Usage:
         return self.client.get_failed_records()
 
     def send(self, packet):
+        if self.config['amie']['api_key'] is None:
+            return ['No API key specified for AMIE']
         # we are not keeping copies of usage packets
         return self.client.send(packet)
     
