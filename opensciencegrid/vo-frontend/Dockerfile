@@ -1,7 +1,7 @@
 ARG BASE_YUM_REPO=release
 ARG BASE_OSG_SERIES=3.6
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el7-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
@@ -26,9 +26,15 @@ RUN yum -y install \
 # clean log dirs
 RUN rm -rf /var/log/gwms-frontend/*
 
-# patch gwms (but only 3.9.4)
-ADD patch_gwms.sh /tmp/patch_gwms.sh
-RUN if rpm -qa | grep glideinwms-libs-3.9.4; then /tmp/patch_gwms.sh; fi
+# patch gwms (but only for certain versions)
+ADD patches /opt/gwms-patches
+#RUN if rpm -qa | grep glideinwms-libs-3.9.4; then /tmp/patch_gwms.sh; fi
+RUN VERSION=$(rpm -qa | grep glideinwms-libs | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+') && \
+    if [ -e /opt/gwms-patches/$VERSION.sh ]; then \
+        /opt/gwms-patches/$VERSION.sh; \
+    else \
+        echo "No patch for version $VERSION"; \
+    fi
 
 ADD healthy.sh /healthy.sh
 ADD frontend_scitoken_check_ces /usr/sbin/frontend_scitoken_check_ces
