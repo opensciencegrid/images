@@ -5,7 +5,7 @@ if [ ! -e /var/lib/access-amie/liveness.state ]; then
     exit 1
 fi
 
-if (find /var/lib/access-amie/ -name liveness.state -mmin +65) >/dev/null 2>&1; then
+if (find /var/lib/access-amie/ -name liveness.state -mmin +65 | grep liveness.state) >/dev/null 2>&1; then
     echo "liveness.state file is stale" >&2
     exit 2
 fi
