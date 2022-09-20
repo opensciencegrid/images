@@ -37,8 +37,6 @@ RUN VERSION=$(rpm -qa | grep glideinwms-libs | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+'
     fi
 
 ADD healthy.sh /healthy.sh
-ADD frontend_scitoken_check_ces /usr/sbin/frontend_scitoken_check_ces
-ADD frontend_scitoken_check_ces.cron /etc/cron.d/frontend_scitoken_check_ces.cron
 
 ADD image-config.d/*    /etc/osg/image-config.d/
 ADD cron.d/*            /etc/cron.d/
