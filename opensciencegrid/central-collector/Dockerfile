@@ -25,9 +25,6 @@ RUN    yum module enable -y mod_auth_openidc \
 # Create home directory for registry user
 RUN mkdir /var/lib/condor-ce/webapp
 
-# Disable Globus (GSS_ASSIST_GRIDMAP) lookups
-RUN rm /etc/condor-ce/mapfiles.d/50-gsi-callout.conf
-
 COPY etc/supervisord.d/*      /etc/supervisord.d/
 COPY etc/condor-ce/config.d/* /etc/condor-ce/config.d/
 COPY etc/httpd/conf.d/*       /etc/httpd/conf.d/
