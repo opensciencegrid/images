@@ -92,15 +92,15 @@ class Main():
         pi_nsf_status_code = packet.NsfStatusCode
 
         subject = f'OSG/ACCESS - create PI account to activate your allocation TG-{grant_number}'
-        body = f'''<p>Thank you for your interest in using OSG resources via an ACCESS allocation.
-When you are ready to use your OSG allocation, you (the allocation PI) need an OSG-based account
+        body = f'''<p>Thank you for your interest in using OSPool resources via an ACCESS allocation.
+When you are ready to use your OSPool allocation, you (the allocation PI) need an account
 with the OSG Connect service.</p>
 
 <br>
 <p>
 <b>If you already have an OSG Connect user profile:</b><br>
 You can check by trying to ‘Log In’ via the osgconnect.net website using your institutional
-identity. If you are able to view your user Profile and are ready to charge OSG usage against
+identity. If you are able to view your user Profile and are ready to charge OSPool usage against
 your ACCESS allocation, please send an email to support@osg-htc.org, to request that your
 user account be associated with the appropriate allocation charge code (e.g. TG-{grant_number}).
 </p>
@@ -108,7 +108,7 @@ user account be associated with the appropriate allocation charge code (e.g. TG-
 <br>
 <p>
 <b>If you do not yet have an OSG Connect user profile:</b><br>
-Please ‘Sign Up’ for an OSG account at https://osgconnect.net/signup using your institutional
+Please ‘Sign Up’ for an account at https://connect.osg-htc.org/signup using your institutional
 identity, and copy the below into the Comments field before submitting your Sign Up request.
 </p>
 
@@ -124,13 +124,13 @@ Email: {pi_email}<br/>
 <br>
 <p>
 An OSG Research Computing Facilitator will follow up to meet with you and/or your group, to
-activate accounts and provide personalized guidance on using OSG.
+activate accounts and provide personalized guidance on using the OSPool.
 </p>
 
 <br>
 <p>
 <b>Users on your allocation can follow either step, above, after the allocation has been
-activated by an OSG staff member.</b>
+activated by a staff member.</b>
 </p>
 
 <br>
@@ -205,22 +205,22 @@ OSG User Facilitation
 
         subject = f'OSG/ACCESS - create an account on OSG Connect'
         body = f'''<p>Thank you for your application for an OSG account via an ACCESS allocation. When you
-are ready to use your OSG allocation, you will need an OSG-based account with the OSG Connect service.
+are ready to use your allocation, you will need an account with the OSG Connect service.
 </p>
 
 <br>
 <p>
 <b>If you already have an OSG Connect user profile:</b><br>
-You can double check by trying to ‘Log In’ via the osgconnect.net website using your institutional identity.
-If you are able to view your user Profile without needing to ‘Sign Up’ and are ready to charge OSG usage
-against your ACCESS allocation, please send an email to support@opensciencegrid.org, to request that your
+You can double check by trying to ‘Log In’ via the https://connect.osg-htc.org/ website using your institutional identity.
+If you are able to view your user Profile without needing to ‘Sign Up’ and are ready to charge OSPool usage
+against your ACCESS allocation, please send an email to support@osg-htc.org, to request that your
 user account be associated with the appropriate allocation charge code (e.g. {project_id}).
 </p>
 
 <br>
 <p>
 <b>If you do not yet have an OSG Connect user profile:</b><br>
-Please ‘Sign Up’ for an account at https://osgconnect.net/signup using your institutional identity, and
+Please ‘Sign Up’ for an account at https://connect.osg-htc.org/signup using your institutional identity, and
 copy the below into the Comments field before submitting your ‘Sign Up’ request:
 </p>
 
@@ -233,7 +233,7 @@ ACCESS global ID: {user_global_id}<br/>
 <br>
 <p>
 An OSG Research Computing Facilitator will follow up to meet with you and/or your group, to activate
-accounts and provide personalized guidance on using OSG.
+accounts and provide personalized guidance on using the OSPool.
 </p>
 
 <br>
