@@ -11,6 +11,6 @@ RUN yum -y install \
 
 ADD mailchimp-sync /srv/mailchimp-sync
 
-ENTRYPOINT ["/srv/mailchimp-sync/runme.sh"]
+CMD ["/srv/mailchimp-sync/runme.sh"]
 
 
