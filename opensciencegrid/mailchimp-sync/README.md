@@ -4,7 +4,7 @@ User information and group memberships are pulled from OSGConnect
 and Comanage APIs.
 
 It is expected that a config file is bind mounted to 
-`/srv/mailchimp-sync/mailchimp-sync.conf . Example
+`/srv/mailchimp-sync/mailchimp-sync.conf` . Example:
 
     [mailchimp]
     
