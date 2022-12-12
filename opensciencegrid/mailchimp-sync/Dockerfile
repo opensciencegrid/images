@@ -1,12 +1,8 @@
-ARG BASE_YUM_REPO=release
-ARG BASE_OSG_SERIES=3.6
+FROM almalinux:8
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
+LABEL maintainer OSG Software <help@osg-htc.org>
 
-LABEL maintainer OSG Software <help@opensciencegrid.org>
-
-RUN yum -y install \
-             vim && \
+RUN yum -y install python3 python3-requests && \
     yum -y clean all
 
 ADD mailchimp-sync /srv/mailchimp-sync
