@@ -144,7 +144,7 @@ def comanage_find_users(users):
 def comanage_apply_tag(users, tag, co_group_name):
 
     # find the group id
-    resp = comanage_mkrequest('GET', 'co_groups.json', coid=7, search__identifier="ap7-login")
+    resp = comanage_mkrequest('GET', 'co_groups.json', coid=7, search__identifier=co_group_name)
     if resp.status_code != 200:
         raise ApiError('Cannot fetch groups: {}'.format(resp.status_code))
     if len(resp.json()['CoGroups']) != 1:
