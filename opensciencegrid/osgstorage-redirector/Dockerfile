@@ -19,3 +19,4 @@ RUN  chmod a+x /usr/local/sbin/*.sh
 
 # Copy certs to /etc/grid-security/xrd on container startup
 RUN ln -t /etc/osg/image-init.d -s /usr/local/sbin/xrd-certs-init.sh
+
