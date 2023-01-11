@@ -44,7 +44,7 @@ Additional configuration is needed to make XrootD Standalone production-ready.
     docker run --rm \
            --publish 1094:1094 \
            --volume /baremetalPartition:/data
-           --volume 10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
+           --volume $PWD/10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
            --name xrootd_standalone opensciencegrid/xrootd-standalone:release &
     ```
 
@@ -61,8 +61,8 @@ Additional configuration is needed to make XrootD Standalone production-ready.
     docker run --rm \
            --publish 1094:1094 \
            --volume /baremetalPartition:/data
-           --volume 10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
-           --volume 90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg
+           --volume $PWD/10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
+           --volume $PWD/90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg
            --name xrootd_standalone opensciencegrid/xrootd-standalone:release &
     ```
 
@@ -75,9 +75,9 @@ Additional configuration is needed to make XrootD Standalone production-ready.
     docker run --rm \
            --publish 1094:1094 \
            --volume /baremetalPartition:/data
-           --volume 10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
-           --volume my_auth_file:/etc/xrootd/auth_file \
-           --volume 90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg \
+           --volume $PWD/10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
+           --volume $PWD/my_auth_file:/etc/xrootd/auth_file \
+           --volume $PWD/90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg \
            --name xrootd_standalone opensciencegrid/xrootd-standalone:release &
     ```
 
@@ -100,11 +100,11 @@ Additional configuration is needed to make XrootD Standalone production-ready.
     docker run --rm \
            --publish 1094:1094 \
            --volume /baremetalPartition:/data
-           --volume 10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
-           --volume	my_auth_file:/etc/xrootd/auth_file \
-           --volume 90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg \
-           --volume mygridmapfile:/etc/grid-security/grid-mapfile \
-           --volume vomsmapfile:/etc/grid-security/voms-map-file \
+           --volume $PWD/10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
+           --volume	$PWD/my_auth_file:/etc/xrootd/auth_file \
+           --volume $PWD/90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg \
+           --volume $PWD/mygridmapfile:/etc/grid-security/grid-mapfile \
+           --volume $PWD/vomsmapfile:/etc/grid-security/voms-map-file \
            --name xrootd_standalone opensciencegrid/xrootd-standalone:release &
     ```
 
@@ -114,11 +114,11 @@ Additional configuration is needed to make XrootD Standalone production-ready.
     docker run --rm \
            --publish 1094:1094 \
            --volume /baremetalPartition:/data
-           --volume 10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
-           --volume my_auth_file:/etc/xrootd/auth_file \
-           --volume 90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg \
-           --volume mygridmapfile:/etc/grid-security/grid-mapfile \
-           --volume vomsmapfile:/etc/grid-security/voms-map-file \
+           --volume $PWD/10-my-site-variables.cfg:/etc/xrootd/config.d/10-common-site-local.cfg \
+           --volume $PWD/my_auth_file:/etc/xrootd/auth_file \
+           --volume $PWD/90-my-paths.cfg:/etc/xrootd/config.d/90-osg-standalone-paths.cfg \
+           --volume $PWD/mygridmapfile:/etc/grid-security/grid-mapfile \
+           --volume $PWD/vomsmapfile:/etc/grid-security/voms-map-file \
            --volume /etc/grid-security/hostcert.pem:/etc/grid-security/hostcert.pem \
            --volume /etc/grid-security/hostkey.pem:/etc/grid-security/hostkey.pem \
            --name xrootd_standalone opensciencegrid/xrootd-standalone:release &
