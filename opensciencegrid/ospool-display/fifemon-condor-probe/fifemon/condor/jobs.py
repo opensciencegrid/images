@@ -217,7 +217,7 @@ class Jobs(object):
     def job_bin(self, job_classad):
         bin = None
         if job_classad["JobStatus"] == 1:
-            if "QDate" in job_classad:
+            if "ServerTime" in job_classad and "QDate" in job_classad:
                 qage = job_classad["ServerTime"]-job_classad["QDate"]
                 bin = ".count_"+find_bin(qage, self.bins)
             else:
@@ -229,7 +229,7 @@ class Jobs(object):
             else:
                 bin = ".count_unknown"
         elif job_classad["JobStatus"] == 5:
-            if "EnteredCurrentStatus" in job_classad:
+            if "ServerTime" in job_classad and "EnteredCurrentStatus" in job_classad:
                 holdage = job_classad["ServerTime"]-job_classad["EnteredCurrentStatus"]
                 bin = ".count_holdage_"+find_bin(holdage, self.bins)
             else:
