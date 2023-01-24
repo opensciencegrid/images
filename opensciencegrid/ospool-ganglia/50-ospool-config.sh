@@ -22,7 +22,7 @@ set -e
 ###     install -o condor -g condor -m 0600 $FILE /etc/condor/tokens.d/$FILE
 ### done
 
-if [ "X$DEPLOYMENT_ENV" = "Xproduction" ]; then
+if [ "X$DEPLOYMENT_ENV" == "Xproduction" ]; then
     cat >/etc/condor/config.d/50-ospool.config <<EOF
 CONDOR_HOST = cm-1.ospool.osg-htc.org,cm-2.ospool.osg-htc.org
 EOF
