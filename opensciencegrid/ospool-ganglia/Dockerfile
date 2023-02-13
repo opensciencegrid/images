@@ -21,9 +21,16 @@ COPY 05-gmetad.conf /etc/supervisord.d/
 COPY 05-gmond.conf /etc/supervisord.d/
 COPY 05-httpd.conf /etc/supervisord.d/
 COPY 05-php-fpm.conf /etc/supervisord.d/
+
 COPY gmetad.conf /etc/ganglia/
+
 COPY 50-ganglia.conf /etc/condor/config.d/
+
 COPY 50-ospool-config.sh /etc/osg/image-init.d/
+
 COPY httpd-ganglia.conf /etc/httpd/conf.d/ganglia.conf
 
+COPY index.php /var/www/html/
+
+ADD ganglia-web-overrides /usr/share/ganglia
 
