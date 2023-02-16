@@ -1,0 +1,32 @@
+#!/bin/sh
+
+FACTORY_XMLDIR="/etc/gwms-factory/config.d"
+GENERATED_XMLFILE="10-hosted-ces.auto.xml"
+
+AUTOCONF_WORKDIR=$(mktemp -p /tmp -d OSG_autoconf.XXXXXXXXXX)
+trap 'rm -rf "$AUTOCONF_WORKDIR"' EXIT
+
+cp /opt/osg-gfactory/OSG_autoconf/missing.yml $AUTOCONF_WORKDIR/missing.yml
+echo "{}" > $AUTOCONF_WORKDIR/OSG.yml
+cp /opt/osg-gfactory/OSG_autoconf/10-hosted-ces.auto.yml $AUTOCONF_WORKDIR/10-hosted-ces.auto.yml
+
+cat > $AUTOCONF_WORKDIR/config.yaml << EOF
+OSG_COLLECTOR: "collector.opensciencegrid.org:9619"
+OSG_YAML: "$AUTOCONF_WORKDIR/OSG.yml" # Automatically generated
+OSG_DEFAULT: "/opt/osg-gfactory/OSG_autoconf/etc/default.yml" # Default file
+MISSING_YAML: "$AUTOCONF_WORKDIR/missing.yml"
+OSG_WHITELISTS: # Operator's whitelist/override files
+  - "$AUTOCONF_WORKDIR/10-hosted-ces.auto.yml"
+EOF
+
+pushd /tmp
+python3 /usr/bin/OSG_autoconf "$AUTOCONF_WORKDIR/config.yaml"
+if [ $? -ne 0 ]; then
+  echo "WARNING: OSG_autoconf failed to generate a new configuration."
+  exit $?
+fi
+popd
+
+echo "Moving $AUTOCONF_WORKDIR/$GENERATED_XMLFILE to $FACTORY_XMLDIR/$GENERATED_XMLFILE"
+mv "$AUTOCONF_WORKDIR/$GENERATED_XMLFILE" "$FACTORY_XMLDIR/$GENERATED_XMLFILE"
+echo "hostedce_gen.sh has finished"
