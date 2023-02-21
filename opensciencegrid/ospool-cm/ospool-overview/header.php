@@ -35,10 +35,3 @@
       </div>
       <div id="main">
  
-        <p>
-        <div class="warning">
-          The data below is for the new OSPool. These pages are being replaced by the OSPool Display:
-          <a href="https://ospool-display.opensciencegrid.org/">https://ospool-display.opensciencegrid.org/</a>
-        </div>
-        </p>
-

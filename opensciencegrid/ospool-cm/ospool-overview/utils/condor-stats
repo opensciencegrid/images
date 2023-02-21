@@ -146,6 +146,55 @@ tac /var/log/condor/NegotiatorLog \
     | sed 's/</[/g' | sed 's/>/]/g' \
     > data/negotiation.txt
 
+
+# OSPool stats
+if [ ! -e data/ospool.rrd ]; then
+    rrdtool create data/ospool.rrd \
+        --step 300 \
+        DS:fairshare:GAUGE:600:0:10000000 \
+        DS:other:GAUGE:600:0:10000000 \
+        RRA:AVERAGE:0.5:1:8928 \
+        RRA:AVERAGE:0.5:12:8760
+fi
+FAIRSHARE=$(condor_status -const 'OSPool =?= True' -total | tail -n 1 | awk '{print $2;}')
+if [ "x$FAIRSHARE" = "x" ]; then
+    FAIRSHARE=0
+fi
+OTHER=$(condor_status -const 'OSPool =!= True' -total | tail -n 1 | awk '{print $2;}')
+if [ "x$OTHER" = "x" ]; then
+    OTHER=0
+fi
+CMD="rrdtool update data/ospool.rrd N:$FAIRSHARE:$OTHER"
+echo $CMD
+$CMD
+
+rrdtool graph data/tmp.png \
+    --slope-mode \
+    --start -7day \
+    --title "OSPool Fairshare - 1 week" --width 600 --height 300 \
+    --lower-limit 0 \
+    'DEF:fairshare=data/ospool.rrd:fairshare:AVERAGE' \
+    'DEF:other=data/ospool.rrd:other:AVERAGE' \
+    'VDEF:fairshare_current=fairshare,LAST' \
+    'VDEF:fairshare_avg=fairshare,AVERAGE' \
+    'VDEF:fairshare_min=fairshare,MINIMUM' \
+    'VDEF:fairshare_max=fairshare,MAXIMUM' \
+    'VDEF:other_current=other,LAST' \
+    'VDEF:other_avg=other,AVERAGE' \
+    'VDEF:other_min=other,MINIMUM' \
+    'VDEF:other_max=other,MAXIMUM' \
+    'AREA:fairshare#6666ff:Fairshare    ' \
+    'GPRINT:fairshare_current:  Current\: %6.0lf' \
+    'GPRINT:fairshare_avg:  Avg\: %6.0lf' \
+    'GPRINT:fairshare_max:  Max\: %6.0lf\n' \
+    'STACK:other#ff66ff:Other     ' \
+    'GPRINT:other_current:     Current\: %6.0lf' \
+    'GPRINT:other_avg:  Avg\: %6.0lf' \
+    'GPRINT:other_max:  Max\: %6.0lf\n'
+
+mv data/tmp.png data/ospool.png
+
+
 # site stats
 mkdir -p data/sites
 condor_status -af GLIDEIN_ResourceName | sed 's/.*= "//' | sed 's/"//g' | sed 's/ //g' | sort | uniq -c >data/sites/current.txt
