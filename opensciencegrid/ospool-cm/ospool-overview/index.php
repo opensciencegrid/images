@@ -15,6 +15,9 @@
 <img src='data/idle.png'>
 </div>
 
+<div class="box">
+<img src='data/ospool.png'>
+</div>
 
 <?php
   include("footer.php");
