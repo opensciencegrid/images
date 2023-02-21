@@ -1,0 +1,9 @@
+
+[
+  Name   = "JobsUnmaterialized";
+  Desc   = "Number of unmaterialized jobs in this schedd's queue";
+  Units  = "jobs";
+  TargetType = "Scheduler";
+]
+
+
