@@ -26,6 +26,8 @@ COPY gmetad.conf /etc/ganglia/
 
 COPY 50-ganglia.conf /etc/condor/config.d/
 
+COPY ganglia.d/* /etc/condor/ganglia.d/
+
 COPY 50-ospool-config.sh /etc/osg/image-init.d/
 
 COPY httpd-ganglia.conf /etc/httpd/conf.d/ganglia.conf

@@ -1,0 +1,17 @@
+
+[
+  Name   = "JobsUnmaterialized";
+  Desc   = "Number of unmaterialized jobs in this schedd's queue";
+  Units  = "jobs";
+  TargetType = "Scheduler";
+]
+[
+  Aggregate = "SUM";
+  Name   = "Unmaterialized Jobs in Pool";
+  Value  = JobsUnmaterialized;
+  Desc   = "Number of unmaterialized jobs in schedds reporting to this pool";
+  Units  = "jobs";
+  TargetType = "Scheduler";
+]
+
+
