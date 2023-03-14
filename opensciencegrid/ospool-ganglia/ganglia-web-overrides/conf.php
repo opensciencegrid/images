@@ -8,6 +8,9 @@
 # For a list of available options, see /usr/share/ganglia/conf_default.php
 #
 
+# use chicago tz
+$conf['rrdtool'] = "env TZ='America/Chicago' /usr/bin/rrdtool";
+
 #
 # Default metric
 #
