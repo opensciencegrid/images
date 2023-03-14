@@ -14,4 +14,19 @@
   TargetType = "Scheduler";
 ]
 
+[
+  Name   = "RecentJobsExitException";
+  Desc   = "Number number of jobs exiting with exception";
+  Units  = "jobs";
+  TargetType = "Scheduler";
+]
+[
+  Aggregate = "SUM";
+  Name   = "RecentJobsExitException in Pool";
+  Value  = RecentJobsExitException;
+  Desc   = "Total number of jobs existing with exceptions in schedds reporting to this pool";
+  Units  = "jobs";
+  TargetType = "Scheduler";
+]
+
 

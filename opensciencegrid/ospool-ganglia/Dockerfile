@@ -30,6 +30,8 @@ COPY ganglia.d/* /etc/condor/ganglia.d/
 
 COPY 50-ospool-config.sh /etc/osg/image-init.d/
 
+COPY 90-ospool-php.ini /etc/php.d/
+
 COPY httpd-ganglia.conf /etc/httpd/conf.d/ganglia.conf
 
 COPY index.php /var/www/html/
