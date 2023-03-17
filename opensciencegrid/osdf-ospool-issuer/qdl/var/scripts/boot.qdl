@@ -1,0 +1,59 @@
+#! /usr/bin/env qdl-run
+
+/*
+   Boot script in QDL to set up a new OA4MP issuer install. This is run exactly
+   once before the system is started the first time. This will read in all the
+   template files for clients in ${ST_HOME}/etc/templates and ingest them into
+   OA4MP's client store.
+*/
+
+assert[is_defined(os_env().'ST_HOME')]['Environment variable ST_HOME is not defined. Exiting...'];
+
+st_home := os_env().'ST_HOME'; // get the scitokens home directory from the environment
+// normalize the path. If it ends in a /, drop it for later use in strings.
+st_home := '.*/' =~ st_home?substring(st_home,0,size(st_home)-1):st_home;
+template_dir := st_home + '/etc/templates';
+/*
+    Set up access to the client store using the current server configuration.
+*/
+module_import('oa2:/qdl/store', 'clients');
+clients#init(st_home+'/etc/server-config.xml', 'scitokens-server', 'client');
+
+
+files. := dir(template_dir);
+if[
+   size(files.) == 0
+ ][
+   say('(no templates.)');
+   return();
+];
+
+files. := ~mask(files.,   '.*xml' =~ files.); // regex match on those that end in .xml
+say('processing ' + size(files.) + ' templates from ' + template_dir);
+
+while[
+   for_next(t, files.)
+ ][
+   template. := clients#from_xml(file_read(template_dir + '/' + t));
+   if[
+      !is_defined(template.'client_id')
+   ][
+      say('warning -- file "' + t + '" is not a client template. skipping');
+   ]else[
+   // At this point we don't want to just overwrite an existing template since
+   // there may be customizations that the admin has added.
+     if[
+          size(clients#read(template.'client_id')) == 0
+        ][
+          clients#save(template.);
+        ]else[
+          say('Warning, but "' + t + '" already exists in the store. Update it manually. Skipping');
+       ];
+   ];
+]; // end while
+
+say('done!');
+
+
+
+

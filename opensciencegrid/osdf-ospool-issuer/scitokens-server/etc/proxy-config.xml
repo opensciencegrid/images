@@ -1,0 +1,24 @@
+<config>
+    <client name="proxy-client">
+        <logging
+                logFileName="/tmp/oa4mp-oauth2-fs-client.xml"
+                logName="oa4mp"
+                logSize="100000"
+                logFileCount="2"
+                debug="true"/>
+        <id>{CLIENT_ID}</id>
+        <secret>{CLIENT_SECRET}</secret>
+        <callbackUri>https://{HOSTNAME}/scitokens-server/ready</callbackUri>
+        <serviceUri>https://cilogon.org/oauth2</serviceUri>
+        <authorizeUri>https://cilogon.org/authorize</authorizeUri>
+        <wellKnownUri>https://cilogon.org/oauth2/.well-known/openid-configuration</wellKnownUri>
+        <scopes>
+            <scope>email</scope>
+            <scope>openid</scope>
+            <scope>profile</scope>
+            <scope>org.cilogon.userinfo</scope>
+        </scopes>
+        <memoryStore><assetStore/></memoryStore>
+    </client>
+
+</config>

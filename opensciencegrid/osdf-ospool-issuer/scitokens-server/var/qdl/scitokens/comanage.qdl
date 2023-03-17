@@ -1,0 +1,24 @@
+/*
+ * Query the CILogon COManage LDAP for informationo
+ */
+
+block [
+  ini. := file_read('/opt/secrets/cilogon_ldap_password.ini', 2).'prod';
+
+  ldap_cfg.                   := new_template('ldap');
+  ldap_cfg.auth_type          := 'simple';
+  ldap_cfg.address            := ini.'server';
+  ldap_cfg.port               := 636;
+  ldap_cfg.claim_name         := 'voPersonID';
+  ldap_cfg.search_base        := ini.'search_base';
+  ldap_cfg.search_scope       := 'subtree';
+  ldap_cfg.fail_on_error      := true;
+  ldap_cfg.type               := 'ldap';
+  ldap_cfg.groups             := ['isMemberOf'];
+  ldap_cfg.ldap_name          := 'voPersonID';
+  ldap_cfg.search_attributes. := ['isMemberOf', 'voPersonApplicationUID', 'voPersonID'];
+  ldap_cfg.username           := ini.'name';
+  ldap_cfg.password           := ini.'password';
+
+  return(get_claims(create_source(ldap_cfg.), script_args(0)));
+];
