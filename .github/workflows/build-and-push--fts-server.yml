@@ -1,0 +1,119 @@
+
+on:
+  workflow_call:
+    inputs:
+      dtag:
+        required: true
+        type: string
+    secrets:
+      OSG_HARBOR_ROBOT_USER:
+        required: true
+      OSG_HARBOR_ROBOT_PASSWORD:
+        required: true
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Prevent a single build failure from killing the workflow.
+    # This is safe since subsequent pushes should fail on cache load
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['3.10', '3.11', '3.12']
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build fts-server:${{ matrix.version }}
+        uses: docker/build-push-action@v2.8.0
+        with:
+          push: false
+          context: ./contrib/fts-server
+          file: Dockerfile.${{ matrix.version }}-osg36
+          tags: fts3:${{ matrix.version }},fts3:${{ matrix.version }}-${{ inputs.dtag }}
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+
+      - name: Cache Docker images
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: fts-server_${{ matrix.version }}_3.6_release_buildx_${{ github.sha }}_${{ github.run_id }}
+
+
+  push-harbor:
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      github.repository_owner == 'opensciencegrid' &&
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['3.10', '3.11', '3.12']
+    steps:
+      - name: Import Docker images from cache
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: fts-server_${{ matrix.version }}_3.6_release_buildx_${{ github.sha }}_${{ github.run_id }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v1
+        with:
+          registry: hub.opensciencegrid.org
+          username: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
+          password: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+
+      - name: Build image
+        uses: docker/build-push-action@v2.8.0
+        with:
+          push: true
+          context: ./contrib/fts-server
+          tags: fts3:${{ matrix.version }},fts3:${{ matrix.version }}-${{ inputs.dtag }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+
+  push-dockerhub:
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      github.repository_owner == 'opensciencegrid' &&
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['3.10', '3.11', '3.12']
+    steps:
+      - name: Import Docker images from cache
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: fts-server_${{ matrix.version }}_3.6_release_buildx_${{ github.sha }}_${{ github.run_id }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build image
+        uses: docker/build-push-action@v2.8.0
+        with:
+          push: true
+          context: ./contrib/fts-server
+          tags: fts3:${{ matrix.version }},fts3:${{ matrix.version }}-${{ inputs.dtag }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+

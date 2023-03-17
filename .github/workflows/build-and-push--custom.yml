@@ -1,0 +1,49 @@
+
+on:
+  workflow_call:
+    inputs:
+      images:
+        required: true
+        type: string
+      dtag:
+        required: true
+        type: string
+    secrets:
+      OSG_HARBOR_ROBOT_USER:
+        required: true
+      OSG_HARBOR_ROBOT_PASSWORD:
+        required: true
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+jobs:
+  run-custom-workflows:
+    runs-on: ubuntu-latest
+    if: inputs.images != '["dummy"]'
+    # Prevent a single build failure from killing the workflow.
+    # This is safe since subsequent pushes should fail on cache load
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(inputs.images) }}
+    steps:
+      - name: Extract custom workflow path
+        id: workflow-path
+        run: |
+          uses=$(jq .uses ${{inputs.images}}/.osg_build.json)
+          echo "::set-output name=workflow::$uses"
+
+      - name: Call custom workflow
+        id: call-custom-workflow
+        uses: ${{ steps.workflow-path.outputs.workflow }}
+        with:
+          dtag: ${{ inputs.dtag }}
+        secrets:
+          OSG_HARBOR_ROBOT_USER: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
+          OSG_HARBOR_ROBOT_PASSWORD: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
