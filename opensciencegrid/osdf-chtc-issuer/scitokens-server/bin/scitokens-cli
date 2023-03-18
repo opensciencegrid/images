@@ -1,0 +1,37 @@
+# Run the OA4MP command processor. This will allow you to edit, create or remove
+# clients, approvals, users and archived users. You can also reset the counter and do copy
+# operations from one store to another
+#
+# The next 5 entries completely determine how this operates. Change these to whatever you want if
+# different from the standard install.
+
+OA2_ROOT=/opt/scitokens-server
+DEFAULT_CONFIG=$OA2_ROOT/etc/server-config.xml
+DEFAULT_TARGET=scitokens-server
+oa2jar=$OA2_ROOT/lib/scitokens-cli.jar
+logFile=$OA2_ROOT/var/log/scitokens--cli.log
+DEFAULT_ENV=$OA2_ROOT/etc/cli.properties
+
+# End of user serviceable parts.
+
+if [[  "$1" = "--help" || $# -gt 2 ]];then
+  echo "scitokens-server-cli [configName configFile environment"]
+  echo "Start the OA4MP for OAuth2 command line admin tool with the"
+  echo "given configuration name in the given configuration file (full path)."
+  echo "No arguments means to use the config named '$DEFAULT_TARGET' in the file  '$DEFAULT_CONFIG'" 
+  echo "and to try and load the '$DEFAULT_ENV' as the environment."
+  echo "One argument is assumed to be the configuration name in the default config file."
+  exit 1
+fi
+
+target=${1:-$DEFAULT_TARGET}
+adminCfg=${2:-$DEFAULT_CONFIG}
+env=${3:-$DEFAULT_ENV}
+
+java -jar $oa2jar -cfg $adminCfg -name $target -log $logFile  -v -set_env $env
+
+if [ $? != 0 ]; then
+  exit 1
+fi
+
+exit 0

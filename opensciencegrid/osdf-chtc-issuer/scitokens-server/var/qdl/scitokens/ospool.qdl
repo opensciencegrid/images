@@ -1,0 +1,89 @@
+/*
+ * This script changes the provided scopes based on request.
+ *
+ * TODO:
+ * - prefix matching, allowing more refined scopes.
+ * - have token prefix path specified by an INI file instead of hardcode.
+ */
+
+if [0 == size(proxy_claims.)] then
+[
+     return();
+];
+
+say(proxy_claims.);
+
+if [!is_defined(proxy_claims.'idp_name')] then
+[
+     sys_err.ok := false;
+     sys_err.message := 'Authentication is missing IDP name.';
+     return();
+];
+
+if [!is_defined(proxy_claims.'eppn')] then
+[
+     sys_err.ok := false;
+     sys_err.message := 'Authentication is missing ePPN.';
+     return();
+];
+
+if [proxy_claims.'idp_name'  != 'University of Wisconsin-Madison'] then
+[
+     sys_err.ok := false;
+     sys_err.message := 'Identity provider must be "University of Wisconsin-Madison" for CHTC authentication';
+     return();
+];
+
+eppn_tokens. := tokenize(proxy_claims.'eppn', '@');
+netid := eppn_tokens.0;
+
+record. := script_load('scitokens/comanage.qdl', netid);
+
+if [0 == size(record.)] then
+[
+     sys_err.ok := false;
+     sys_err.message := 'Failed to locate the user record.';
+     return();
+];
+
+group_scopes_read.  := [];
+group_scopes_write. := [];
+if [is_defined(record.'isMemberOf'.)] then
+[
+/*
+    if [!reduce(@&&, in_group2('cn=htc_execute_node,ou=user_tags,dc=chtc,dc=wisc,dc=edu', record.'isMemberOf'.))] then
+    [
+        sys_err.ok := false;
+        sys_err.message := 'User must be in the htc_execute_node group';
+        return();
+    ];
+*/
+
+    group_scopes_read.  := 'storage.read:/PROTECTED/projects/' + ~values(record.'isMemberOf'.);
+    group_scopes_read.  :=  ~mask(group_scopes_read.,  -1 >= starts_with(group_scopes_read., 'storage.read:/PROTECTED/projects/cn='));
+    group_scopes_write. := 'storage.write:/PROTECTED/projects/' + ~values(record.'isMemberOf'.);
+    group_scopes_write. :=  ~mask(group_scopes_write., -1 >= starts_with(group_scopes_write., 'storage.write:/PROTECTED/projects/cn='));
+] else [
+    sys_err.ok := false;
+    sys_err.message := 'User must be in CHTC groups';
+    return();
+];
+
+// group_scopes_read.  := ~mask(scopes., -1 < list_starts_with(scopes., group_scopes_read.));
+// group_scopes_write. := ~mask(scopes., -1 < list_starts_with(scopes., group_scopes_write.));
+
+user_scopes. := [];
+if [0 < size(record.uid.)] then
+[
+     //user_scopes. := ~mask(scopes., -1 < list_starts_with(scopes., ['storage.read:/PROTECTED/' + record.uid, 'storage.write:/PROTECTED/' + record.uid]));
+     user_scopes. := ['storage.read:/PROTECTED/' + record.uid, 'storage.write:/PROTECTED/' + record.uid];
+];
+
+remove(access_token.ver.);
+access_token.'wlcg.ver'. := '1.0';
+access_token.'aud'       := 'https://wlcg.cern.ch/jwt/v1/any';
+access_token.sub         := record.uid;
+access_token.iss         := 'https://chtc.cs.wisc.edu';
+
+all_scopes. := unique(group_scopes_read. ~ group_scopes_write. ~ user_scopes.);
+access_token.scope := detokenize(all_scopes., ' ', 2);
