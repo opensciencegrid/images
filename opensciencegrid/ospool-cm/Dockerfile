@@ -35,4 +35,5 @@ COPY 10-htcondor.conf /etc/supervisord.d/
 
 COPY ospool-overview /opt/ospool-overview
 
+ADD healthy.sh /healthy.sh
 
