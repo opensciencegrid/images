@@ -24,6 +24,12 @@ perl -e "printf('    %.1f%', ($SUBSET / $FULLSET) * 100);"
 echo
 
 echo
+echo "Number of cores idle due to memory starvation:"
+echo
+echo -n "   "
+condor_status -const 'PartitionableSlot == true && Memory < 1024' -af Cpus | paste -sd+ - | bc
+
+echo
 echo "OS Breakdown and number of glideins with 0 jobs started:"
 echo
 echo "              Total 0-jobs"
