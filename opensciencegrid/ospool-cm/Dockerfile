@@ -9,6 +9,7 @@ ARG BASE_YUM_REPO
 
 RUN yum -y upgrade && \
     yum -y install \
+      bc \
       git \
       lsof \
       rrdtool \
