@@ -1,0 +1,2 @@
+# Allow the OSDF services issuer to create usernames directly.
+SCITOKENS ^https\:\/\/osg\-htc\.org\/osdf,OSDF-(.*)@osg-htc.org$ \1@osg-htc.org
