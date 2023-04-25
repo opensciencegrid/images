@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ! supervisorctl status frontend >/dev/null 2>&1; then
+if ! (supervisorctl status frontend | grep RUNNING) >/dev/null 2>&1; then
     echo "gwms frontend is not running" >&2
     exit 1
 fi
