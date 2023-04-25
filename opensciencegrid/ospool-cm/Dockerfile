@@ -12,6 +12,7 @@ RUN yum -y upgrade && \
       bc \
       git \
       lsof \
+      python3-prometheus_client \
       rrdtool \
       vim \
       wget \
@@ -26,6 +27,9 @@ RUN if [[ $BASE_YUM_REPO = release ]]; then \
       yum -y install condor; \
     fi
 
+# basic config is a collector, so we can test
+RUN echo "DAEMON_LIST = MASTER, SHARED_PORT, COLLECTOR" >/etc/condor/config.d/05-ospool-base.config
+
 COPY condor_master_wrapper /usr/sbin/
 RUN chmod 755 /usr/sbin/condor_master_wrapper
 
@@ -33,8 +37,11 @@ RUN chmod 755 /usr/sbin/condor_master_wrapper
 COPY supervisord.conf /etc/supervisord.conf
 
 COPY 10-htcondor.conf /etc/supervisord.d/
+COPY 30-prometheus.conf /etc/supervisord.d/
 
 COPY ospool-overview /opt/ospool-overview
+
+ADD prometheus.py /prometheus.py
 
 ADD healthy.sh /healthy.sh
 
