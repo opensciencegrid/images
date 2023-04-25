@@ -228,6 +228,8 @@ lateststablerelease=$(ls gfactory-condor-*.tar.gz | grep $platform | sed 's|gfac
 
 download_release_tarballs "feature"
 
+mkdir -p "/etc/gwms-factory/config.d"
+
 output_file=/etc/gwms-factory/config.d/01-condor-tarballs.xml
 echo "<glidein><condor_tarballs>" > $output_file
 for platform in $platforms; do
