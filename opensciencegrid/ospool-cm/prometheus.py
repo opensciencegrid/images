@@ -16,7 +16,8 @@ from prometheus_client import start_http_server, Gauge, Counter
 ospool_total_cpus_count = Gauge("ospool_total_cpus_count", "Total CPUs", ["resource_name"])
 ospool_claimed_cpus_count = Gauge("ospool_claimed_cpus_count", "Claimed CPUs", ["resource_name"])
 ospool_idle_retirement_cpus_count = Gauge("ospool_idle_retirement_cpus_count", "Idle CPUs due to retirement", ["resource_name"])
-ospool_idle_starvation_cpus_count = Gauge("ospool_idle_starvation_cpus_count", "Idle CPUs due to starvation", ["resource_name"])
+ospool_idle_memstarvation_cpus_count = Gauge("ospool_idle_memstarvation_cpus_count", "Idle CPUs due to starvation", ["resource_name"])
+ospool_idle_other_cpus_count = Gauge("ospool_idle_other_cpus_count", "Idle CPUs due to other reasons", ["resource_name"])
 
 # submitter metrics
 ospool_submitter_idle_jobs_count = Gauge("ospool_submitter_idle_jobs_count", "Submitter idle jobs", ["submitter", "schedd"])
@@ -49,31 +50,35 @@ def cm_resources_info(collector):
         ospool_total_cpus_count.labels(resource).set(total_cpus)
         
         # claimed cpus
-        total_cpus = 0
+        claimed_cpus = 0
         ads = collector.query(ad_type=htcondor.AdTypes.Startd,
                               constraint=f"GLIDEIN_ResourceName == \"{resource}\" && State != \"Unclaimed\"",
                               projection=["CPUs"])
         for ad in ads:
-            total_cpus += int(ad["CPUs"])
-        ospool_claimed_cpus_count.labels(resource).set(total_cpus)
+            claimed_cpus += int(ad["CPUs"])
+        ospool_claimed_cpus_count.labels(resource).set(claimed_cpus)
 
         # idle cpus due to retirement
-        total_cpus = 0
-        ads = collector.query(ad_type=htcondor.AdTypes.Startd,
-                              constraint=f"GLIDEIN_ResourceName == \"{resource}\" && PartitionableSlot == true && GLIDEIN_ToRetire > Time() && CPUs >= 1",
-                              projection=["CPUs"])
-        for ad in ads:
-            total_cpus += int(ad["CPUs"])
-        ospool_idle_retirement_cpus_count.labels(resource).set(total_cpus)
-
-        # idle cpus due to starvation
-        total_cpus = 0
+        idle_retirement_cpus = 0
         ads = collector.query(ad_type=htcondor.AdTypes.Startd,
                               constraint=f"GLIDEIN_ResourceName == \"{resource}\" && PartitionableSlot == true && GLIDEIN_ToRetire < Time() && CPUs >= 1",
                               projection=["CPUs"])
         for ad in ads:
-            total_cpus += int(ad["CPUs"])
-        ospool_idle_starvation_cpus_count.labels(resource).set(total_cpus)
+            idle_retirement_cpus += int(ad["CPUs"])
+        ospool_idle_retirement_cpus_count.labels(resource).set(idle_retirement_cpus)
+
+        # idle cpus due to memory starvation
+        idle_memstarvation_cpus = 0
+        ads = collector.query(ad_type=htcondor.AdTypes.Startd,
+                              constraint=f"GLIDEIN_ResourceName == \"{resource}\" && PartitionableSlot == true && GLIDEIN_ToRetire > Time() && CPUs >= 1 && Memory < 1000",
+                              projection=["CPUs"])
+        for ad in ads:
+            idle_memstarvation_cpus += int(ad["CPUs"])
+        ospool_idle_memstarvation_cpus_count.labels(resource).set(idle_memstarvation_cpus)
+
+        # jobs idle for other reasons
+        idle_other_cpus = total_cpus - claimed_cpus - idle_retirement_cpus - idle_memstarvation_cpus
+        ospool_idle_other_cpus_count.labels(resource).set(idle_other_cpus)
 
 
 def cm_submitters_info(collector):
@@ -114,6 +119,5 @@ if __name__ == '__main__':
         cm_resources_info(collector)
         cm_submitters_info(collector)
         time.sleep(60)
-
 
 
