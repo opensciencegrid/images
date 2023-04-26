@@ -28,7 +28,8 @@ RUN if [[ $BASE_YUM_REPO = release ]]; then \
     fi
 
 # basic config is a collector, so we can test
-RUN echo "DAEMON_LIST = MASTER, SHARED_PORT, COLLECTOR" >/etc/condor/config.d/05-ospool-base.config
+RUN echo "DAEMON_LIST = MASTER, COLLECTOR" >/etc/condor/config.d/05-ospool-base.config && \
+    echo "USE_SHARED_PORT = TRUE"         >>/etc/condor/config.d/05-ospool-base.config
 
 COPY condor_master_wrapper /usr/sbin/
 RUN chmod 755 /usr/sbin/condor_master_wrapper
