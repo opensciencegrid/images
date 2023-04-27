@@ -32,7 +32,7 @@ def cm_resources_info(collector):
     resources = {}
 
     ads = collector.query(ad_type=htcondor.AdTypes.Startd,
-                          constraint="True",
+                          constraint="!isUndefined(GLIDEIN_ResourceName)",
                           projection=["GLIDEIN_ResourceName"])
     for ad in ads:
         if ad["GLIDEIN_ResourceName"] not in resources:
