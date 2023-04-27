@@ -105,8 +105,9 @@ if __name__ == '__main__':
         ads = collector.query(ad_type=htcondor.AdTypes.Startd,
                               constraint="True",
                               projection=["Machine"])
-    except:
-        print("Unable to connect to HTCondor collector. Exiting...")
+    except Exception as err:
+        print("Unable to connect to HTCondor collector due to %s" % err)
+        print("Exiting...")
         time.sleep(20)
         sys.exit(1)
 
