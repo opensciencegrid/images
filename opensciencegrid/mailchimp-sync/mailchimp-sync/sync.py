@@ -125,7 +125,7 @@ def comanage_find_users(users):
     if resp.status_code != 200:
         raise ApiError('Cannot fetch names: {}'.format(resp.status_code))
     for n in resp.json()['Names']:
-        if n['PrimaryName'] == True:
+        if n.get('PrimaryName', False) == True:
             pid = n['Person']['Id']
             if pid in co_users:
                 co_users[pid]['firstname'] = n['Given']
