@@ -1,32 +1,43 @@
-#!/bin/sh
+#!/bin/bash
 
-FACTORY_XMLDIR="/etc/gwms-factory/config.d"
+AUTOCONF_FILE="/etc/osg-gfactory/OSG_autoconf/etc/config.yaml"
+FACTORY_XMLDIR="/etc/osg-gfactory/"
+AUTOCONF_YMLDIR="/etc/osg-gfactory/OSG_autoconf/"
 GENERATED_XMLFILE="10-hosted-ces.auto.xml"
+MYTMP=${TMPDIR:-/tmp}
 
-AUTOCONF_WORKDIR=$(mktemp -p /tmp -d OSG_autoconf.XXXXXXXXXX)
-trap 'rm -rf "$AUTOCONF_WORKDIR"' EXIT
+function pause {
+  read -n 1 -r -s -p $'Press a key to continue...\n'
+}
 
-cp /opt/osg-gfactory/OSG_autoconf/missing.yml $AUTOCONF_WORKDIR/missing.yml
-echo "{}" > $AUTOCONF_WORKDIR/OSG.yml
-cp /opt/osg-gfactory/OSG_autoconf/10-hosted-ces.auto.yml $AUTOCONF_WORKDIR/10-hosted-ces.auto.yml
+function isyes_or_exit {
+  while true; do
+    read -p "Press y to apply the changes, n to cancel (then Enter).. " yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+  done
+}
 
-cat > $AUTOCONF_WORKDIR/config.yaml << EOF
-OSG_COLLECTOR: "collector.opensciencegrid.org:9619"
-OSG_YAML: "$AUTOCONF_WORKDIR/OSG.yml" # Automatically generated
-OSG_DEFAULT: "/opt/osg-gfactory/OSG_autoconf/etc/default.yml" # Default file
-MISSING_YAML: "$AUTOCONF_WORKDIR/missing.yml"
-OSG_WHITELISTS: # Operator's whitelist/override files
-  - "$AUTOCONF_WORKDIR/10-hosted-ces.auto.yml"
-EOF
-
-pushd /tmp
-python3 /usr/bin/OSG_autoconf "$AUTOCONF_WORKDIR/config.yaml"
+cd $MYTMP
+OSG_autoconf "$AUTOCONF_FILE"
 if [ $? -ne 0 ]; then
-  echo "WARNING: OSG_autoconf failed to generate a new configuration."
-  exit $?
+  echo "OSG_autoconf exited with a code different than 0. Aborting."
+  pause
+  echo "Continuing with reconfigure and old xmls"
+  exit
 fi
-popd
 
-echo "Moving $AUTOCONF_WORKDIR/$GENERATED_XMLFILE to $FACTORY_XMLDIR/$GENERATED_XMLFILE"
-mv "$AUTOCONF_WORKDIR/$GENERATED_XMLFILE" "$FACTORY_XMLDIR/$GENERATED_XMLFILE"
+echo "Differences with current xml:"
+# Use gfdiff when it is fixed
+ret=1
+diff "$AUTOCONF_YMLDIR/$GENERATED_XMLFILE" "$FACTORY_XMLDIR/$GENERATED_XMLFILE"
+if [ $? -ne 0 ]; then
+  # Dont pause if no diff
+  isyes_or_exit
+fi
+echo "Moving $AUTOCONF_YMLDIR/$GENERATED_XMLFILE to $FACTORY_XMLDIR/$GENERATED_XMLFILE"
+mv "$AUTOCONF_YMLDIR/$GENERATED_XMLFILE" "$FACTORY_XMLDIR/$GENERATED_XMLFILE"
 echo "hostedce_gen.sh has finished"
