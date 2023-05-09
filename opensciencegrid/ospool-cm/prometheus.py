@@ -16,7 +16,8 @@ from prometheus_client import start_http_server, Gauge, Counter
 ospool_total_cpus_count = Gauge("ospool_total_cpus_count", "Total CPUs", ["resource_name"])
 ospool_claimed_cpus_count = Gauge("ospool_claimed_cpus_count", "Claimed CPUs", ["resource_name"])
 ospool_idle_retirement_cpus_count = Gauge("ospool_idle_retirement_cpus_count", "Idle CPUs due to retirement", ["resource_name"])
-ospool_idle_memstarvation_cpus_count = Gauge("ospool_idle_memstarvation_cpus_count", "Idle CPUs due to starvation", ["resource_name"])
+ospool_idle_memstarvation_cpus_count = Gauge("ospool_idle_memstarvation_cpus_count", "Idle CPUs due to memory starvation", ["resource_name"])
+ospool_idle_diskstarvation_cpus_count = Gauge("ospool_idle_diskstarvation_cpus_count", "Idle CPUs due to disk starvation", ["resource_name"])
 ospool_idle_other_cpus_count = Gauge("ospool_idle_other_cpus_count", "Idle CPUs due to other reasons", ["resource_name"])
 
 # submitter metrics
@@ -31,53 +32,61 @@ def cm_resources_info(collector):
     '''
     resources = {}
 
+    # These are the limits we use to determine if a pslot is being
+    # starved. Memory is in MB, Disk in KB.
+    mem_starvation = 2000
+    disk_starvation = 2000000
+
+    # iterate over all resources
     ads = collector.query(ad_type=htcondor.AdTypes.Startd,
                           constraint="!isUndefined(GLIDEIN_ResourceName)",
-                          projection=["GLIDEIN_ResourceName"])
+                          projection=["GLIDEIN_ResourceName", "CPUs", "State"])
     for ad in ads:
         if ad["GLIDEIN_ResourceName"] not in resources:
-            resources[ad["GLIDEIN_ResourceName"]] = {}
+            resources[ad["GLIDEIN_ResourceName"]] = {
+                "total_cpus": 0,
+                "claimed_cpus": 0,
+                "idle_retirement_cpus": 0,
+                "idle_memstarvation_cpus": 0,
+                "idle_diskstarvation_cpus": 0,
+                "idle_other_cpus": 0
+            }
+        r = resources[ad["GLIDEIN_ResourceName"]]
+        r["total_cpus"] += int(ad["CPUs"])
+        if ad["State"] != "Unclaimed":
+            r["claimed_cpus"] += int(ad["CPUs"])
 
+    # classify idle CPUs
+    ads = collector.query(ad_type=htcondor.AdTypes.Startd,
+                          constraint="!isUndefined(GLIDEIN_ResourceName) && PartitionableSlot == true && CPUs >= 1",
+                          projection=["GLIDEIN_ResourceName", "CPUs", "Disk", "Memory", "GLIDEIN_ToRetire"])
+    now = time.time()
+    for ad in ads:
+        r = resources[ad["GLIDEIN_ResourceName"]]
+        if "GLIDEIN_ToRetire" in ad and int(ad["GLIDEIN_ToRetire"]) < now:
+            r["idle_retirement_cpus"] += int(ad["CPUs"])
+        elif int(ad["Memory"]) < mem_starvation:
+            r["idle_memstarvation_cpus"] += int(ad["CPUs"])
+        elif int(ad["Disk"]) < disk_starvation:
+            r["idle_diskstarvation_cpus"] += int(ad["CPUs"])
+        else:
+            r["idle_other_cpus"] += int(ad["CPUs"])
+
+    # done collecting data, update Prometheus
     for resource, data in resources.items():
         
-        # total cpus
-        total_cpus = 0
-        ads = collector.query(ad_type=htcondor.AdTypes.Startd,
-                              constraint=f"GLIDEIN_ResourceName == \"{resource}\"",
-                              projection=["CPUs"])
-        for ad in ads:
-            total_cpus += int(ad["CPUs"])
-        ospool_total_cpus_count.labels(resource).set(total_cpus)
-        
-        # claimed cpus
-        claimed_cpus = 0
-        ads = collector.query(ad_type=htcondor.AdTypes.Startd,
-                              constraint=f"GLIDEIN_ResourceName == \"{resource}\" && State != \"Unclaimed\"",
-                              projection=["CPUs"])
-        for ad in ads:
-            claimed_cpus += int(ad["CPUs"])
-        ospool_claimed_cpus_count.labels(resource).set(claimed_cpus)
+        ospool_total_cpus_count.labels(resource).set(data["total_cpus"])
+        ospool_claimed_cpus_count.labels(resource).set(data["claimed_cpus"])
 
-        # idle cpus due to retirement
-        idle_retirement_cpus = 0
-        ads = collector.query(ad_type=htcondor.AdTypes.Startd,
-                              constraint=f"GLIDEIN_ResourceName == \"{resource}\" && PartitionableSlot == true && GLIDEIN_ToRetire < Time() && CPUs >= 1",
-                              projection=["CPUs"])
-        for ad in ads:
-            idle_retirement_cpus += int(ad["CPUs"])
-        ospool_idle_retirement_cpus_count.labels(resource).set(idle_retirement_cpus)
-
-        # idle cpus due to memory starvation
-        idle_memstarvation_cpus = 0
-        ads = collector.query(ad_type=htcondor.AdTypes.Startd,
-                              constraint=f"GLIDEIN_ResourceName == \"{resource}\" && PartitionableSlot == true && GLIDEIN_ToRetire > Time() && CPUs >= 1 && Memory < 1000",
-                              projection=["CPUs"])
-        for ad in ads:
-            idle_memstarvation_cpus += int(ad["CPUs"])
-        ospool_idle_memstarvation_cpus_count.labels(resource).set(idle_memstarvation_cpus)
+        ospool_idle_retirement_cpus_count.labels(resource).set(data["idle_retirement_cpus"])
+        ospool_idle_memstarvation_cpus_count.labels(resource).set(data["idle_memstarvation_cpus"])
+        ospool_idle_diskstarvation_cpus_count.labels(resource).set(data["idle_diskstarvation_cpus"])
 
         # jobs idle for other reasons
-        idle_other_cpus = total_cpus - claimed_cpus - idle_retirement_cpus - idle_memstarvation_cpus
+        idle_other_cpus = data["total_cpus"] - data["claimed_cpus"] \
+                          - data["idle_retirement_cpus"] \
+                          - data["idle_memstarvation_cpus"] \
+                          - data["idle_diskstarvation_cpus"]
         ospool_idle_other_cpus_count.labels(resource).set(idle_other_cpus)
 
 
@@ -119,6 +128,6 @@ if __name__ == '__main__':
         # can we determine if we are in ccb or cm mode?
         cm_resources_info(collector)
         cm_submitters_info(collector)
-        time.sleep(60)
+        time.sleep(20)
 
 
