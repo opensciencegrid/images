@@ -11,7 +11,11 @@ RUN useradd feglow
 
 # Note: EL7 and EL8 PyYAML RPM version is too old to include yaml.FullLoader (v5.1+)
 #       for glideinwms/lib/config_util.py
-RUN    yum -y install glideinwms-factory vo-client git \
+RUN    yum -y install \
+         git \
+         glideinwms-factory \
+         vo-client \
+         vim-enhanced \
     && pip3 install --no-cache-dir PyYAML \
     && rm -rf /var/cache/yum/*
 

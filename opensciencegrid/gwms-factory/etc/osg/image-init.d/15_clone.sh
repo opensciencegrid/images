@@ -1,29 +1,35 @@
 #!/bin/bash
 # This script clones the glideinWMS factory repos into /opt/.
-# It looks for the repo and branch names into the ENV VARS.
-# The pattern GWMS_FACTORY_REPO_[0-9]+ specifies the repo and
-# GWMS_FACTORY_BRANCH_[0-9]+ specifies the branch. If the later is not found
-# the default "master" branch is used instead
-
-pushd /opt/
+# It looks for the repo and branch names in the ENV VARS.
+# - GWMS_FACTORY_REPO_[0-9]+    specifies the repo (required)
+# - GWMS_FACTORY_DIR_[0-9]+     specifies the output directory (required)
+# - GWMS_FACTORY_BRANCH_[0-9]+  specifies the branch (optional)
 
 echo "Cloning repos..."
-for i in `printenv | grep GWMS_FACTORY_REPO`;
+# Loop over GWMS_FACTORY_REPO_* envvars
+for i in ${!GWMS_FACTORY_REPO_*};
 do
-        REPO=`echo $i | awk -F "=" '{print $2}'`;
-        INDEX=`echo $i | awk -F "=" '{print $1}' | grep  -oEi '[0-9]+'`;
-        echo "Cloning repo: "$REPO;
+        REPO=${!i}
+        INDEX=`echo $i | grep -oEi '[0-9]+'`;
+
         BRANCH_VAR="GWMS_FACTORY_BRANCH_"$INDEX;
-        BRANCH=`printenv | grep "$BRANCH_VAR" | awk -F "=" '{print $2}'`
+        DIR_VAR="GWMS_FACTORY_DIR_"$INDEX;
+
+        BRANCH=${!BRANCH_VAR}
+        DIR=${!DIR_VAR}
+
+        if [ -z "$DIR" ]
+        then
+                echo "Variable $DIR_VAR is required"
+                continue
+        fi
+
         if [ -z "$BRANCH" ]
         then
-                echo "Branch not set, using: 'master'"
-                git clone --single-branch --branch "master" "$REPO";
+                # Using default branch
+                ( set -x ; git clone --quiet --single-branch "$REPO" "$DIR" )
         else
-                echo "Branch set to : "$BRANCH;
-                git clone --single-branch --branch "$BRANCH" "$REPO";
+                ( set -x ; git clone --quiet --single-branch --branch "$BRANCH" "$REPO" "$DIR" )
         fi;
 done
 echo "Done cloning repos..."
-
-popd
