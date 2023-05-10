@@ -12,7 +12,7 @@ fi
 
 mkdir -p "$target_dir"
 
-for fname in "$config_dir"/*.xml ; do
+for fname in "$config_dir"/*.auto.xml ; do
 
    base_fname=$(basename "$fname")
    ln -sf "$fname" "$target_dir"/"$base_fname"
