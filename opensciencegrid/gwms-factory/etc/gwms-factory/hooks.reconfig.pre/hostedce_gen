@@ -6,26 +6,10 @@ AUTOCONF_YMLDIR="/etc/osg-gfactory/OSG_autoconf/"
 GENERATED_XMLFILE="10-hosted-ces.auto.xml"
 MYTMP=${TMPDIR:-/tmp}
 
-function pause {
-  read -n 1 -r -s -p $'Press a key to continue...\n'
-}
-
-function isyes_or_exit {
-  while true; do
-    read -p "Press y to apply the changes, n to cancel (then Enter).. " yn
-    case $yn in
-        [Yy]* ) break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-  done
-}
-
 cd $MYTMP
 OSG_autoconf "$AUTOCONF_FILE"
 if [ $? -ne 0 ]; then
   echo "OSG_autoconf exited with a code different than 0. Aborting."
-  pause
   echo "Continuing with reconfigure and old xmls"
   exit
 fi
@@ -35,9 +19,8 @@ echo "Differences with current xml:"
 ret=1
 diff "$AUTOCONF_YMLDIR/$GENERATED_XMLFILE" "$FACTORY_XMLDIR/$GENERATED_XMLFILE"
 if [ $? -ne 0 ]; then
-  # Dont pause if no diff
-  #isyes_or_exit
+  # Replace only if different
+  echo "Moving $AUTOCONF_YMLDIR/$GENERATED_XMLFILE to $FACTORY_XMLDIR/$GENERATED_XMLFILE"
+  mv "$AUTOCONF_YMLDIR/$GENERATED_XMLFILE" "$FACTORY_XMLDIR/$GENERATED_XMLFILE"
 fi
-echo "Moving $AUTOCONF_YMLDIR/$GENERATED_XMLFILE to $FACTORY_XMLDIR/$GENERATED_XMLFILE"
-mv "$AUTOCONF_YMLDIR/$GENERATED_XMLFILE" "$FACTORY_XMLDIR/$GENERATED_XMLFILE"
 echo "hostedce_gen.sh has finished"
