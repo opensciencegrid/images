@@ -31,5 +31,8 @@ do
         else
                 ( set -x ; git clone --quiet --single-branch --branch "$BRANCH" "$REPO" "$DIR" )
         fi;
+
+	# Ensure output directory is owned by factory user
+	chown --recursive gfactory: "$DIR"
 done
 echo "Done cloning repos..."
