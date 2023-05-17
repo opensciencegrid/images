@@ -19,6 +19,6 @@ mkdir -p "$target_dir"
 #
 #done
 
-ln -sf $(config_dir}/10-hosted-ces.auto.xml ${target_dir}/10-hosted-ces.auto.xml
+ln -sf ${config_dir}/10-hosted-ces.auto.xml ${target_dir}/10-hosted-ces.auto.xml
 
 echo "Images linked OK from $config_dir to $target_dir"
