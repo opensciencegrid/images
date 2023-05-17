@@ -12,11 +12,13 @@ fi
 
 mkdir -p "$target_dir"
 
-for fname in "$config_dir"/*.auto.xml ; do
+#for fname in "$config_dir"/*.xml ; do
+#
+#   base_fname=$(basename "$fname")
+#   ln -sf "$fname" "$target_dir"/"$base_fname"
+#
+#done
 
-   base_fname=$(basename "$fname")
-   ln -sf "$fname" "$target_dir"/"$base_fname"
-
-done
+ln -sf $(config_dir}/10-hosted-ces.auto.xml ${target_dir}/10-hosted-ces.auto.xml
 
 echo "Images linked OK from $config_dir to $target_dir"
