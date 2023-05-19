@@ -1,6 +1,10 @@
 #!/bin/sh
 
 mkdir -p /var/lib/gwms-factory/condor
+
+# just exit early since this script will be replaced
+exit 0
+
 pushd /var/lib/gwms-factory/condor/
 if [ $? -ne 0 ]; then
     echo "Unable to chdir to /var/lib/gwms-factory/condor"
