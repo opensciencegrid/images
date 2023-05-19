@@ -3,7 +3,7 @@
 mkdir -p /var/lib/gwms-factory/condor
 
 # just exit early since this script will be replaced
-exit 0
+return
 
 pushd /var/lib/gwms-factory/condor/
 if [ $? -ne 0 ]; then
