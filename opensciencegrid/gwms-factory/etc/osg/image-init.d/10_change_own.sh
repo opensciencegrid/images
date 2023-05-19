@@ -3,6 +3,7 @@
 cp /etc/gwms-factory/glideinWMS.xml.base /etc/gwms-factory/glideinWMS.xml
 chown gfactory: /etc/gwms-factory/glideinWMS.xml
 
+mkdir -p /etc/gwms-factory/config.d
 chown gfactory: /etc/gwms-factory/config.d
 
 mkdir -p /var/lib/condor/{schedd_glideins2,schedd_glideins3,schedd_glideins4,schedd_glideins5}/spool
