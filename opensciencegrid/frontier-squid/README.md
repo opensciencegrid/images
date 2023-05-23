@@ -9,12 +9,27 @@ The image is built according to the
 Usage
 -----
 
-To run with the defaults:
+To run with the defaults on docker or podman:
 
 ```bash
 docker run --rm --name frontier-squid \
   -p 3128:3128 opensciencegrid/frontier-squid:3.6-release
 ```
+
+Running docker or podman with a `-u` option to start as a non-root user
+is also supported.
+
+To run with the default settings on apptainer:
+
+```bash
+apptainer run --writable-tmpfs \
+  -B /scratch/squid/cache:/var/cache/squid \
+  -B /scratch/squid/log:/var/log/squid \
+  docker://opensciencegrid/frontier-squid:3.6-release
+```
+
+Replace `/scratch/squid` with a path to wherever you have a filesystem
+large enough to hold the squid cache and logs.
 
 See [our documentation](https://opensciencegrid.org/technology/policy/container-release/#tags) for details of our docker
 image tags.
