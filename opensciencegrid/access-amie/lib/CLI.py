@@ -107,11 +107,10 @@ def project_created(args):
 
     # find the parked packet
     rpc = None
-    for packet in amie.load_packets('incoming', 'parked'):
+    for packet in amie.load_packets('incoming', 'parked', ptype='request_project_create'):
         p = 'TG-{}'.format(packet.GrantNumber)
         if p == args.project:
             rpc = packet
-            break
 
     if rpc is None:
         raise RuntimeError('Unable to find a corresponding rpc packet in incoming/parked')

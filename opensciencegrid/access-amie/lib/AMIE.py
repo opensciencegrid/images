@@ -2,6 +2,7 @@
 
 import datetime
 import glob
+import json
 import logging
 import os
 
@@ -51,13 +52,16 @@ class AMIE:
             return True
         return False
 
-    def load_packets(self, direction, subdir):
+    def load_packets(self, direction, subdir, ptype=None):
         state_dir = self.config['main']['state_dir']
         results = []
-        for fname in glob.glob('{}/xfer/{}/{}/*.json'.format(state_dir, direction, subdir)):
+        for fname in sorted(glob.glob('{}/xfer/{}/{}/*.json'.format(state_dir, direction, subdir))):
             with open(fname) as f:
-                # packet = RequestProjectCreate().from_json(f.read())
-                packet = Packet().from_json(f.read())
+                fdata = json.load(f)
+            # only include packets of specific types
+            if ptype and fdata['type'] != ptype:
+                continue
+            packet = Packet().from_dict(fdata)
             results.append(packet)
         return results
 
