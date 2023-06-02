@@ -9,7 +9,7 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 ARG BASE_YUM_REPO=release
 
 RUN yum update -y && \
-    yum install -y oidc-agent && \
+    yum install -y oidc-agent-cli && \
     yum clean all && \
     rm -rf /var/cache/yum/*
     
