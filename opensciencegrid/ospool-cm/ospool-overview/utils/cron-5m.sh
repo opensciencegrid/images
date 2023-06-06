@@ -13,6 +13,8 @@ if [ -e .cron.lock ]; then
 fi
 touch .cron.lock
 
+export _CONDOR_COLLECTOR_HOST=cm-1.ospool.osg-htc.org
+
 mkdir -p data
 
 ./utils/condor-stats
