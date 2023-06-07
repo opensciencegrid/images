@@ -7,7 +7,7 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
 
-RUN yum -y upgrade && \
+RUN yum -y distro-sync && \
     yum -y install \
       bc \
       git \
@@ -39,6 +39,8 @@ COPY supervisord.conf /etc/supervisord.conf
 
 COPY 10-htcondor.conf /etc/supervisord.d/
 COPY 30-prometheus.conf /etc/supervisord.d/
+
+COPY 10-rotate-logs /etc/osg/image-init.d/
 
 COPY ospool-overview /opt/ospool-overview
 

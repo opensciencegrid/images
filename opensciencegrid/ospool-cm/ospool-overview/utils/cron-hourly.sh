@@ -13,6 +13,8 @@ if [ -e .cron-hourly.lock ]; then
 fi
 touch .cron-hourly.lock
 
+export _CONDOR_COLLECTOR_HOST=cm-1.ospool.osg-htc.org
+
 mkdir -p data
 
 # stats

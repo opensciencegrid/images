@@ -34,8 +34,8 @@ def cm_resources_info(collector):
 
     # These are the limits we use to determine if a pslot is being
     # starved. Memory is in MB, Disk in KB.
-    mem_starvation = 2000
-    disk_starvation = 2000000
+    mem_starvation = 5000
+    disk_starvation = 5000000
 
     # iterate over all resources
     ads = collector.query(ad_type=htcondor.AdTypes.Startd,
