@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: make date tag
         id: mkdatetag
-        run: echo “dtag=$(date +%Y%m%d-%H%M)” >> $GITHUB_OUTPUT
+        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUPUT
 
   build-image-list:
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
           # otherwise GHA will throw an error about an empty matrix
           # vector in subsequent steps
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
-          echo “json=$image_json” >> $GITHUB_OUTPUT
+          echo "json=$image_json" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
