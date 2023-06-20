@@ -2,14 +2,13 @@
 
 import re
 import htcondor
-from pprint import pprint
 
-
-def update_user(ad):
+def update_user(negotiator, ad):
     current_factor = int(ad["PriorityFactor"])
     new_factor = current_factor
 
-    # ap20/21 migration
+    # ap20/21 migration - users on the old access point
+    # will have lower priority to incentivize migration
     if re.search("login0[45].osgconnect.net", ad["Name"]):
         new_factor = 500
 
@@ -23,5 +22,9 @@ negotiator = htcondor.Negotiator()
 prios = negotiator.getPriorities()
 
 for ad in negotiator.getPriorities():
-    update_user(ad)
+    try:
+        update_user(negotiator, ad)
+    except:
+        # ignore individual exceptions - we want to try all users
+        pass
 
