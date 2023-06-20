@@ -2,3 +2,7 @@
 # prios
  */5 * * * *  root  /opt/ospool/update-prios >/dev/null 2>&1
 
+# web interface
+ */5 * * * *  root  cd /shared/web/overview && ./utils/cron-5m.sh >/dev/null 2>&1
+  0  * * * *  root  cd /shared/web/overview && ./utils/cron-hourly.sh >/dev/null 2>&1
+
