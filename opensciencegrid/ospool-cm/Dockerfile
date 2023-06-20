@@ -42,6 +42,10 @@ COPY 30-prometheus.conf /etc/supervisord.d/
 
 COPY 10-rotate-logs /etc/osg/image-init.d/
 
+COPY ospool.cron /etc/cron.d/ospool
+
+COPY /opt/ospool /opt/
+
 COPY ospool-overview /opt/ospool-overview
 
 ADD prometheus.py /prometheus.py

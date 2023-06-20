@@ -1,0 +1,27 @@
+#!/bin/python3
+
+import re
+import htcondor
+from pprint import pprint
+
+
+def update_user(ad):
+    current_factor = int(ad["PriorityFactor"])
+    new_factor = current_factor
+
+    # ap20/21 migration
+    if re.search("login0[45].osgconnect.net", ad["Name"]):
+        new_factor = 500
+
+    if new_factor != current_factor:
+        user = ad["Name"]
+        print(f"Updating {user} from {current_factor} to {new_factor}")
+        negotiator.setFactor(user, new_factor)
+
+
+negotiator = htcondor.Negotiator()
+prios = negotiator.getPriorities()
+
+for ad in negotiator.getPriorities():
+    update_user(ad)
+
