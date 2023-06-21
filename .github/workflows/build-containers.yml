@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: make date tag
         id: mkdatetag
-        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUPUT
+        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
 
   build-image-list:
     runs-on: ubuntu-latest
