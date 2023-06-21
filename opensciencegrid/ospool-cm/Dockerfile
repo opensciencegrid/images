@@ -44,7 +44,7 @@ COPY 10-rotate-logs /etc/osg/image-init.d/
 
 COPY ospool.cron /etc/cron.d/ospool
 
-COPY /opt/ospool /opt/
+ADD opt/ospool /opt/ospool
 
 COPY ospool-overview /opt/ospool-overview
 

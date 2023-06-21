@@ -10,7 +10,7 @@ def update_user(negotiator, ad):
     # ap20/21 migration - users on the old access point
     # will have lower priority to incentivize migration
     if re.search("login0[45].osgconnect.net", ad["Name"]):
-        new_factor = 500
+        new_factor = 2000
 
     if new_factor != current_factor:
         user = ad["Name"]
