@@ -8,6 +8,7 @@ RUN groupadd -o -g 996 gfactory && useradd -o -u 996 -g 996 -s /bin/sh gfactory
 
 # Add frontends
 RUN useradd feglow
+RUN useradd feosgospool
 
 # Note: EL7 and EL8 PyYAML RPM version is too old to include yaml.FullLoader (v5.1+)
 #       for glideinwms/lib/config_util.py
