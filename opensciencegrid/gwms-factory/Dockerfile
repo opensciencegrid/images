@@ -21,3 +21,5 @@ RUN    yum -y install \
     && rm -rf /var/cache/yum/*
 
 ADD etc /etc
+ADD usr /usr
+ADD http://mmascher.web.cern.ch/mmascher/OSG_autoconf /tmp
