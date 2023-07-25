@@ -15,6 +15,7 @@ RUN useradd feosgospool
 RUN    yum -y install \
          git \
          glideinwms-factory \
+         msmtp \
          vo-client \
          vim-enhanced \
     && pip3 install --no-cache-dir PyYAML \
