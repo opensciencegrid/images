@@ -14,7 +14,9 @@
 #chown gfactory: ${autoconf_dir}/OSG.yml
 
 cp /etc/gwms-factory/OSG_autoconf.yaml.base /etc/gwms-factory/OSG_autoconf.yaml
-#chown gfactory: /etc/gwms-factory/OSG_autoconf.yaml
+
+mkdir /var/lib/gwms-factory/OSG_autoconf
+chown gfactory:gfactory /var/lib/gwms-factory/OSG_autoconf
 
 #curl -sSf -o ${autoconf_dir}/missing.yml ${missing_url}
 #if [ $? -ne 0 ];then
