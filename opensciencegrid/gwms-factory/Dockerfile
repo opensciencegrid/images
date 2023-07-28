@@ -23,4 +23,3 @@ RUN    yum -y install \
 
 ADD etc /etc
 ADD usr /usr
-ADD http://mmascher.web.cern.ch/mmascher/OSG_autoconf /tmp
