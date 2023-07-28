@@ -46,6 +46,7 @@ COPY start-frontier-squid.sh /usr/sbin/
 COPY squid-customize.sh /etc/squid/customize.sh
 COPY customize.d/* /etc/squid/customize.d/
 COPY supervisor-frontier-squid.conf /etc/supervisord.d/40-frontier-squid.conf
+COPY 10-chown-mount-points.sh /etc/osg/image-init.d/
 # For OKD, which runs as non-root user and root group
 RUN chgrp root /run/squid /etc/squid /var/cache/squid /var/log/squid
 RUN chmod g+w /run/squid /etc/squid /var/cache/squid /var/log/squid
