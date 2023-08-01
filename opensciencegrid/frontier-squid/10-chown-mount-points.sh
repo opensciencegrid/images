@@ -9,7 +9,7 @@ GROUP=root
 EXIT_CODE=13
 
 for squid_dir in ${SQUID_DIRS[@]}; do
-  if ! find $squid_dir | xargs chown $OWNER:$GROUP ; then 
+  if ! chown -R $OWNER:$GROUP $squid_dir; then 
     echo "Error: Unable to set ownership of mounted $squid_dir to $OWNER:$GROUP. frontier-squid is unable to run."
     exit $EXIT_CODE
   fi
