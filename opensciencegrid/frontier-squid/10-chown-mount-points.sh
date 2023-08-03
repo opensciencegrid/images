@@ -8,9 +8,23 @@ OWNER=squid
 GROUP=root
 EXIT_CODE=13
 
-for squid_dir in ${SQUID_DIRS[@]}; do
-  if ! chown -R $OWNER:$GROUP $squid_dir; then 
+change_dir_permissions() {
+  squid_dir=$1
+  # Only chown if the top level directory has incorrect permissions
+  if [ $(stat -c %U:%G $squid_dir) == "$OWNER:$GROUP" ] ; then
+    return
+  fi
+
+  # Recursively chown the given directory, exiting on failure
+  if ! chown -R "$OWNER:$GROUP" "$squid_dir" ; then 
     echo "Error: Unable to set ownership of mounted $squid_dir to $OWNER:$GROUP. frontier-squid is unable to run."
     exit $EXIT_CODE
   fi
-done
+}
+
+# Only attempt to chown if the script is being run as root
+if [[ $(id -u) -eq 0 ]] ; then
+  for dir in ${SQUID_DIRS[@]}; do
+    change_dir_permissions $dir
+  done
+fi
