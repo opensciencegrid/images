@@ -1,0 +1,10 @@
+# GitHub code owners file for setting ownership of parts of the repo.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+/opensciencegrid/koji-builder           @opensciencegrid/technology-team
+/opensciencegrid/osgconnect-report      @rynge
+/opensciencegrid/ospool-cm              @rynge
+/opensciencegrid/ospool-display         @rynge
+/opensciencegrid/svn-to-git             @jthiltges
+/opensciencegrid/vo-frontend            @rynge
+/opensciencegrid/xrootd-standalone      @opensciencegrid/technology-team
