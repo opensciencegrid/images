@@ -1,6 +1,5 @@
 # GitHub code owners file for setting ownership of parts of the repo.
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
-# There is a 3 MB (3145728 B) file size limit - run `wc -c CODEOWNERS` to check size.
 
 /opensciencegrid/koji-builder           @matyasselmeci
 /opensciencegrid/osgconnect-report      @rynge
