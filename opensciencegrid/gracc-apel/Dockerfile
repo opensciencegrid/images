@@ -12,7 +12,7 @@ RUN yum -y install python-dirq
 
 # install ca-policy-egi-core
 RUN yum -y remove osg-ca-certs
-RUN curl -so /etc/yum.repos.d/EGI-trustanchors.repo https://repository.egi.eu/sw/production/cas/1/current/repo-files/EGI-trustanchors.repo && \
+RUN curl -so /etc/yum.repos.d/EGI-trustanchors.repo https://repository.egi.eu/sw/production/cas/1/current/repo-files/egi-trustanchors.repo && \
   yum -y install ca-policy-egi-core
 
 
