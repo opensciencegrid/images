@@ -51,4 +51,5 @@ COPY ospool-overview /opt/ospool-overview
 ADD prometheus.py /prometheus.py
 
 ADD healthy.sh /healthy.sh
+ADD --chmod=0755 count_errors_since.py /bin/count_errors_since.py
 
