@@ -20,18 +20,6 @@
         </ul>
         </p>
 
-        <p>
-        <b>Submit Hosts</b>
-        <br>
-        <ul>
-          <li><a href="login04.php">login04.osgconnect.net</a></li>
-          <li><a href="login05.php">login05.osgconnect.net</a></li>
-          <li><a href="veritas.php">login.veritas.ci-connect.net</a></li>
-          <li><a href="xenon.php">login.xenon.ci-connect.net</a></li>
-          <li><a href="uchicago.php">login.ci-connect.uchicago.edu</a></li>
-        </ul>
-        </p>
-
       </div>
       <div id="main">
  
