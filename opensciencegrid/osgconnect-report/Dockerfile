@@ -1,7 +1,7 @@
 ARG BASE_YUM_REPO=release
 ARG BASE_OSG_SERIES=3.6
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el9-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
