@@ -7,16 +7,11 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-al8-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
-RUN : \
-&& yum install -y --enablerepo=devops-itb koji-builder \
-&& yum clean all \
-&& rm -rf /var/cache/yum/* \
-&& :
+RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
+ yum install -y --enablerepo=devops-itb 'koji-builder >= 1.21.1'
 
 COPY kojid-supervisord.conf  /etc/supervisord.d/kojid.conf
 COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
 RUN touch /var/log/kojid.log
-COPY healthcheck /sbin/healthcheck
-RUN chmod +x /sbin/healthcheck
-COPY cleanup /etc/cron.hourly
-RUN chmod +x /etc/cron.hourly/cleanup
+COPY --chmod=0755 healthcheck /sbin/healthcheck
+COPY --chmod=0755 cleanup /etc/cron.hourly
