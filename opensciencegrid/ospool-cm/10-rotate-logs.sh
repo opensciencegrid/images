@@ -13,7 +13,7 @@ mkdir -p $TARGET_DIR
 find . -maxdepth 1 -type f -exec mv {} $TARGET_DIR/ \;
 
 # only keep the last N set of saved logs
-for OLD in $(ls -d -t save-*| tail -n +20); do
+for OLD in $(ls -d -t save-*| tail -n +2); do
     rm -rf $OLD
 done
 
