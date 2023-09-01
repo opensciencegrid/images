@@ -13,3 +13,6 @@ mkdir -p /var/lib/gwms-factory/{client-proxies,creation,server-credentials,web-a
 chown gfactory: /var/lib/gwms-factory/{client-proxies,creation,server-credentials,web-area,web-base,work-dir}
 
 mkdir -p /var/lib/gwms-factory/condor
+
+mkdir -p /var/log/gwms-factory/client
+chown gfactory:gfactory /var/log/gwms-factory/client

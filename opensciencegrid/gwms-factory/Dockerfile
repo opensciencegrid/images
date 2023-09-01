@@ -19,3 +19,4 @@ RUN    yum -y install \
 
 ADD etc /etc
 ADD usr /usr
+ADD var /var
