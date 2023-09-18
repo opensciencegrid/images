@@ -12,6 +12,25 @@ RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
 
 COPY kojid-supervisord.conf  /etc/supervisord.d/kojid.conf
 COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
+COPY --chmod=0755 create-config.sh /etc/osg/image-init.d/create-config.sh
 RUN touch /var/log/kojid.log
 COPY --chmod=0755 healthcheck /sbin/healthcheck
 COPY --chmod=0755 cleanup /etc/cron.hourly
+
+# Required environment variables
+# ------------------------------
+# The hostname of the koji-hub XMLRPC server
+ENV KOJI_HUB=
+# Optional environment variables
+# ------------------------------
+# The username of the kojid (will use the container FQDN if not specified)
+ENV KOJID_USER=
+# Maximum jobs to run at one time
+ENV KOJID_MAXJOBS=10
+# Minimum free megabytes of disk before starting a new job
+ENV KOJID_MINSPACE=4096
+# Seconds before killing possibly hung rpm build
+ENV KOJID_RPMBUILD_TIMEOUT=43200
+# Work directory to do builds in
+ENV KOJID_WORKDIR=/var/lib/koji
+
