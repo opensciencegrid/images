@@ -21,10 +21,10 @@ COPY --chmod=0755 cleanup /etc/cron.hourly
 # ------------------------------
 # The hostname of the koji-hub XMLRPC server
 ENV KOJI_HUB=
+# The username of the kojid; needs to match the commonName of the cert/key
+ENV KOJID_USER=
 # Optional environment variables
 # ------------------------------
-# The username of the kojid (will use the container FQDN if not specified)
-ENV KOJID_USER=
 # Maximum jobs to run at one time
 ENV KOJID_MAXJOBS=10
 # Minimum free megabytes of disk before starting a new job
@@ -33,4 +33,5 @@ ENV KOJID_MINSPACE=4096
 ENV KOJID_RPMBUILD_TIMEOUT=43200
 # Work directory to do builds in
 ENV KOJID_WORKDIR=/var/lib/koji
-
+# SSL cert/key file for authentication; the CN must match KOJID_USER
+ENV KOJID_CERTKEY=/etc/pki/tls/private/kojid.pem
