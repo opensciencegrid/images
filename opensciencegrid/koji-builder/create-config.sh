@@ -8,18 +8,15 @@ fail () {
     exit "$ret"
 }
 
+set -u
 [[ $KOJI_HUB ]] || fail 2 KOJI_HUB not provided
-
-if [[ ! $KOJID_USER ]]; then
-    echo >&2 "KOJID_USER not provided; using hostname $(hostname -f)"
-    KOJID_USER=$(hostname -f)
-fi
-[[ -f $KOJID_CERT ]] || fail 3 "KOJID_CERT $KOJID_CERT missing or not a file"
+[[ $KOJID_USER ]] || fail 2 KOJID_USER not provided
+[[ -f $KOJID_CERTKEY ]] || fail 3 "KOJID_CERTKEY $KOJID_CERTKEY missing or not a file"
 [[ -d $KOJID_WORKDIR ]] || fail 4 "KOJID_WORKDIR $KOJID_WORKDIR missing or not a directory"
 
-commonName=$(openssl x509 -in "$KOJID_CERT" -noout -subject -nameopt multiline | awk -F' = ' '/commonName/ {print $2;exit}')
+commonName=$(openssl x509 -in "$KOJID_CERTKEY" -noout -subject -nameopt multiline | awk -F' = ' '/commonName/ {print $2;exit}')
 if [[ $commonName != "$KOJID_USER" ]]; then
-    fail 5 "KOJID_CERT commonName $commonName does not match KOJID_USER $KOJID_USER"
+    fail 5 "KOJID_CERTKEY commonName $commonName does not match KOJID_USER $KOJID_USER"
 fi
 
 tmp_conf=$(mktemp -t kojid-conf-XXXXXX)
@@ -44,8 +41,7 @@ allowed_scms=
     github.com:/unlhcc/hcc-packaging.git:no:fetch-sources,.
     github.com:/opensciencegrid/Software-Redhat.git:no:fetch-sources,.
 
-cert = $KOJID_CERT
-ca = /etc/pki/tls/certs/koji_ca_cert.crt
+cert = $KOJID_CERTKEY
 serverca = /etc/pki/tls/certs/ca-bundle.crt
 
 TLDR
