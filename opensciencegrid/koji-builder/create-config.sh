@@ -29,10 +29,8 @@ maxjobs = $KOJID_MAXJOBS
 minspace = $KOJID_MINSPACE
 rpmbuild_timeout = $KOJID_RPMBUILD_TIMEOUT
 
-srv = $KOJI_HUB
-
-server = https://%(srv)s/kojihub
-topurl = https://%(srv)s/kojifiles
+server = https://${KOJI_HUB}/kojihub
+topurl = https://${KOJI_HUB}/kojifiles
 
 workdir = $KOJID_WORKDIR
 
