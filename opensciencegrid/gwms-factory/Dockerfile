@@ -10,10 +10,10 @@ RUN groupadd -o -g 996 gfactory && useradd -o -u 996 -g 996 -s /bin/sh gfactory
 #       for glideinwms/lib/config_util.py
 RUN    yum -y install \
          git \
+         glideinwms-factory \
          msmtp \
          vo-client \
          vim-enhanced \
-    && yum -y install --enablerepo=osg-testing glideinwms-factory \
     && pip3 install --no-cache-dir PyYAML \
     && rm -rf /var/cache/yum/*
 
