@@ -1,7 +1,8 @@
-ARG BASE_OSG_SERIES=3.6
 ARG BASE_OS=el9
+ARG BASE_OSG_SERIES=3.6
+ARG BASE_YUM_REPO=release
 
-FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-release
+FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 
 # OSG RPMs
 RUN \

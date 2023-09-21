@@ -1,6 +1,6 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=3.6
 ARG BASE_OS=el9
+ARG BASE_OSG_SERIES=3.6
 ARG BASE_YUM_REPO=release
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO

@@ -1,6 +1,8 @@
 ARG BASE_OS=el9
+ARG BASE_OSG_SERIES=23
+ARG BASE_YUM_REPO=release
 
-FROM opensciencegrid/software-base:3.6-$BASE_OS-release
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Create the frontend user with a fixed GID/UID
