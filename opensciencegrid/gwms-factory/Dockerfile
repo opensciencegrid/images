@@ -1,4 +1,6 @@
-FROM opensciencegrid/software-base:3.6-el7-release
+ARG BASE_OS=el9
+
+FROM opensciencegrid/software-base:3.6-$BASE_OS-release
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Create the frontend user with a fixed GID/UID

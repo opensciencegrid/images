@@ -1,12 +1,16 @@
 ARG BASE_OSG_SERIES=3.6
+ARG BASE_OS=el9
 
-FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-el7-release
+FROM hub.opensciencegrid.org/opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-release
+
+# Reinitiate vars that have gone out of scope
+ARG BASE_OS
 
 # install dependencies
 RUN yum -y install python3 python3-pip && \
   pip3 install elasticsearch-dsl && \
   pip3 install argo-ams-library
-RUN yum -y install http://rpm-repo.argo.grnet.gr/ARGO/devel/centos7/python-argo-ams-library-0.5.5-20210415071520.ff0c536.el7.noarch.rpm
+RUN yum -y install http://rpm-repo.argo.grnet.gr/ARGO/devel/centos7/python-argo-ams-library-0.5.5-20210415071520.ff0c536.$BASE_OS.noarch.rpm
 
 RUN yum -y install python-dirq
 
@@ -16,7 +20,7 @@ RUN curl -so /etc/yum.repos.d/EGI-trustanchors.repo https://repository.egi.eu/sw
   yum -y install ca-policy-egi-core
 
 
-RUN yum -y install https://github.com/apel/ssm/releases/download/3.2.1-1/apel-ssm-3.2.1-1.el7.noarch.rpm  && \
+RUN yum -y install https://github.com/apel/ssm/releases/download/3.2.1-1/apel-ssm-3.2.1-1.$BASE_OS.noarch.rpm  && \
   mkdir /etc/grid-security/apel && \
   mkdir -p /var/spool/apel/outgoing/12345678 && \
   { fetch-crl -p10 -T10 || :; }
