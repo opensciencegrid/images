@@ -88,6 +88,12 @@ jobs:
         image: ${{ fromJson(needs.build-image-list.outputs.images) }}
         yum_repo: ['development', 'testing', 'release']
         series: ['3.6', '23']
+        # FIXME: reenable testing and release for OSG 23 builds when available
+        exclude:
+          - yum_repo: 'testing'
+            series: '23'
+          - yum_repo: 'release'
+            series: '23'
     steps:
       - name: Build ${{ matrix.image }}:${{ matrix.series }}-${{ matrix.yum_repo }}
         continue-on-error: ${{ matrix.yum_repo == 'development' }}
@@ -123,7 +129,7 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Harbor (${{ matrix.series }}-testing)
-        if: always()
+        if: ${{ matrix.series != "23" }}
         uses: opensciencegrid/push-container-action@v0.5.0
         with:
           repo: testing
@@ -134,7 +140,7 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Harbor (${{ matrix.series }}-release)
-        if: always()
+        if: ${{ matrix.series != "23" }}
         uses: opensciencegrid/push-container-action@v0.5.0
         with:
           repo: release
@@ -156,7 +162,7 @@ jobs:
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub (${{ matrix.series }}-testing)
-        if: always()
+        if: ${{ matrix.series != "23" }}
         uses: opensciencegrid/push-container-action@v0.5.0
         with:
           repo: testing
@@ -167,7 +173,7 @@ jobs:
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub (${{ matrix.series }}-release)
-        if: always()
+        if: ${{ matrix.series != "23" }}
         uses: opensciencegrid/push-container-action@v0.5.0
         with:
           repo: release
