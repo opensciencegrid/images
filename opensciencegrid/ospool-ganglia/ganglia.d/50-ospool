@@ -28,5 +28,19 @@
   Units  = "jobs";
   TargetType = "Scheduler";
 ]
-
-
+[
+  Aggregate = "SUM";
+  Name   = "NRP Gpus in Pool";
+  Value  = Glidein_ResourceName =?= "SDSC-PRP-OSPool-Provisioner" ? TotalGpus : 0;
+  Desc   = "Number of NRP GPUs in the pool";
+  Units  = "GPUs";
+  TargetType = "Machine_slot1";
+]
+[
+  Aggregate = "SUM";
+  Name   = "Gpus in Pool";
+  Value  = TotalGpus;
+  Desc   = "Number of GPUs in the pool";
+  Units  = "GPUs";
+  TargetType = "Machine_slot1";
+]

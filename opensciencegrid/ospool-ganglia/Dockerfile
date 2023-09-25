@@ -24,9 +24,17 @@ COPY 05-php-fpm.conf /etc/supervisord.d/
 
 COPY gmetad.conf /etc/ganglia/
 
+# Setup condor_ganglid for OSPool Monitoring
 COPY 50-ganglia.conf /etc/condor/config.d/
-
-COPY ganglia.d/* /etc/condor/ganglia.d/
+# .... note: the below ganglia.d/ copy will also copy all subdirs
+COPY ganglia.d/ /etc/condor/ganglia.d/
+# Setup condor_ganglid for HTCondor CE Dashboard work
+COPY 51-ganglia-ce-dashboards.conf /etc/condor/config.d/
+# Make a ganglia view dashboard for CE charts
+COPY view_chtc-spark.json /var/lib/ganglia-web/conf/
+# Setup condor_gangliad for monitoring GPU usage in Icecube and IGWN pools
+COPY 52-ganglia-icecube /etc/condor/config.d/
+COPY 53-ganglia-igwn /etc/condor/config.d/
 
 COPY 50-ospool-config.sh /etc/osg/image-init.d/
 
