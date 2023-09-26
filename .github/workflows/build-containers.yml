@@ -139,6 +139,7 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Harbor (${{ matrix.series.name }}-testing)
+        # FIXME: reenable for OSG 23 builds when available
         if: matrix.series.name != '23'
         uses: opensciencegrid/push-container-action@v0.8.0
         with:
@@ -175,6 +176,7 @@ jobs:
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub (${{ matrix.series.name }}-testing)
+        # FIXME: reenable for OSG 23 builds when available
         if: matrix.series.name != '23'
         uses: opensciencegrid/push-container-action@v0.8.0
         with:
