@@ -87,14 +87,26 @@ jobs:
       matrix:
         image: ${{ fromJson(needs.build-image-list.outputs.images) }}
         yum_repo: ['development', 'testing', 'release']
+        series:
+          - name: '3.6'
+            os: 'el7'
+          - name: '23'
+            os: 'el9'
+        # FIXME: reenable testing and release for OSG 23 builds when available
+        exclude:
+          - yum_repo: 'testing'
+            series: {name: '23', os: 'el9'}
+          - yum_repo: 'release'
+            series: {name: '23', os: 'el9'}
     steps:
-      - name: Build ${{ matrix.image }}:3.6-${{ matrix.yum_repo }}
+      - name: Build ${{ matrix.image }}:${{ matrix.series }}-${{ matrix.yum_repo }}
         continue-on-error: ${{ matrix.yum_repo == 'development' }}
-        uses: opensciencegrid/build-container-action@v0.4.1
+        uses: opensciencegrid/build-container-action@v0.6.0
         with:
-          osg_series: 3.6
-          repo: ${{ matrix.yum_repo }}
+          osg_series: ${{ matrix.series.name }}
+          osg_repo: ${{ matrix.yum_repo }}
           context: ${{ matrix.image }}
+          base_os: ${{ matrix.series.os }}
 
   push:
     runs-on: ubuntu-latest
@@ -108,69 +120,82 @@ jobs:
       fail-fast: false
       matrix:
         image: ${{ fromJson(needs.build-image-list.outputs.images) }}
+        series:
+          - name: '3.6'
+            os: 'el7'
+          - name: '23'
+            os: 'el9'
     steps:
-      - name: Push to Harbor (3.6-development)
+      - name: Push to Harbor (${{ matrix.series }}-development)
         if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
+        uses: opensciencegrid/push-container-action@v0.8.0
         with:
           repo: development
-          osg_series: 3.6
+          osg_series: ${{ matrix.series.name }}
           context: ${{ matrix.image }}
+          base_os: ${{ matrix.series.os }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Harbor (3.6-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
+      - name: Push to Harbor (${{ matrix.series.name }}-testing)
+        # FIXME: reenable for OSG 23 builds when available
+        if: matrix.series.name != '23'
+        uses: opensciencegrid/push-container-action@v0.8.0
         with:
           repo: testing
-          osg_series: 3.6
+          osg_series: ${{ matrix.series.name }}
           context: ${{ matrix.image }}
+          base_os: ${{ matrix.series.os }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Harbor (3.6-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
+      - name: Push to Harbor (${{ matrix.series.name }}-release)
+        if: matrix.series.name != '23'
+        uses: opensciencegrid/push-container-action@v0.8.0
         with:
           repo: release
-          osg_series: 3.6
+          osg_series: ${{ matrix.series.name }}
           context: ${{ matrix.image }}
+          base_os: ${{ matrix.series.os }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Docker Hub (3.6-development)
+      - name: Push to Docker Hub (${{ matrix.series.name }}-development)
         if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
+        uses: opensciencegrid/push-container-action@v0.8.0
         with:
           repo: development
-          osg_series: 3.6
+          osg_series: ${{ matrix.series.name }}
           context: ${{ matrix.image }}
+          base_os: ${{ matrix.series.os }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub (3.6-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
+      - name: Push to Docker Hub (${{ matrix.series.name }}-testing)
+        # FIXME: reenable for OSG 23 builds when available
+        if: matrix.series.name != '23'
+        uses: opensciencegrid/push-container-action@v0.8.0
         with:
           repo: testing
-          osg_series: 3.6
+          osg_series: ${{ matrix.series.name }}
           context: ${{ matrix.image }}
+          base_os: ${{ matrix.series.os }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub (3.6-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@v0.5.0
+      - name: Push to Docker Hub (${{ matrix.series.name }}-release)
+        if: matrix.series.name != '23'
+        uses: opensciencegrid/push-container-action@v0.8.0
         with:
           repo: release
-          osg_series: 3.6
+          osg_series: ${{ matrix.series.name }}
           context: ${{ matrix.image }}
+          base_os: ${{ matrix.series.os }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
