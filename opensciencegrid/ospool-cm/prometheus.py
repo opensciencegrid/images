@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
     try:
         # HTCondor pool
-        collector = htcondor.Collector("localhost")
+        collector = htcondor.Collector("127.0.0.1")
 
         # test it
         ads = collector.query(ad_type=htcondor.AdTypes.Startd,
