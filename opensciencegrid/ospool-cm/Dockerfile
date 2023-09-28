@@ -10,11 +10,13 @@ ARG BASE_YUM_REPO
 
 RUN yum -y distro-sync && \
     yum -y install \
+      epel-release && \
+    yum -y install \
       bc \
       git \
       lsof \
-      python3-prometheus_client \
       rrdtool \
+      python3-pip \
       vim \
       wget \
     && \
@@ -27,6 +29,8 @@ RUN if [[ $BASE_YUM_REPO = release ]]; then \
     else \
       yum -y install condor; \
     fi
+
+RUN python3 -m pip install prometheus_client
 
 # basic config is a collector, so we can test
 RUN echo "DAEMON_LIST = MASTER, COLLECTOR" >/etc/condor/config.d/05-ospool-base.config && \
