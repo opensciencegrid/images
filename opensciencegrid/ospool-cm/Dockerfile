@@ -1,14 +1,15 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=3.6
+ARG BASE_OSG_SERIES=23
 ARG BASE_YUM_REPO=release
+ARG BASE_OS=el9
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
 
-RUN yum -y distro-sync && \
-    yum -y install \
+RUN dnf -y distro-sync && \
+    dnf -y install \
       bc \
       git \
       lsof \
@@ -17,14 +18,14 @@ RUN yum -y distro-sync && \
       vim \
       wget \
     && \
-    yum clean all
+    dnf clean all
 
 # Pull HTCondor from the proper repo. For "release" we need to use
 # osg-upcoming-testing to meet the patch tuesday requirements.
 RUN if [[ $BASE_YUM_REPO = release ]]; then \
-      yum -y --enablerepo=osg-upcoming-testing install condor; \
+      dnf -y --enablerepo=osg-upcoming-testing install condor; \
     else \
-      yum -y install condor; \
+      dnf -y install condor; \
     fi
 
 # basic config is a collector, so we can test
