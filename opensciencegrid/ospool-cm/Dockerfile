@@ -8,8 +8,8 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
 
-RUN dnf -y distro-sync && \
-    dnf -y install \
+RUN yum -y distro-sync && \
+    yum -y install \
       bc \
       git \
       lsof \
@@ -18,14 +18,14 @@ RUN dnf -y distro-sync && \
       vim \
       wget \
     && \
-    dnf clean all
+    yum clean all
 
 # Pull HTCondor from the proper repo. For "release" we need to use
 # osg-upcoming-testing to meet the patch tuesday requirements.
 RUN if [[ $BASE_YUM_REPO = release ]]; then \
-      dnf -y --enablerepo=osg-upcoming-testing install condor; \
+      yum -y --enablerepo=osg-upcoming-testing install condor; \
     else \
-      dnf -y install condor; \
+      yum -y install condor; \
     fi
 
 # basic config is a collector, so we can test
