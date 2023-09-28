@@ -1,19 +1,22 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=3.6
+ARG BASE_OSG_SERIES=23
 ARG BASE_YUM_REPO=release
+ARG BASE_OS=el9
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
 
 RUN yum -y distro-sync && \
     yum -y install \
+      epel-release && \
+    yum -y install \
       bc \
       git \
       lsof \
-      python3-prometheus_client \
       rrdtool \
+      python3-pip \
       vim \
       wget \
     && \
@@ -26,6 +29,10 @@ RUN if [[ $BASE_YUM_REPO = release ]]; then \
     else \
       yum -y install condor; \
     fi
+
+# FIXME: when we drop EL7 for this image,
+#  change this back to a python3-prometheus_client RPM install
+RUN python3 -m pip install prometheus_client
 
 # basic config is a collector, so we can test
 RUN echo "DAEMON_LIST = MASTER, COLLECTOR" >/etc/condor/config.d/05-ospool-base.config && \
