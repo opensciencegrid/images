@@ -30,6 +30,8 @@ RUN if [[ $BASE_YUM_REPO = release ]]; then \
       yum -y install condor; \
     fi
 
+# FIXME: when we drop EL7 for this image,
+#  change this back to a python3-prometheus_client RPM install
 RUN python3 -m pip install prometheus_client
 
 # basic config is a collector, so we can test
