@@ -128,7 +128,7 @@ jobs:
     steps:
       - name: Push to Harbor (${{ matrix.series }}-development)
         if: always()
-        uses: opensciencegrid/push-container-action@v0.8.0
+        uses: opensciencegrid/push-container-action@main
         with:
           repo: development
           osg_series: ${{ matrix.series.name }}
@@ -141,7 +141,7 @@ jobs:
       - name: Push to Harbor (${{ matrix.series.name }}-testing)
         # FIXME: reenable for OSG 23 builds when available
         if: matrix.series.name != '23'
-        uses: opensciencegrid/push-container-action@v0.8.0
+        uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
           osg_series: ${{ matrix.series.name }}
@@ -153,7 +153,7 @@ jobs:
 
       - name: Push to Harbor (${{ matrix.series.name }}-release)
         if: matrix.series.name != '23'
-        uses: opensciencegrid/push-container-action@v0.8.0
+        uses: opensciencegrid/push-container-action@main
         with:
           repo: release
           osg_series: ${{ matrix.series.name }}
@@ -165,7 +165,7 @@ jobs:
 
       - name: Push to Docker Hub (${{ matrix.series.name }}-development)
         if: always()
-        uses: opensciencegrid/push-container-action@v0.8.0
+        uses: opensciencegrid/push-container-action@main
         with:
           repo: development
           osg_series: ${{ matrix.series.name }}
@@ -178,7 +178,7 @@ jobs:
       - name: Push to Docker Hub (${{ matrix.series.name }}-testing)
         # FIXME: reenable for OSG 23 builds when available
         if: matrix.series.name != '23'
-        uses: opensciencegrid/push-container-action@v0.8.0
+        uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
           osg_series: ${{ matrix.series.name }}
@@ -190,7 +190,7 @@ jobs:
 
       - name: Push to Docker Hub (${{ matrix.series.name }}-release)
         if: matrix.series.name != '23'
-        uses: opensciencegrid/push-container-action@v0.8.0
+        uses: opensciencegrid/push-container-action@main
         with:
           repo: release
           osg_series: ${{ matrix.series.name }}
