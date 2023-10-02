@@ -26,5 +26,3 @@ RUN    yum -y install \
     && rm -rf /var/cache/yum/*
 
 ADD etc /etc
-ADD usr /usr
-ADD var /var
