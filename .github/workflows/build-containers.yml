@@ -125,7 +125,8 @@ jobs:
             os: 'el9'
     steps:
       - name: Push to Harbor (${{ matrix.series }}-development)
-        if: always()
+        # FIXME: reenable for OSG 23 development when available
+        if: matrix.series.name != '23'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
