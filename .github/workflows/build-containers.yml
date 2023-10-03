@@ -92,6 +92,10 @@ jobs:
             os: 'el7'
           - name: '23'
             os: 'el9'
+        # FIXME: reenable osg-23 development when available
+        exclude:
+          - yum_repo: 'development'
+            series: {name: '23', os: 'el9'}
     steps:
       - name: Build ${{ matrix.image }}:${{ matrix.series }}-${{ matrix.yum_repo }}
         continue-on-error: ${{ matrix.yum_repo == 'development' }}
