@@ -8,10 +8,10 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 # Previous build args went out of scope
 ARG BASE_OS
 
-# Create the frontend user with a fixed GID/UID
-# This is important so that we can use the same IDs in the persistent volume used for
-# the web-area
-RUN groupadd -o -g 996 gfactory && useradd -o -u 996 -g 996 -s /bin/sh gfactory
+# Create the condor and factory users with a fixed GID/UID
+# This is important so that we can use the same IDs in persistent volumes
+RUN groupadd -g 1000 condor && useradd -u 1000 -g condor -s /bin/sh condor
+RUN groupadd -g 1001 gfactory && useradd -u 1001 -g gfactory -s /bin/sh gfactory
 
 RUN    yum -y install \
          git \
