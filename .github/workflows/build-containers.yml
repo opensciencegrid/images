@@ -16,14 +16,14 @@ jobs:
     steps:
       - name: make date tag
         id: mkdatetag
-        run: echo "::set-output name=dtag::$(date +%Y%m%d-%H%M)"
+        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
 
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
       images: ${{ steps.image-list.outputs.json }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -73,7 +73,7 @@ jobs:
           # otherwise GHA will throw an error about an empty matrix
           # vector in subsequent steps
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
-          echo "::set-output name=json::$image_json"
+          echo "json=$image_json" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
