@@ -7,14 +7,14 @@ FROM opensciencegrid/ospool-cm:$BASE_OSG_SERIES-$BASE_YUM_REPO
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
 
-RUN dnf -y install \
+RUN yum -y install \
       ganglia-gmond \
       ganglia-gmetad \
       ganglia-web \
       httpd \
       php-fpm \
     && \
-    dnf -y clean all && \
+    yum -y clean all && \
     mkdir -p /run/php-fpm
 
 COPY 05-gmetad.conf /etc/supervisord.d/
