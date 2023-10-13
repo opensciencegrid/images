@@ -6,8 +6,10 @@
      {"regex":"chtc-spark-ce1.svc.opensciencegrid.org"}
        ],
        "metric_regex":[
-     {"regex":"^Glideins(Running|Idle)$"}
-       ],
+	 {"regex":"^GlideinsRunning$"},
+	 {"regex":"^GlideinsIdle$"}
+	   ],
+       "sortit":"false",
        "graph_type":"stack",
        "vertical_label":"glideins",
        "title":"Glideins Running vs Idle"
