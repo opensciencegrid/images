@@ -28,3 +28,4 @@ RUN if [[ ${BASE_OS} < 'el9' ]] ; then \
     ; fi
 
 ADD etc /etc
+ADD usr /usr
