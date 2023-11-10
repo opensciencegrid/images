@@ -20,6 +20,11 @@ ospool_idle_memstarvation_cpus_count = Gauge("ospool_idle_memstarvation_cpus_cou
 ospool_idle_diskstarvation_cpus_count = Gauge("ospool_idle_diskstarvation_cpus_count", "Idle CPUs due to disk starvation", ["resource_name"])
 ospool_idle_other_cpus_count = Gauge("ospool_idle_other_cpus_count", "Idle CPUs due to other reasons", ["resource_name"])
 
+# gpus
+ospool_total_gpus_count = Gauge("ospool_total_gpus_count", "Total GPUs", ["resource_name"])
+ospool_claimed_gpus_count = Gauge("ospool_claimed_gpus_count", "Claimed GPUs", ["resource_name"])
+ospool_idle_gpus_count = Gauge("ospool_idle_gpus_count", "Idle GPUs", ["resource_name"])
+
 # submitter metrics
 ospool_submitter_idle_jobs_count = Gauge("ospool_submitter_idle_jobs_count", "Submitter idle jobs", ["submitter", "schedd"])
 ospool_submitter_running_jobs_count = Gauge("ospool_submitter_running_jobs_count", "Submitter running jobs", ["submitter", "schedd"])
@@ -40,7 +45,7 @@ def cm_resources_info(collector):
     # iterate over all resources
     ads = collector.query(ad_type=htcondor.AdTypes.Startd,
                           constraint="!isUndefined(GLIDEIN_ResourceName)",
-                          projection=["GLIDEIN_ResourceName", "CPUs", "State"])
+                          projection=["GLIDEIN_ResourceName", "CPUs", "GPUs", "State"])
     for ad in ads:
         if ad["GLIDEIN_ResourceName"] not in resources:
             resources[ad["GLIDEIN_ResourceName"]] = {
@@ -49,12 +54,22 @@ def cm_resources_info(collector):
                 "idle_retirement_cpus": 0,
                 "idle_memstarvation_cpus": 0,
                 "idle_diskstarvation_cpus": 0,
-                "idle_other_cpus": 0
+                "idle_other_cpus": 0,
+                "total_gpus": 0,
+                "claimed_gpus": 0,
+                "idle_gpus": 0,
             }
         r = resources[ad["GLIDEIN_ResourceName"]]
         r["total_cpus"] += int(ad["CPUs"])
         if ad["State"] != "Unclaimed":
             r["claimed_cpus"] += int(ad["CPUs"])
+
+        # gpus
+        if "GPUs" in ad:
+            r["total_gpus"] += int(ad["GPUs"])
+            if ad["State"] != "Unclaimed":
+                r["claimed_gpus"] += int(ad["GPUs"])
+            r["idle_gpus"] = r["total_gpus"] - r["claimed_gpus"]
 
     # classify idle CPUs
     ads = collector.query(ad_type=htcondor.AdTypes.Startd,
@@ -88,6 +103,10 @@ def cm_resources_info(collector):
                           - data["idle_memstarvation_cpus"] \
                           - data["idle_diskstarvation_cpus"]
         ospool_idle_other_cpus_count.labels(resource).set(idle_other_cpus)
+
+        ospool_total_gpus_count.labels(resource).set(data["total_gpus"])
+        ospool_claimed_gpus_count.labels(resource).set(data["claimed_gpus"])
+        ospool_idle_gpus_count.labels(resource).set(data["idle_gpus"])
 
 
 def cm_submitters_info(collector):
