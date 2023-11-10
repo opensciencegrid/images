@@ -115,10 +115,10 @@ def main():
         sys.exit("Failed to read email file: %s" % exc)
     
     subscribed = status_api.get_subscribers(is_subscribed = True)
-    subscribed_email_id_list = { i['email']: i['id'] for i in subscribed }
-    subscribed_emails = [ i['email'] for i in subscribed ]
+    subscribed_email_id_list = { i['email']: i['id'] for i in subscribed if 'email' in i }
+    subscribed_emails = [ i['email'] for i in subscribed if 'email' in i ]
     unsubscribed = status_api.get_subscribers(is_subscribed = False)
-    unsubscribed_emails = [ i['email'] for i in unsubscribed ]
+    unsubscribed_emails = [ i['email'] for i in unsubscribed if 'email' in i ]
     contact_emails = get_contact_emails(args)
     
     syslog.openlog("contact_sync")
