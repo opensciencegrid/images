@@ -2,6 +2,7 @@
 
 import re
 import htcondor
+import pprint
 
 def update_user(negotiator, ad):
     current_factor = int(ad["PriorityFactor"])
@@ -18,13 +19,22 @@ def update_user(negotiator, ad):
         negotiator.setFactor(user, new_factor)
 
 
-negotiator = htcondor.Negotiator()
-prios = negotiator.getPriorities()
+coll = htcondor.Collector()
+negotiator_ads = coll.locateAll(htcondor.DaemonTypes.Negotiator)
 
-for ad in negotiator.getPriorities():
-    try:
-        update_user(negotiator, ad)
-    except:
-        # ignore individual exceptions - we want to try all users
-        pass
+for negotiator_ad in negotiator_ads:
+
+    if "ALLOCATED" in negotiator_ad["Name"]:
+        continue
+
+    negotiator = htcondor.Negotiator(negotiator_ad)
+    prios = negotiator.getPriorities()
+
+    for ad in negotiator.getPriorities():
+        pprint.pprint(ad)
+        try:
+            update_user(negotiator, ad)
+        except:
+            # ignore individual exceptions - we want to try all users
+            pass
 
