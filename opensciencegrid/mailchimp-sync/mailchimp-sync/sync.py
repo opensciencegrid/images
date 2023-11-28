@@ -289,9 +289,9 @@ def main():
     # comanage
     comanage_find_users(users)
     comanage_apply_tag(users, 'PATh-Facility', 'ap1-login')
-    comanage_apply_tag(users, 'OSPool-Wisc', 'ap7-login')
+    comanage_apply_tag(users, 'OSPool-Wisc', 'ap40-login')
     # OSPool is a meta tag spanning our sites
-    comanage_apply_tag(users, 'OSPool', 'ap7-login')
+    comanage_apply_tag(users, 'OSPool', 'ap40-login')
 
     # update mailchimp
     for email, data in users.items():
