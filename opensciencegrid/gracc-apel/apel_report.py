@@ -225,8 +225,8 @@ def add_record(recs, vo, site, cores, dn, bkt):
 
     recs[rk] += rec
 
-def print_header():
-    print(fixed_header)
+def print_header(output_file = sys.stdout):
+    print(fixed_header, file=output_file)
 
 def print_rk_recr(year, month, rk, rec, output_file=sys.stdout):
 
@@ -300,16 +300,15 @@ def main():
             print("usage: %s [YEAR MONTH]" % os.path.basename(__file__), file=sys.stderr)
             sys.exit(0)
 
-    orig_stdout = sys.stdout
-    outfile = "%02d_%d.apel" % (month, year)
-    sys.stdout = open(outfile, "w")
+    outfile_name = "%02d_%d.apel" % (month, year)
+    outfile = open(outfile_name, "w")
 
     resp = gracc_query_apel(year, month)
     aggs = resp.aggregations
 
     recs = autodict()
 
-    print_header()
+    print_header(outfile)
     for cores_bkt in sorted_buckets(aggs.Cores):
         cores = cores_bkt.key
         for vo_bkt in sorted_buckets(cores_bkt.VO):
@@ -327,10 +326,9 @@ def main():
                         add_record(recs, vo, site, cores, dn, site_bkt)
 
     for rk,rec in sorted(recs.items()):
-        print_rk_recr(year, month, rk, rec)
+        print_rk_recr(year, month, rk, rec, outfile)
 
-    sys.stdout = orig_stdout
-    print("wrote: %s" % outfile)
+    print("wrote: %s" % outfile_name)
 
 if __name__ == '__main__':
     main()
