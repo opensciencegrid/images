@@ -1,21 +1,47 @@
-# Specify the opensciencegrid/ospool-cm image tag
-ARG BASE_OSG_SERIES=3.6
+# Specify the opensciencegrid/software-base image tag
+ARG BASE_OSG_SERIES=23
 ARG BASE_YUM_REPO=release
 
-FROM opensciencegrid/ospool-cm:$BASE_OSG_SERIES-$BASE_YUM_REPO
+# has to be el8 for a working ganglia/php combination
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
 
-RUN dnf -y install \
-      ganglia-gmond \
+# has to be redefined for use in the RUN stages
+ARG BASE_YUM_REPO
+
+RUN dnf -y distro-sync && \
+    dnf -y install \
+      epel-release && \
+    dnf -y install \
+      bc \
       ganglia-gmetad \
+      ganglia-gmond \
       ganglia-web \
+      git \
       httpd \
+      lsof \
       php-fpm \
+      python3-pip \
+      rrdtool \
+      vim \
+      wget \
     && \
     dnf -y clean all && \
     mkdir -p /run/php-fpm
+
+# Pull HTCondor from the proper repo. For "release" we need to use
+# osg-upcoming-testing to meet the patch tuesday requirements.
+RUN if [[ $BASE_YUM_REPO = release ]]; then \
+      dnf -y --enablerepo=osg-upcoming-testing install condor; \
+    else \
+      dnf -y install condor; \
+    fi
+
+COPY condor_master_wrapper /usr/sbin/
+RUN chmod 755 /usr/sbin/condor_master_wrapper
+COPY 10-htcondor.conf /etc/supervisord.d/
 
 COPY 05-gmetad.conf /etc/supervisord.d/
 COPY 05-gmond.conf /etc/supervisord.d/
