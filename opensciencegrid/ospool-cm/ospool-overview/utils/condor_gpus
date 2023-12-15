@@ -4,3 +4,8 @@ echo "  Count  Resource                                          GPU            
 echo " ======  ================================================  ============================  ===========  ============== ==============="
 condor_status -const 'GPUs > 0' -format " %-50s" GLIDEIN_ResourceName -format "%-30s" GPUS_DeviceName -format "%-13s" GPUS_DriverVersion -format "%-15s" GPUS_Capability -format "%-11s\n" HAS_SINGULARITY | sort | uniq -c
 
+echo
+echo
+
+condor_status -const 'TotalGPUs > 0' -af:h Name SlotType Activity CPUs GPUs Memory Disk RoomForCPUOnlyJobs | column -t
+
