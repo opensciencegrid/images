@@ -56,8 +56,6 @@ def get_hs23_portion(resource_group) -> float:
             for resource in raw_json[resource_group_name]["Resources"]['Resource']:
                 if 'HEPScore23Percentage' in resource['WLCGInformation']:
                     hep_spec_percentages.append(float(resource['WLCGInformation']['HEPScore23Percentage']))
-            if resource_group_name == "Nebraska":
-                print(hep_spec_percentages)
             if len(hep_spec_percentages) > 0:
                 resource_group_map[resource_group_name] = mean(hep_spec_percentages)
             else:
@@ -252,8 +250,10 @@ def print_rk_recr(year, month, rk, rec, output_file=sys.stdout):
 
         if submit_host == 0:
             portion = 1.0 - hs23_portion
+            metric_name = "hepspec"
         elif submit_host == 1:
             portion = hs23_portion
+            metric_name = "HEPscore23"
         else:
             raise ValueError(f"Invalid submit_host: {submit_host}")
         
@@ -270,8 +270,8 @@ def print_rk_recr(year, month, rk, rec, output_file=sys.stdout):
         write("NodeCount:",              fixed_nodecount)
         write("WallDuration:",           int(rec.walldur * portion))
         write("CpuDuration:",            int(rec.cpudur * portion))
-        write("NormalisedWallDuration:", int(rec.walldur * rec.nf * portion))
-        write("NormalisedCpuDuration:",  int(rec.cpudur  * rec.nf * portion))
+        write("NormalisedWallDuration:", "{" + metric_name + ": " + str(int(rec.walldur * rec.nf * portion)) + "}")
+        write("NormalisedCpuDuration:",  "{" + metric_name + ": " + str(int(rec.cpudur  * rec.nf * portion)) + "}")
         write("NumberOfJobs:",           int(rec.njobs * portion))
         write(fixed_separator)
 
