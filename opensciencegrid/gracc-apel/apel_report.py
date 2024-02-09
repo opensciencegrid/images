@@ -10,6 +10,10 @@ import dateutil.relativedelta
 import operator
 import sys
 import os
+import requests
+import json
+from statistics import mean
+from math import isclose
 
 
 #logging.basicConfig(level=logging.WARN)
@@ -25,6 +29,42 @@ vo_list = ['atlas', 'alice', 'belle', 'cms', 'enmr.eu', 'lhcb']
 
 MAXSZ=2**30
 MISSING='__MISSING__'
+
+resource_group_map = None
+
+def get_hs23_portion(resource_group) -> float:
+    """
+    Download the HS23 portion of the OSG site info from OIM.
+
+    :param resource_group: The Topology resource group name.
+    :return: The HS23 portion of the site, or 0.0 if not found.
+    """
+    global resource_group_map
+    if resource_group_map == None:
+        # Download the map from Topology
+        resp = requests.get("https://topology.opensciencegrid.org/api/resource_group_summary")
+        if resp.status_code != 200:
+            #print("Error downloading resource group summary from Topology: {}".format(resp.status_code))
+            #return 0.0
+            raise Exception("Error downloading resource group summary from Topology: {}".format(resp.status_code))
+        
+        raw_json = resp.json()
+        # Parse the JSON response
+        resource_group_map = {}
+        for resource_group_name in raw_json:
+            hep_spec_percentages = []
+            for resource in raw_json[resource_group_name]["Resources"]['Resource']:
+                if 'HEPScore23Percentage' in resource['WLCGInformation']:
+                    hep_spec_percentages.append(float(resource['WLCGInformation']['HEPScore23Percentage']))
+            if len(hep_spec_percentages) > 0:
+                resource_group_map[resource_group_name] = mean(hep_spec_percentages)
+            else:
+                resource_group_map[resource_group_name] = 0.0
+
+    return resource_group_map.get(resource_group, 0.0)
+        
+
+
 
 def add_bkt_metrics(bkt):
     bkt = bkt.metric('NormalFactor','terms', field='OIM_WLCGAPELNormalFactor')
@@ -71,7 +111,7 @@ def gracc_query_apel(year, month):
     return response
 
 # Fixed entries:
-fixed_header = "APEL-summary-job-message: v0.3"
+fixed_header = "APEL-summary-job-message: v0.4"
 fixed_separator = "%%"
 fixed_infrastructure = "Gratia-OSG"
 fixed_nodecount = 1
@@ -183,32 +223,57 @@ def add_record(recs, vo, site, cores, dn, bkt):
 
     recs[rk] += rec
 
-def print_header():
-    print(fixed_header)
+def print_header(output_file = sys.stdout):
+    print(fixed_header, file=output_file)
 
-def print_rk_recr(year, month, rk, rec):
+def print_rk_recr(year, month, rk, rec, output_file=sys.stdout):
 
     if rk.dn == "N/A":
         dn = "generic %s user" % rk.vo
     else:
         dn = rk.dn
 
-    print("Site:",                   rk.site)
-    print("VO:",                     rk.vo)
-    print("EarliestEndTime:",        rec.mintime)
-    print("LatestEndTime:",          rec.maxtime + 60*60*24 - 1)
-    print("Month:",                  "%02d" % month)
-    print("Year:",                   year)
-    print("Infrastructure:",         fixed_infrastructure)
-    print("GlobalUserName:",         dn)
-    print("Processors:",             rk.cores)
-    print("NodeCount:",              fixed_nodecount)
-    print("WallDuration:",           rec.walldur)
-    print("CpuDuration:",            rec.cpudur)
-    print("NormalisedWallDuration:", int(rec.walldur * rec.nf))
-    print("NormalisedCpuDuration:",  int(rec.cpudur  * rec.nf))
-    print("NumberOfJobs:",           rec.njobs)
-    print(fixed_separator)
+    # With no hs23 portion, the submit host is just "hepspec-hosts"
+    # With hs23 portion, it's both "hepspec-hosts" and "hepscore-hosts"
+    submit_hosts = ["hepspec-hosts"]
+    # Check the site name for the HS23 portion
+    hs23_portion = get_hs23_portion(rk.site)
+    if not isclose(hs23_portion, 0.0):
+        submit_hosts.append("hepscore-hosts")
+        
+    # Quick lambda to write the lines
+    write = lambda *line: print(*line, file=output_file)
+
+    for submit_host in range(len(submit_hosts)):
+        # Index 0 is hepspec-hosts, index 1 is hepscore-hosts
+        # Do some clever math to get the portion
+
+        if submit_host == 0:
+            portion = 1.0 - hs23_portion
+            metric_name = "hepspec"
+        elif submit_host == 1:
+            portion = hs23_portion
+            metric_name = "HEPscore23"
+        else:
+            raise ValueError(f"Invalid submit_host: {submit_host}")
+        
+        write("Site:",                   rk.site)
+        write("SubmitHost:",             submit_hosts[submit_host])
+        write("VO:",                     rk.vo)
+        write("EarliestEndTime:",        rec.mintime)
+        write("LatestEndTime:",          rec.maxtime + 60*60*24 - 1)
+        write("Month:",                  "%02d" % month)
+        write("Year:",                   year)
+        write("Infrastructure:",         fixed_infrastructure)
+        write("GlobalUserName:",         dn)
+        write("Processors:",             rk.cores)
+        write("NodeCount:",              fixed_nodecount)
+        write("WallDuration:",           int(rec.walldur * portion))
+        write("CpuDuration:",            int(rec.cpudur * portion))
+        write("NormalisedWallDuration:", "{" + metric_name + ": " + str(int(rec.walldur * rec.nf * portion)) + "}")
+        write("NormalisedCpuDuration:",  "{" + metric_name + ": " + str(int(rec.cpudur  * rec.nf * portion)) + "}")
+        write("NumberOfJobs:",           int(rec.njobs * portion))
+        write(fixed_separator)
 
 def bkt_key_lower(bkt):
     return bkt.key.lower()
@@ -235,16 +300,15 @@ def main():
             print("usage: %s [YEAR MONTH]" % os.path.basename(__file__), file=sys.stderr)
             sys.exit(0)
 
-    orig_stdout = sys.stdout
-    outfile = "%02d_%d.apel" % (month, year)
-    sys.stdout = open(outfile, "w")
+    outfile_name = "%02d_%d.apel" % (month, year)
+    outfile = open(outfile_name, "w")
 
     resp = gracc_query_apel(year, month)
     aggs = resp.aggregations
 
     recs = autodict()
 
-    print_header()
+    print_header(outfile)
     for cores_bkt in sorted_buckets(aggs.Cores):
         cores = cores_bkt.key
         for vo_bkt in sorted_buckets(cores_bkt.VO):
@@ -262,10 +326,9 @@ def main():
                         add_record(recs, vo, site, cores, dn, site_bkt)
 
     for rk,rec in sorted(recs.items()):
-        print_rk_recr(year, month, rk, rec)
+        print_rk_recr(year, month, rk, rec, outfile)
 
-    sys.stdout = orig_stdout
-    print("wrote: %s" % outfile)
+    print("wrote: %s" % outfile_name)
 
 if __name__ == '__main__':
     main()
