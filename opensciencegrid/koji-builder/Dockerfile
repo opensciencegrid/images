@@ -8,7 +8,11 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-al8-$BASE_YUM_REPO
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
- yum install -y --enablerepo=devops-itb 'koji-builder >= 1.21.1'
+ if [[ $BASE_OSG_SERIES = 3.6 ]]; then \
+   yum install -y --enablerepo=devops-itb 'koji-builder >= 1.21.1'; \
+ else \
+   yum install -y --enablerepo=osg-internal-development 'koji-builder'; \
+ fi
 
 COPY kojid-supervisord.conf  /etc/supervisord.d/kojid.conf
 COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
