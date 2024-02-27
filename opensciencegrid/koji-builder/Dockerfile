@@ -1,14 +1,21 @@
-ARG BASE_OSG_SERIES=3.6
+ARG BASE_OSG_SERIES=23
 ARG BASE_YUM_REPO=release
+ARG BASE_OS=el9
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-al8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 # OSG kojid container
 # Requires CAP_SYS_ADMIN for chroot(1), unshare(1), and mounting tmpfs
+
+ARG BASE_OSG_SERIES
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
- yum install -y --enablerepo=devops-itb 'koji-builder >= 1.21.1'
+ if [[ $BASE_OSG_SERIES = 3.6 ]]; then \
+   yum install -y --enablerepo=devops-itb 'koji-builder >= 1.21.1'; \
+ else \
+   yum install -y --enablerepo=osg-internal-development 'koji-builder'; \
+ fi
 
 COPY kojid-supervisord.conf  /etc/supervisord.d/kojid.conf
 COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
