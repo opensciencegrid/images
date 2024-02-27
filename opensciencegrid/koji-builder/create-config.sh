@@ -38,6 +38,7 @@ allowed_scms=
     vdt.cs.wisc.edu:/svn/native/*:no:fetch-sources,.
     github.com:/unlhcc/hcc-packaging.git:no:fetch-sources,.
     github.com:/opensciencegrid/Software-Redhat.git:no:fetch-sources,.
+    github.com:/CHTC/packaging.git:no:fetch-sources,.
 
 cert = $KOJID_CERTKEY
 serverca = /etc/pki/tls/certs/ca-bundle.crt
