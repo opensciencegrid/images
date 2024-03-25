@@ -2,9 +2,9 @@
 
 # GRACC-based APEL reporting script; run from docker-run.sh
 
-import elasticsearch
-from elasticsearch_dsl import Search, A, Q
 #import logging
+import opensearchpy
+from opensearchpy import Search, A, Q
 import datetime
 import dateutil.relativedelta
 import operator
@@ -17,7 +17,7 @@ from math import isclose
 
 
 #logging.basicConfig(level=logging.WARN)
-es = elasticsearch.Elasticsearch(
+es = opensearchpy.OpenSearch(
         ['https://gracc.opensciencegrid.org/q'],
         timeout=300, use_ssl=True, verify_certs=True,
         ca_certs='/etc/ssl/certs/ca-bundle.crt')
