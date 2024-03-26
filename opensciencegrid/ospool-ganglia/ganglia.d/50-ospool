@@ -1,4 +1,11 @@
-
+[
+  Name   = strcat(MyType,"RecentDaemonCoreDutyCycle");
+  Value  = RecentDaemonCoreDutyCycle;
+  Desc   = "Recent fraction of busy time in the daemon event loop";
+  Scale  = 100;
+  Units  = "%";
+  TargetType = "Scheduler,Negotiator,Collector";
+]
 [
   Name   = "JobsUnmaterialized";
   Desc   = "Number of unmaterialized jobs in this schedd's queue";
