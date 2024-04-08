@@ -14,7 +14,7 @@ RUN yum -y install \
     && \
     yum clean all
 
-RUN python3 -m pip install amieclient simplejson elasticsearch-dsl
+RUN python3 -m pip install amieclient simplejson opensearch-py
 
 # copy our app
 WORKDIR /opt/access-amie
