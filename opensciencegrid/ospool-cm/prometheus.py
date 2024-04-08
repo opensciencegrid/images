@@ -30,6 +30,25 @@ ospool_submitter_idle_jobs_count = Gauge("ospool_submitter_idle_jobs_count", "Su
 ospool_submitter_running_jobs_count = Gauge("ospool_submitter_running_jobs_count", "Submitter running jobs", ["submitter", "schedd"])
 ospool_submitter_held_jobs_count = Gauge("ospool_submitter_held_jobs_count", "Submitter held jobs", ["submitter", "schedd"])
 
+
+def init_resource(resources, rname):
+    '''
+    Make sure we have a base enty for given resoure
+    '''
+    if rname not in resources:
+        resources[rname] = {
+            "total_cpus": 0,
+            "claimed_cpus": 0,
+            "idle_retirement_cpus": 0,
+            "idle_memstarvation_cpus": 0,
+            "idle_diskstarvation_cpus": 0,
+            "idle_other_cpus": 0,
+            "total_gpus": 0,
+            "claimed_gpus": 0,
+            "idle_gpus": 0,
+        }
+
+
 def cm_resources_info(collector):
     '''
     Discover the sites, and then query for specifics per site.
@@ -47,18 +66,7 @@ def cm_resources_info(collector):
                           constraint="!isUndefined(GLIDEIN_ResourceName)",
                           projection=["GLIDEIN_ResourceName", "CPUs", "GPUs", "State"])
     for ad in ads:
-        if ad["GLIDEIN_ResourceName"] not in resources:
-            resources[ad["GLIDEIN_ResourceName"]] = {
-                "total_cpus": 0,
-                "claimed_cpus": 0,
-                "idle_retirement_cpus": 0,
-                "idle_memstarvation_cpus": 0,
-                "idle_diskstarvation_cpus": 0,
-                "idle_other_cpus": 0,
-                "total_gpus": 0,
-                "claimed_gpus": 0,
-                "idle_gpus": 0,
-            }
+        init_resource(resources, ad["GLIDEIN_ResourceName"])
         r = resources[ad["GLIDEIN_ResourceName"]]
         r["total_cpus"] += int(ad["CPUs"])
         if ad["State"] != "Unclaimed":
@@ -77,6 +85,7 @@ def cm_resources_info(collector):
                           projection=["GLIDEIN_ResourceName", "CPUs", "Disk", "Memory", "GLIDEIN_ToRetire"])
     now = time.time()
     for ad in ads:
+        init_resource(resources, ad["GLIDEIN_ResourceName"])
         r = resources[ad["GLIDEIN_ResourceName"]]
         if "GLIDEIN_ToRetire" in ad and int(ad["GLIDEIN_ToRetire"]) < now:
             r["idle_retirement_cpus"] += int(ad["CPUs"])
