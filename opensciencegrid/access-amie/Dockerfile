@@ -5,7 +5,9 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
-RUN yum -y install \
+RUN yum -y clean all && \
+    rm -r /var/cache/dnf && \
+    yum -y install \
            curl \
            python3-devel \
            python3-pip \
