@@ -9,6 +9,7 @@ import re
 import sys
 import time
 
+from collections import defaultdict
 from pprint import pprint
 from prometheus_client import start_http_server, Gauge, Counter
 
@@ -31,22 +32,22 @@ ospool_submitter_running_jobs_count = Gauge("ospool_submitter_running_jobs_count
 ospool_submitter_held_jobs_count = Gauge("ospool_submitter_held_jobs_count", "Submitter held jobs", ["submitter", "schedd"])
 
 
-def init_resource(resources, rname):
+def entry_factory():
     '''
     Make sure we have a base enty for given resoure
     '''
-    if rname not in resources:
-        resources[rname] = {
-            "total_cpus": 0,
-            "claimed_cpus": 0,
-            "idle_retirement_cpus": 0,
-            "idle_memstarvation_cpus": 0,
-            "idle_diskstarvation_cpus": 0,
-            "idle_other_cpus": 0,
-            "total_gpus": 0,
-            "claimed_gpus": 0,
-            "idle_gpus": 0,
-        }
+    entry = {
+        "total_cpus": 0,
+        "claimed_cpus": 0,
+        "idle_retirement_cpus": 0,
+        "idle_memstarvation_cpus": 0,
+        "idle_diskstarvation_cpus": 0,
+        "idle_other_cpus": 0,
+        "total_gpus": 0,
+        "claimed_gpus": 0,
+        "idle_gpus": 0,
+    }
+    return entry
 
 
 def cm_resources_info(collector):
@@ -54,7 +55,7 @@ def cm_resources_info(collector):
     Discover the sites, and then query for specifics per site.
     Can we do this in a single query?
     '''
-    resources = {}
+    resources = defaultdict(entry_factory)
 
     # These are the limits we use to determine if a pslot is being
     # starved. Memory is in MB, Disk in KB.
@@ -66,7 +67,6 @@ def cm_resources_info(collector):
                           constraint="!isUndefined(GLIDEIN_ResourceName)",
                           projection=["GLIDEIN_ResourceName", "CPUs", "GPUs", "State"])
     for ad in ads:
-        init_resource(resources, ad["GLIDEIN_ResourceName"])
         r = resources[ad["GLIDEIN_ResourceName"]]
         r["total_cpus"] += int(ad["CPUs"])
         if ad["State"] != "Unclaimed":
@@ -85,7 +85,6 @@ def cm_resources_info(collector):
                           projection=["GLIDEIN_ResourceName", "CPUs", "Disk", "Memory", "GLIDEIN_ToRetire"])
     now = time.time()
     for ad in ads:
-        init_resource(resources, ad["GLIDEIN_ResourceName"])
         r = resources[ad["GLIDEIN_ResourceName"]]
         if "GLIDEIN_ToRetire" in ad and int(ad["GLIDEIN_ToRetire"]) < now:
             r["idle_retirement_cpus"] += int(ad["CPUs"])
