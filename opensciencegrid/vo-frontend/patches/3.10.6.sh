@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 # Use git diff in the glideinwms checkout to generate the patch
-pushd /usr/lib/python3.9/site-packages/glideinwms
+SITE_PACKAGES=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+pushd $SITE_PACKAGES/glideinwms
 patch -p1 <<'__END_PATCH__'
 diff --git a/creation/lib/cvWCreate.py b/creation/lib/cvWCreate.py
 index f88353830..80e0c943a 100644
