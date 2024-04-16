@@ -8,8 +8,8 @@ from calendar import timegm
 from datetime import datetime
 
 import simplejson
-from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search
+from opensearchpy import OpenSearch
+from opensearchpy import Search
 
 log = logging.getLogger('accessamie')
 
@@ -44,7 +44,7 @@ class GRACC:
         if self.conf.has_option(conf_section, "project_name"):
             wildcardProjectName = self.conf.get(conf_section, "project_name")
 
-        # Elasticsearch query and aggregations
+        # OpenSearch query and aggregations
         s = Search(using=self._establish_client(), index=index) \
                 .query("wildcard", ProbeName=wildcardProbeNameq) \
                 .filter("wildcard", ProjectName=wildcardProjectName) \
@@ -76,7 +76,7 @@ class GRACC:
                 raise
             results = response.aggregations
         except Exception as e:
-            print(e, "Error accessing Elasticsearch")
+            print(e, "Error accessing Opensearch")
             sys.exit(1)
 
         # build our return data structure - it is a dict with some metadata, and then the actual data
@@ -146,7 +146,7 @@ class GRACC:
         '''
         Initialize and return the elasticsearch client
         '''
-        client = Elasticsearch([self.conf.get("gracc", "url")])
+        client = OpenSearch([self.conf.get("gracc", "url")])
         return client
 
     def _date_to_epoch(self, s):

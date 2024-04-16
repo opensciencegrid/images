@@ -5,7 +5,9 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
-RUN yum -y install \
+RUN yum -y clean all && \
+    rm -r /var/cache/dnf && \
+    yum -y install \
            curl \
            python3-devel \
            python3-pip \
@@ -14,7 +16,7 @@ RUN yum -y install \
     && \
     yum clean all
 
-RUN python3 -m pip install amieclient simplejson elasticsearch-dsl
+RUN python3 -m pip install amieclient simplejson opensearch-py
 
 # copy our app
 WORKDIR /opt/access-amie
