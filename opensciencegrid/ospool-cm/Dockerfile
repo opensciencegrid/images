@@ -47,8 +47,6 @@ COPY supervisord.conf /etc/supervisord.conf
 COPY 10-htcondor.conf /etc/supervisord.d/
 COPY 30-prometheus.conf /etc/supervisord.d/
 
-COPY 10-rotate-logs.sh /etc/osg/image-init.d/
-
 COPY ospool.cron /etc/cron.d/ospool
 
 ADD opt/ospool /opt/ospool

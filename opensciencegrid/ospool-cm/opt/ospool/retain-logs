@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# For performance reasons, the pods are set up to log to local
+# disk. This script is run from cron, and keeps copies of the
+# logs for a certain number of days.
+
+TARGET_DIR=save-$(date +'%Y%m%d')
+
+mkdir -p /state/htcondor/logs
+cd /state/htcondor/logs || exit 1
+
+mkdir -p $TARGET_DIR
+rsync -a /var/log/condor/. $TARGET_DIR/.
+
+# only keep the last N set of saved logs
+for OLD in $(ls -d -t save-*| tail -n +7); do
+    rm -rf $OLD
+done
+
