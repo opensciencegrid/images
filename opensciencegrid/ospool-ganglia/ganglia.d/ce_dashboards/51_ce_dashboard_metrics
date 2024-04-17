@@ -34,15 +34,6 @@
 ]
 [
   Aggregate = "SUM";
-  Name   = strcat("Cpus_User ",RemoteUser?:"Unknown");
-  Desc   = "Number of CPU cores provisioned per user";
-  Value  = Cpus;
-  Units  = "cores";
-  Requirements = ( State == "Claimed" || State=="Preempting" );
-  TargetType = "Machine";
-]
-[
-  Aggregate = "SUM";
   Name   = "CpusNotInUse";
   Desc   = "Number of CPU cores not provisioned";
   Value  = Cpus;
@@ -70,15 +61,6 @@
 ]
 [
   Aggregate = "SUM";
-  Name   = strcat("Memory_User ",RemoteUser?:"Unknown");
-  Desc   = "Amount of memory provisioned per user";
-  Value  = Memory;
-  Units  = "megabytes";
-  Requirements = ( State == "Claimed" || State=="Preempting" );
-  TargetType = "Machine";
-]
-[
-  Aggregate = "SUM";
   Name   = "MemoryNotInUse";
   Desc   = "Amount of memory not provisioned";
   Value  = Memory;
@@ -99,15 +81,6 @@
   Aggregate = "SUM";
   Name   = strcat("Gpus_Project ",replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown");
   Desc   = "Number of GPUs provisioned per project";
-  Value  = Gpus;
-  Units  = "devices";
-  Requirements = Gpus =!= UNDEFINED && ( State == "Claimed" || State=="Preempting" );
-  TargetType = "Machine";
-]
-[
-  Aggregate = "SUM";
-  Name   = strcat("Gpus_User ",RemoteUser?:"Unknown");
-  Desc   = "Number of GPUs provisioned per user";
   Value  = Gpus;
   Units  = "devices";
   Requirements = Gpus =!= UNDEFINED && ( State == "Claimed" || State=="Preempting" );
