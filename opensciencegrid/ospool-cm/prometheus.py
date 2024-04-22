@@ -34,7 +34,7 @@ ospool_submitter_held_jobs_count = Gauge("ospool_submitter_held_jobs_count", "Su
 
 def entry_factory():
     '''
-    Make sure we have a base enty for given resoure
+    Make sure we have a base entry for given resource
     '''
     entry = {
         "total_cpus": 0,
