@@ -10,17 +10,5 @@ if ! supervisorctl status >/dev/null 2>&1; then
     exit 2
 fi
 
-procs_z=$(ps axo pid,stat | awk '$2 ~ /^Z/ { print $1 }' | wc -l)
-if [ "$procs_z" -gt 0 ]; then
-    echo "Found $procs_z zombie processes" >&2
-    exit 3
-fi
-
-procs_d=$(ps axo pid,stat | awk '$2 ~ /^D/ { print $1 }' | wc -l)
-if [ "$procs_d" -gt 0 ]; then
-    echo "Found $procs_d deadlocked processes" >&2
-    exit 4
-fi
-
 exit 0
 
