@@ -27,6 +27,7 @@ RUN dnf -y distro-sync && \
       rrdtool \
       vim \
       wget \
+      lrzsz \
     && \
     dnf -y clean all && \
     mkdir -p /run/php-fpm
