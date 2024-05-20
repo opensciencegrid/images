@@ -16,6 +16,24 @@
 ]
 [
   Aggregate = "SUM";
+  Name   = "BcusInUse";
+  Desc   = "Number of 1core-4GB-4GB Basic Computing Units provisioned";
+  Value  = floor(min({totalslotcpus,totalslotmemory/1024/4,totalslotdisk/1024/1024/4}))-floor(min({cpus,Memory/1024/4,Disk/1024/1024/4}));
+  Units  = "Basic Computing Units";
+  Requirements = PartitionableSlot=?=True;
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
+  Name   = "BcusNotInUse";
+  Desc   = "Number of 1core-4GB-4GB Basic Computing Units not provisioned";
+  Value  = floor(min({cpus,Memory/1024/4,Disk/1024/1024/4}));
+  Units  = "Basic Computing Units";
+  Requirements = PartitionableSlot=?=True;
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
   Name   = "CpusInUse";
   Desc   = "Number of CPU cores provisioned for running jobs";
   Value  = Cpus;
