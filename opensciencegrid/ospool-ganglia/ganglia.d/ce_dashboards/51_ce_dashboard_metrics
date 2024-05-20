@@ -70,6 +70,33 @@
 ]
 [
   Aggregate = "SUM";
+  Name   = "DiskInUse";
+  Desc   = "Amount of disk provisioned";
+  Value  = Disk/1024.0/1024;
+  Units  = "gigabytes";
+  Requirements = ( State == "Claimed" || State=="Preempting" ) && Activity != "Idle" && Activity != "Suspended";
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
+  Name   = strcat("Disk_Project ",replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown");
+  Desc   = "Amount of disk provisioned per project";
+  Value  = Disk/1024.0/1024;
+  Units  = "gigabytes";
+  Requirements = ( State == "Claimed" || State=="Preempting" );
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
+  Name   = "DiskNotInUse";
+  Desc   = "Amount of disk not provisioned";
+  Value  = Disk/1024.0/1024;
+  Units  = "gigabytes";
+  Requirements = ( ( State == "Claimed" || State == "Preempting" ) && Activity != "Idle" && Activity != "Suspended" ) == false;
+  TargetType =  "Machine";
+]
+[
+  Aggregate = "SUM";
   Name   = "GpusInUse";
   Desc   = "Number of GPU devices provisioned";
   Value  = Gpus?:0;
