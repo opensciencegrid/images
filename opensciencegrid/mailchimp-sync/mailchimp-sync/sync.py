@@ -279,6 +279,7 @@ def main():
     connect_apply_tag(users, 'CMS',         'root.cms')
     connect_apply_tag(users, 'Duke',        'root.duke')
     connect_apply_tag(users, 'OSG-Connect', 'root.osg')
+    connect_apply_tag(users, 'Collab',      'root.collab')
     connect_apply_tag(users, 'SPT',         'root.spt')
     connect_apply_tag(users, 'UChicago',    'root.uchicago')
     connect_apply_tag(users, 'XENONnT',     'root.xenon1t')
