@@ -23,3 +23,7 @@ trap "$STARTSTOPSCRIPT stop" TERM
 export SQUID_START_ARGS="--foreground"
 $STARTSTOPSCRIPT start &
 wait
+
+# Halt the supervisord init process after squid exits
+# Per https://github.com/Supervisor/supervisor/issues/712
+kill -s SIGINT `cat /var/run/supervisord.pid`
