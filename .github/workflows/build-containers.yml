@@ -110,7 +110,7 @@ jobs:
     if: >-
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
-      github.repository_owner == 'opensciencegrid' &&
+      github.repository_owner == 'PPathu' &&
       needs.build-image-list.outputs.images != '["dummy"]'
     needs: [make-date-tag, build-image-list, build]
     strategy:
