@@ -32,6 +32,14 @@ jobs:
       - id: image-list
         run: |
           ORG_DIR=opensciencegrid
+          # Get the list of files changed based on the type of event
+          # kicking off the GHA:
+          # 1. For the main branch, diff the previous state of main vs
+          #    the current commit
+          # 2. For other branches (i.e., on someone's fork), diff main
+          #    vs the current commit
+          # 3. For PRs, diff the base ref vs the current commit
+          # 4. For everything else (e.g., dispatches), build all images
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] || [[ $GITHUB_EVENT_NAME == 'push' ]]; then
             if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
               BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
@@ -46,6 +54,8 @@ jobs:
           fi
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "json=$image_json" >> $GITHUB_OUTPUT
+          
+          #Debugging
           echo "Generated image list: $image_json"
 
   build:
