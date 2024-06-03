@@ -3,6 +3,9 @@ name: Build and push container images
 
 on:
   push:
+    branches:
+      - main
+      - testing-branch
   pull_request:
   workflow_dispatch:
   repository_dispatch:
