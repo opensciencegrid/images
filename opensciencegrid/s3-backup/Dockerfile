@@ -7,6 +7,5 @@ RUN microdnf install -y tar xz && \
 
 COPY s3-backup.sh /usr/local/bin/
 COPY --from=mc /usr/bin/mc /usr/bin
-COPY config.ini /etc/
 
 ENTRYPOINT ["/usr/local/bin/s3-backup.sh"]
