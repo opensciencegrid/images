@@ -1,6 +1,6 @@
 ARG BASE_OSG_SERIES=3.6
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-al8-release
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-release
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 # Install dependencies
