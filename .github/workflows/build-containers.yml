@@ -24,15 +24,15 @@ jobs:
         run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT  # Command to generate a date tag and set it as output
 
   build-image-list:
-    runs-on: ubuntu-latest  # Job runs on the latest version of Ubuntu
+    runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.image-list.outputs.json }}  # Output variable 'images' from the step 'image-list'
+      images: ${{ steps.image-list.outputs.json }}
     steps:
-      - uses: actions/checkout@v4  # Check out the repository
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch the entire history
+          fetch-depth: 0
 
-      - id: image-list  # ID of the step
+      - id: image-list
         run: |
           ORG_DIR=opensciencegrid
           # Get the list of files changed based on the type of event
@@ -43,27 +43,42 @@ jobs:
           #    vs the current commit
           # 3. For PRs, diff the base ref vs the current commit
           # 4. For everything else (e.g., dispatches), build all images
-          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] || [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-            if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-              BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)  # Base commit for pull requests
-            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-              BASE=${{ github.event.before }}  # Base commit for main branch pushes
-            else
-              BASE=origin/main  # Base commit for other branch pushes
-            fi
-            # List of changed directories
-            images=$(git diff --name-only "$BASE" "$GITHUB_SHA" |
-             egrep "^$ORG_DIR/" | cut -d/ -f -2 | sort | uniq | xargs -I {} find . -type
-              d -wholename ./{} -printf "%P\n")
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
+             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+                   BASE=${{github.event.before}}
+               else
+                   BASE=origin/main
+               fi
+               # List image root dirs where files have changed and the
+               # root dir exists. Example value:
+               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
+               images=$(git diff --name-only \
+                                 "$BASE" \
+                                 "$GITHUB_SHA" |
+                        egrep "^$ORG_DIR/" |
+                        cut -d/ -f -2 |
+                        sort |
+                        uniq |
+                        xargs -I {} find . -type d \
+                                           -wholename ./{} \
+                                           -printf "%P\n")
           else
-            # Build all images for other events
-            images=$(find $ORG_DIR -mindepth 1 -maxdepth 1 -type d -printf "$ORG_DIR/%P\n")
+               # List all image root dirs. Example value:
+               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
+               images=$(find $ORG_DIR -mindepth 1 \
+                                      -maxdepth 1 \
+                                      -type d \
+                                      -printf "$ORG_DIR/%P\n")
           fi
-          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')  # Convert list to JSON format
-          echo "json=$image_json" >> $GITHUB_OUTPUT  # Set JSON output
-          
-          # Debugging: Print generated image list
-          echo "Generated image list: $image_json"
+
+          # Ensure that the generated JSON array has a member,
+          # otherwise GHA will throw an error about an empty matrix
+          # vector in subsequent steps
+          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
+          echo "json=$image_json" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest  # Job runs on the latest version of Ubuntu
