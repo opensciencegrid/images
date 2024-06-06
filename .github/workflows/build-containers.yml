@@ -1,35 +1,38 @@
+# Name of the workflow
 name: Build and push container images
 
+# Events that trigger the workflow
 on:
   push:
     branches:
-      - main
-      - testing-branch
-  pull_request:
-  workflow_dispatch:
+      - main  # Trigger on push to the main branch
+      - testing-branch  # Trigger on push to the testing-branch
+  pull_request:  # Trigger on pull requests
+  workflow_dispatch:  # Manual trigger from GitHub UI
   repository_dispatch:
-    types: [dispatch-build]
+    types: [dispatch-build]  # Trigger on custom repository dispatch events of type 'dispatch-build'
 
+# Jobs to be executed
 jobs:
   make-date-tag:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Job runs on the latest version of Ubuntu
     outputs:
-      dtag: ${{ steps.mkdatetag.outputs.dtag }}
+      dtag: ${{ steps.mkdatetag.outputs.dtag }}  # Output variable 'dtag' from the step 'mkdatetag'
     steps:
-      - name: make date tag
-        id: mkdatetag
-        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+      - name: make date tag  # Name of the step
+        id: mkdatetag  # ID of the step
+        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT  # Command to generate a date tag and set it as output
 
   build-image-list:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Job runs on the latest version of Ubuntu
     outputs:
-      images: ${{ steps.image-list.outputs.json }}
+      images: ${{ steps.image-list.outputs.json }}  # Output variable 'images' from the step 'image-list'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4  # Check out the repository
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Fetch the entire history
 
-      - id: image-list
+      - id: image-list  # ID of the step
         run: |
           ORG_DIR=opensciencegrid
           # Get the list of files changed based on the type of event
@@ -42,52 +45,56 @@ jobs:
           # 4. For everything else (e.g., dispatches), build all images
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] || [[ $GITHUB_EVENT_NAME == 'push' ]]; then
             if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-              BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+              BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)  # Base commit for pull requests
             elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-              BASE=${{ github.event.before }}
+              BASE=${{ github.event.before }}  # Base commit for main branch pushes
             else
-              BASE=origin/main
+              BASE=origin/main  # Base commit for other branch pushes
             fi
-            images=$(git diff --name-only "$BASE" "$GITHUB_SHA" | egrep "^$ORG_DIR/" | cut -d/ -f -2 | sort | uniq | xargs -I {} find . -type d -wholename ./{} -printf "%P\n")
+            # List of changed directories
+            images=$(git diff --name-only "$BASE" "$GITHUB_SHA" |
+             egrep "^$ORG_DIR/" | cut -d/ -f -2 | sort | uniq | xargs -I {} find . -type
+              d -wholename ./{} -printf "%P\n")
           else
+            # Build all images for other events
             images=$(find $ORG_DIR -mindepth 1 -maxdepth 1 -type d -printf "$ORG_DIR/%P\n")
           fi
-          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
-          echo "json=$image_json" >> $GITHUB_OUTPUT
+          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')  # Convert list to JSON format
+          echo "json=$image_json" >> $GITHUB_OUTPUT  # Set JSON output
           
-          #Debugging
+          # Debugging: Print generated image list
           echo "Generated image list: $image_json"
 
   build:
-    runs-on: ubuntu-latest
-    needs: build-image-list
-    if: needs.build-image-list.outputs.images != '["dummy"]'
-    continue-on-error: true
+    runs-on: ubuntu-latest  # Job runs on the latest version of Ubuntu
+    needs: build-image-list  # Job depends on 'build-image-list' job
+    if: needs.build-image-list.outputs.images != '["dummy"]'  # Only run if there are valid images to build
+    continue-on-error: true  # Continue even if there are errors
     strategy:
-      fail-fast: false
+      fail-fast: false  # Do not stop all jobs if one job fails
       matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
-        yum_repo: ['development', 'testing', 'release']
+        image: ${{ fromJson(needs.build-image-list.outputs.images) }}  # Matrix of images to build
+        yum_repo: ['development', 'testing', 'release']  # Matrix of yum repositories
         series:
           - name: '3.6'
             os: 'el7'
           - name: '23'
             os: 'el9'
     steps:
-      - name: Build ${{ matrix.image }}:${{ matrix.series }}-${{ matrix.yum_repo }}
-        continue-on-error: ${{ matrix.yum_repo == 'development' }}
-        uses: opensciencegrid/build-container-action@v0.6.0
+      - name: Build ${{ matrix.image }}:${{ matrix.series }}-${{ matrix.yum_repo }}  # Step to build the image
+        continue-on-error: ${{ matrix.yum_repo == 'development' }}  # Continue on error only for 'development' repo
+        uses: opensciencegrid/build-container-action@v0.6.0  # Use the build-container-action from Open Science Grid
         with:
-          osg_series: ${{ matrix.series.name }}
-          osg_repo: ${{ matrix.yum_repo }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ matrix.series.name }}  # OSG series name
+          osg_repo: ${{ matrix.yum_repo }}  # Yum repository
+          context: ${{ matrix.image }}  # Build context (image directory)
+          base_os: ${{ matrix.series.os }}  # Base operating system
 
   push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Job runs on the latest version of Ubuntu
     if: >-
-      github.ref == 'refs/heads/main' &&
-      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main' && 
+      github.event_name != 'pull_request' && 
       github.repository_owner == 'PPathu' &&
       needs.build-image-list.outputs.images != '["dummy"]'
     needs: [make-date-tag, build-image-list, build]
@@ -101,74 +108,74 @@ jobs:
           - name: '23'
             os: 'el9'
     steps:
-      - name: Push to Harbor (${{ matrix.series }}-development)
-        if: matrix.series.name != '23'
-        uses: opensciencegrid/push-container-action@main
+      - name: Push to Harbor (${{ matrix.series }}-development)  # Step to push to Harbor development repo
+        if: matrix.series.name != '23'  # Skip if the series name is '23'
+        uses: opensciencegrid/push-container-action@main  # Use the push-container-action from Open Science Grid
         with:
-          repo: development
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          repo: development  # Push to the development repository
+          osg_series: ${{ matrix.series.name }}  # OSG series name
+          context: ${{ matrix.image }}  # Image context
+          base_os: ${{ matrix.series.os }}  # Base operating system
+          registry_url: hub.opensciencegrid.org  # Harbor registry URL
+          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}  # Harbor registry user from secrets
+          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}  # Harbor registry password from secrets
 
-      - name: Push to Harbor (${{ matrix.series.name }}-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Push to Harbor (${{ matrix.series.name }}-testing)  # Step to push to Harbor testing repo
+        if: always()  # Always run this step
+        uses: opensciencegrid/push-container-action@main  # Use the push-container-action from Open Science Grid
         with:
-          repo: testing
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          repo: testing  # Push to the testing repository
+          osg_series: ${{ matrix.series.name }}  # OSG series name
+          context: ${{ matrix.image }}  # Image context
+          base_os: ${{ matrix.series.os }}  # Base operating system
+          registry_url: hub.opensciencegrid.org  # Harbor registry URL
+          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}  # Harbor registry user from secrets
+          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}  # Harbor registry password from secrets
 
-      - name: Push to Harbor (${{ matrix.series.name }}-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Push to Harbor (${{ matrix.series.name }}-release)  # Step to push to Harbor release repo
+        if: always()  # Always run this step
+        uses: opensciencegrid/push-container-action@main  # Use the push-container-action from Open Science Grid
         with:
-          repo: release
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          repo: release  # Push to the release repository
+          osg_series: ${{ matrix.series.name }}  # OSG series name
+          context: ${{ matrix.image }}  # Image context
+          base_os: ${{ matrix.series.os }}  # Base operating system
+          registry_url: hub.opensciencegrid.org  # Harbor registry URL
+          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}  # Harbor registry user from secrets
+          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}  # Harbor registry password from secrets
 
-      - name: Push to Docker Hub (${{ matrix.series.name }}-development)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Push to Docker Hub (${{ matrix.series.name }}-development)  # Step to push to Docker Hub development repo
+        if: always()  # Always run this step
+        uses: opensciencegrid/push-container-action@main  # Use the push-container-action from Open Science Grid
         with:
-          repo: development
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+          repo: development  # Push to the development repository
+          osg_series: ${{ matrix.series.name }}  # OSG series name
+          context: ${{ matrix.image }}  # Image context
+          base_os: ${{ matrix.series.os }}  # Base operating system
+          registry_url: docker.io  # Docker Hub registry URL
+          registry_user: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub registry user from secrets
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub registry password from secrets
 
-      - name: Push to Docker Hub (${{ matrix.series.name }}-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Push to Docker Hub (${{ matrix.series.name }}-testing)  # Step to push to Docker Hub testing repo
+        if: always()  # Always run this step
+        uses: opensciencegrid/push-container-action@main  # Use the push-container-action from Open Science Grid
         with:
-          repo: testing
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+          repo: testing  # Push to the testing repository
+          osg_series: ${{ matrix.series.name }}  # OSG series name
+          context: ${{ matrix.image }}  # Image context
+          base_os: ${{ matrix.series.os }}  # Base operating system
+          registry_url: docker.io  # Docker Hub registry URL
+          registry_user: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub registry user from secrets
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub registry password from secrets
 
-      - name: Push to Docker Hub (${{ matrix.series.name }}-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Push to Docker Hub (${{ matrix.series.name }}-release)  # Step to push to Docker Hub release repo
+        if: always()  # Always run this step
+        uses: opensciencegrid/push-container-action@main  # Use the push-container-action from Open Science Grid
         with:
-          repo: release
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+          repo: release  # Push to the release repository
+          osg_series: ${{ matrix.series.name }}  # OSG series name
+          context: ${{ matrix.image }}  # Image context
+          base_os: ${{ matrix.series.os }}  # Base operating system
+          registry_url: docker.io  # Docker Hub registry URL
+          registry_user: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub registry user from secrets
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub registry password from secrets
