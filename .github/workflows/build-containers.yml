@@ -81,10 +81,10 @@ jobs:
             mkdir -p "${{ matrix.image }}"
             echo '{' > "${{ matrix.image }}/build-config.json"
             echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_name": "default_os",' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_version": "default_version"' >> "${{ matrix.image }}/build-config.json"
+            echo '    "base_name": "el9",' >> "${{ matrix.image }}/build-config.json"
+            echo '    "base_version": "23"' >> "${{ matrix.image }}/build-config.json"
             echo '  },' >> "${{ matrix.image }}/build-config.json"
-            echo '  "base_repo": "default-repo"' >> "${{ matrix.image }}/build-config.json"
+            echo '  "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json"
             echo '}' >> "${{ matrix.image }}/build-config.json"
           else
             echo "build-config.json exists in ${{ matrix.image }}"
