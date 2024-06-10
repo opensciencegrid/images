@@ -1,27 +1,25 @@
-# Name of the workflow
 name: Build and push container images
 
-# Events that trigger the workflow
 on:
   push:
     branches:
       - main  # Trigger on push to the main branch
       - testing-branch  # Trigger on push to the testing-branch
   pull_request:  # Trigger on pull requests
-  workflow_dispatch:  # Manual trigger from GitHub UI
+  workflow_dispatch:  
   repository_dispatch:
-    types: [dispatch-build]  # Trigger on custom repository dispatch events of type 'dispatch-build'
+    types: [dispatch-build]  
 
 # Jobs to be executed
 jobs:
   make-date-tag:
     runs-on: ubuntu-latest  # Job runs on the latest version of Ubuntu
     outputs:
-      dtag: ${{ steps.mkdatetag.outputs.dtag }}  # Output variable 'dtag' from the step 'mkdatetag'
+      dtag: ${{ steps.mkdatetag.outputs.dtag }} 
     steps:
-      - name: make date tag  # Name of the step
-        id: mkdatetag  # ID of the step
-        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT  # Command to generate a date tag and set it as output
+      - name: make date tag  
+        id: mkdatetag 
+        run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT  
 
   build-image-list:
     runs-on: ubuntu-latest
@@ -80,11 +78,11 @@ jobs:
             echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
             mkdir -p "${{ matrix.image }}"
             echo '{' > "${{ matrix.image }}/build-config.json"
-            echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_name": "el9",' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_version": "23"' >> "${{ matrix.image }}/build-config.json"
+            echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json" 
+            echo '    "base_name": "el9",' >> "${{ matrix.image }}/build-config.json" # Default base OS 
+            echo '    "base_version": "23"' >> "${{ matrix.image }}/build-config.json" # Default base OS version
             echo '  },' >> "${{ matrix.image }}/build-config.json"
-            echo '  "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json"
+            echo '  "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json" #Default base repo
             echo '}' >> "${{ matrix.image }}/build-config.json"
           else
             echo "build-config.json exists in ${{ matrix.image }}"
