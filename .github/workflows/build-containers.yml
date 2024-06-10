@@ -78,6 +78,7 @@ jobs:
         run: |
           if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
             echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
+            mkdir -p "${{ matrix.image }}"
             echo '{' > "${{ matrix.image }}/build-config.json"
             echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json"
             echo '    "base_name": "default_os",' >> "${{ matrix.image }}/build-config.json"
