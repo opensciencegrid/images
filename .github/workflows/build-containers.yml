@@ -78,18 +78,16 @@ jobs:
         run: |
           if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
             echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
-            cat <<EOF >${{ matrix.image }}/build-config.json
-            {
-              "base_os": {
-                "base_name": "default_os",
-                "base_version": "default_version"
-              },
-              "base_repo": "default-repo"
-            }
-            EOF
-                    else
-                      echo "build-config.json exists in ${{ matrix.image }}"
-                    fi
+            echo '{' > "${{ matrix.image }}/build-config.json"
+            echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json"
+            echo '    "base_name": "default_os",' >> "${{ matrix.image }}/build-config.json"
+            echo '    "base_version": "default_version"' >> "${{ matrix.image }}/build-config.json"
+            echo '  },' >> "${{ matrix.image }}/build-config.json"
+            echo '  "base_repo": "default-repo"' >> "${{ matrix.image }}/build-config.json"
+            echo '}' >> "${{ matrix.image }}/build-config.json"
+          else
+            echo "build-config.json exists in ${{ matrix.image }}"
+          fi
 
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-jsonfile
