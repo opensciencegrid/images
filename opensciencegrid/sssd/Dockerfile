@@ -2,6 +2,7 @@ ARG BASE_OS=el9
 ARG BASE_OSG_SERIES=23
 ARG BASE_YUM_REPO=release
 
+
 # Run sssd via supervisord.
 #
 # Containers must populate /etc/sssd with configuration for the daemon.
