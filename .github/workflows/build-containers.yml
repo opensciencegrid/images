@@ -87,9 +87,9 @@ jobs:
               "base_repo": "default-repo"
             }
             EOF
-          else
-            echo "build-config.json exists in ${{ matrix.image }}"
-          fi
+                    else
+                      echo "build-config.json exists in ${{ matrix.image }}"
+                    fi
 
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-jsonfile
