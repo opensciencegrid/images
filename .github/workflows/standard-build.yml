@@ -96,9 +96,9 @@ jobs:
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
-          osg_series: ${{ env.base_version }}
-          context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          osg_series: ${{ matrix.series.name }} # OSG series name
+          context: ${{ matrix.image }} # Image context
+          base_os: ${{ matrix.series.os }} # Base operating system
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
