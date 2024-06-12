@@ -1,4 +1,4 @@
-name: Main Workflow
+name: buid-containers
 
 on:
   push:
@@ -32,86 +32,77 @@ jobs:
       - id: image-list
         run: |
           ORG_DIR=opensciencegrid
-          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] || [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-            if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-              BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-              BASE=${{github.event.before}}
-            else
-              BASE=origin/main
-            fi
-            images=$(git diff --name-only "$BASE" "$GITHUB_SHA" |
-              egrep "^$ORG_DIR/" |
-              cut -d/ -f -2 |
-              sort |
-              uniq |
-              xargs -I {} find . -type d \
-                -wholename ./{} \
-                -printf "%P\n")
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
+             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+                   BASE=${{github.event.before}}
+               else
+                   BASE=origin/main
+               fi
+               images=$(git diff --name-only \
+                                 "$BASE" \
+                                 "$GITHUB_SHA" |
+                        egrep "^$ORG_DIR/" |
+                        cut -d/ -f -2 |
+                        sort |
+                        uniq |
+                        xargs -I {} find . -type d \
+                                           -wholename ./{} \
+                                           -printf "%P\n")
           else
-            images=$(find $ORG_DIR -mindepth 1 -maxdepth 1 -type d -printf "$ORG_DIR/%P\n")
+               images=$(find $ORG_DIR -mindepth 1 \
+                                      -maxdepth 1 \
+                                      -type d \
+                                      -printf "$ORG_DIR/%P\n")
           fi
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "json=$image_json" >> $GITHUB_OUTPUT
 
   check-config:
     runs-on: ubuntu-latest
-    needs: build-image-list
+    needs: [make-date-tag, build-image-list]
     outputs:
       standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
       repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Check for build-config.json in images
+      - name: Check for build-config.json in ${{ matrix.image }}
         id: check-jsonfile
         run: |
-          images=${{ needs.build-image-list.outputs.images }}
-          echo $images | jq -c '.[]' | while read image; do
-            if [ ! -f "$image/build-config.json" ]; then
-              echo "No build-config.json found in $image. Creating default build-config.json."
-              mkdir -p "$image"
-              echo '{' > "$image/build-config.json"
-              echo '  "standard_build": {' >> "$image/build-config.json"
-              echo '    "enabled": true,' >> "$image/build-config.json"
-              echo '    "base_os": {' >> "$image/build-config.json"
-              echo '      "base_name": "el7",' >> "$image/build-config.json"
-              echo '      "base_version": "3.6"' >> "$image/build-config.json"
-              echo '    },' >> "$image/build-config.json"
-              echo '    "base_repo": "development"' >> "$image/build-config.json"
-              echo '  },' >> "$image/build-config.json"
-              echo '  "repo_build": {' >> "$image/build-config.json"
-              echo '    "enabled": false,' >> "$image/build-config.json"
-              echo '    "base_os": {' >> "$image/build-config.json"
-              echo '      "base_name": "",' >> "$image/build-config.json"
-              echo '      "base_version": ""' >> "$image/build-config.json"
-              echo '    },' >> "$image/build-config.json"
-              echo '    "base_repo": ""' >> "$image/build-config.json"
-              echo '  }' >> "$image/build-config.json"
-              echo '}' >> "$image/build-config.json"
-            else
-              echo "build-config.json exists in $image"
-            fi
-          done
+          if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
+            echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
+            mkdir -p "${{ matrix.image }}"
+            echo '{' > "${{ matrix.image }}/build-config.json"
+            echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json"
+            echo '    "base_name": "el9",' >> "${{ matrix.image }}/build-config.json" # Default base OS
+            echo '    "base_version": "23"' >> "${{ matrix.image }}/build-config.json" # Default base OS version
+            echo '  },' >> "${{ matrix.image }}/build-config.json"
+            echo '  "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json" # Default base repo
+            echo '}' >> "${{ matrix.image }}/build-config.json"
+          else
+            echo "build-config.json exists in ${{ matrix.image }}"
+          fi
 
-      - name: Read build-config.json
+      - name: Read build-config.json in ${{ matrix.image }}
         id: read-config
         run: |
-          images=${{ needs.build-image-list.outputs.images }}
-          for image in $(echo $images | jq -r '.[]'); do
-            config=$(cat $image/build-config.json)
-            standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
-            repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
-            echo "standard_enabled=$standard_enabled" >> $GITHUB_ENV
-            echo "repo_enabled=$repo_enabled" >> $GITHUB_ENV
-          done
+          config=$(cat ${{ matrix.image }}/build-config.json)
+          standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
+          repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
           echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
           echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
 
       - name: Trigger standard build workflow
-        if: ${{ needs.check-config.outputs.standard_enabled == 'true' }}
+        if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -119,11 +110,12 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'standard-build.yml',
-              ref: context.ref
+              ref: context.ref,
+              inputs: { image: ${{ matrix.image }} }
             })
 
       - name: Trigger repo build workflow
-        if: ${{ needs.check-config.outputs.repo_enabled == 'true' }}
+        if: ${{ steps.read-config.outputs.repo_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -131,11 +123,12 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'repo-build.yml',
-              ref: context.ref
+              ref: context.ref,
+              inputs: { image: ${{ matrix.image }} }
             })
 
       - name: Trigger both build workflows
-        if: ${{ needs.check-config.outputs.standard_enabled == 'true' && needs.check-config.outputs.repo_enabled == 'true' }}
+        if: ${{ steps.read-config.outputs.standard_enabled == 'true' && steps.read-config.outputs.repo_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -143,11 +136,13 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'standard-build.yml',
-              ref: context.ref
+              ref: context.ref,
+              inputs: { image: ${{ matrix.image }} }
             })
             github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'repo-build.yml',
-              ref: context.ref
+              ref: context.ref,
+              inputs: { image: ${{ matrix.image }} }
             })

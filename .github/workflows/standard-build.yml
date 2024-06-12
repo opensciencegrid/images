@@ -114,4 +114,24 @@ jobs:
 
       - name: Push to Docker Hub (${{ env.base_version }}-testing)
         if: always()
-        uses: openscience
+        uses: opensciencegrid/push-container-action@main
+        with:
+          repo: testing
+          osg_series: ${{ env.base_version }}
+          context: ${{ github.event.inputs.image }}
+          base_os: ${{ env.base_name }}
+          registry_url: docker.io
+          registry_user: ${{ secrets.DOCKER_USERNAME }}
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to Docker Hub (${{ env.base_version }}-release)
+        if: always()
+        uses: opensciencegrid/push-container-action@main
+        with:
+          repo: release
+          osg_series: ${{ env.base_version }}
+          context: ${{ github.event.inputs.image }}
+          base_os: ${{ env.base_name }}
+          registry_url: docker.io
+          registry_user: ${{ secrets.DOCKER_USERNAME }}
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
