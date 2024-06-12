@@ -1,4 +1,4 @@
-name: buid-containers
+name: Main Workflow
 
 on:
   push:
