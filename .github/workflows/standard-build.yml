@@ -65,7 +65,7 @@ jobs:
           BASE_REPO: ${{ env.base_repo }}
 
       - name: Push to Harbor (${{ env.base_version }}-development)
-        if: always()
+        if: env.base_repo == 'development'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
@@ -77,7 +77,7 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Harbor (${{ env.base_version }}-testing)
-        if: always()
+        if: env.base_repo == 'testing'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
@@ -89,7 +89,7 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Harbor (${{ env.base_version }}-release)
-        if: always()
+        if: env.base_repo == 'release'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
@@ -101,7 +101,7 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Docker Hub (${{ env.base_version }}-development)
-        if: always()
+        if: env.base_repo == 'development'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
@@ -113,7 +113,7 @@ jobs:
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub (${{ env.base_version }}-testing)
-        if: always()
+        if: env.base_repo == 'testing'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
@@ -125,7 +125,7 @@ jobs:
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub (${{ env.base_version }}-release)
-        if: always()
+        if: env.base_repo == 'release'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
