@@ -2,6 +2,10 @@ name: Standard Build
 
 on:
   workflow_dispatch:
+    inputs:
+      image:
+        description: 'Image to build'
+        required: true
 
 jobs:
   build-standard:
@@ -15,59 +19,27 @@ jobs:
         id: mkdatetag
         run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
 
-      - name: Build image list
-        id: image-list
-        run: |
-          ORG_DIR=opensciencegrid
-          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
-             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-                   BASE=${{github.event.before}}
-               else
-                   BASE=origin/main
-               fi
-               images=$(git diff --name-only \
-                                 "$BASE" \
-                                 "$GITHUB_SHA" |
-                        egrep "^$ORG_DIR/" |
-                        cut -d/ -f -2 |
-                        sort |
-                        uniq |
-                        xargs -I {} find . -type d \
-                                           -wholename ./{} \
-                                           -printf "%P\n")
-          else
-               images=$(find $ORG_DIR -mindepth 1 \
-                                      -maxdepth 1 \
-                                      -type d \
-                                      -printf "$ORG_DIR/%P\n")
-          fi
-          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
-          echo "json=$image_json" >> $GITHUB_OUTPUT
-
-      - name: Check for build-config.json in ${{ matrix.image }}
+      - name: Check for build-config.json in ${{ github.event.inputs.image }}
         id: check-jsonfile
         run: |
-          if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
-            echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
-            mkdir -p "${{ matrix.image }}"
-            echo '{' > "${{ matrix.image }}/build-config.json"
-            echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_name": "el9",' >> "${{ matrix.image }}/build-config.json" # Default base OS
-            echo '    "base_version": "23"' >> "${{ matrix.image }}/build-config.json" # Default base OS version
-            echo '  },' >> "${{ matrix.image }}/build-config.json"
-            echo '  "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json" # Default base repo
-            echo '}' >> "${{ matrix.image }}/build-config.json"
+          if [ ! -f "${{ github.event.inputs.image }}/build-config.json" ]; then
+            echo "No build-config.json found in ${{ github.event.inputs.image }}. Creating default build-config.json."
+            mkdir -p "${{ github.event.inputs.image }}"
+            echo '{' > "${{ github.event.inputs.image }}/build-config.json"
+            echo '  "base_os": {' >> "${{ github.event.inputs.image }}/build-config.json"
+            echo '    "base_name": "el9",' >> "${{ github.event.inputs.image }}/build-config.json" # Default base OS
+            echo '    "base_version": "23"' >> "${{ github.event.inputs.image }}/build-config.json" # Default base OS version
+            echo '  },' >> "${{ github.event.inputs.image }}/build-config.json"
+            echo '  "base_repo": "testing"' >> "${{ github.event.inputs.image }}/build-config.json" # Default base repo
+            echo '}' >> "${{ github.event.inputs.image }}/build-config.json"
           else
-            echo "build-config.json exists in ${{ matrix.image }}"
+            echo "build-config.json exists in ${{ github.event.inputs.image }}"
           fi
 
-      - name: Read build-config.json in ${{ matrix.image }}
+      - name: Read build-config.json in ${{ github.event.inputs.image }}
         id: read-jsonfile
         run: |
-          config=$(cat ${{ matrix.image }}/build-config.json)
+          config=$(cat ${{ github.event.inputs.image }}/build-config.json)
           base_name=$(echo $config | jq -r '.base_os.base_name')
           base_version=$(echo $config | jq -r '.base_os.base_version')
           base_repo=$(echo $config | jq -r '.base_repo')
@@ -78,14 +50,14 @@ jobs:
           echo "base_version=$base_version" >> $GITHUB_ENV
           echo "base_repo=$base_repo" >> $GITHUB_ENV
 
-      - name: Build ${{ matrix.image }}:${{ env.base_name }}-${{ env.base_repo }}
+      - name: Build ${{ github.event.inputs.image }}:${{ env.base_name }}-${{ env.base_repo }}
         if: steps.check-jsonfile.conclusion == 'success'
         continue-on-error: ${{ env.base_repo == 'development' }}
         uses: opensciencegrid/build-container-action@v0.6.0
         with:
           osg_series: ${{ env.base_version }}
           osg_repo: ${{ env.base_repo }}
-          context: ${{ matrix.image }}
+          context: ${{ github.event.inputs.image }}
           base_os: ${{ env.base_name }}
         env:
           BASE_NAME: ${{ env.base_name }}
@@ -98,7 +70,7 @@ jobs:
         with:
           repo: development
           osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
+          context: ${{ github.event.inputs.image }}
           base_os: ${{ env.base_name }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
@@ -110,7 +82,7 @@ jobs:
         with:
           repo: testing
           osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
+          context: ${{ github.event.inputs.image }}
           base_os: ${{ env.base_name }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
@@ -122,7 +94,7 @@ jobs:
         with:
           repo: release
           osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
+          context: ${{ github.event.inputs.image }}
           base_os: ${{ env.base_name }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
@@ -134,7 +106,7 @@ jobs:
         with:
           repo: development
           osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
+          context: ${{ github.event.inputs.image }}
           base_os: ${{ env.base_name }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
@@ -142,4 +114,24 @@ jobs:
 
       - name: Push to Docker Hub (${{ env.base_version }}-testing)
         if: always()
-        uses: openscience
+        uses: opensciencegrid/push-container-action@main
+        with:
+          repo: testing
+          osg_series: ${{ env.base_version }}
+          context: ${{ github.event.inputs.image }}
+          base_os: ${{ env.base_name }}
+          registry_url: docker.io
+          registry_user: ${{ secrets.DOCKER_USERNAME }}
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to Docker Hub (${{ env.base_version }}-release)
+        if: always()
+        uses: opensciencegrid/push-container-action@main
+        with:
+          repo: release
+          osg_series: ${{ env.base_version }}
+          context: ${{ github.event.inputs.image }}
+          base_os: ${{ env.base_name }}
+          registry_url: docker.io
+          registry_user: ${{ secrets.DOCKER_USERNAME }}
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
