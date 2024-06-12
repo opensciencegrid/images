@@ -1,7 +1,19 @@
 {
+  "standard_build": {
+    "enabled": true,
     "base_os": {
       "base_name": "el7",
       "base_version": "3.6"
     },
     "base_repo": "development"
+  },
+  
+  "repo_build": {
+    "enabled": false,
+    "base_os": {
+      "base_name": "",
+      "base_version": ""
+    },
+    "base_repo": ""
   }
+}
