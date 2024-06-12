@@ -106,43 +106,55 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            github.rest.actions.createWorkflowDispatch({
+            const result = await github.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'standard-build.yml',
               ref: context.ref,
-              inputs: { image: ${{ matrix.image }} }
-            })
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result);
 
       - name: Trigger repo build workflow
         if: ${{ steps.read-config.outputs.repo_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
-            github.rest.actions.createWorkflowDispatch({
+            const result = await github.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'repo-build.yml',
               ref: context.ref,
-              inputs: { image: ${{ matrix.image }} }
-            })
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result);
 
       - name: Trigger both build workflows
         if: ${{ steps.read-config.outputs.standard_enabled == 'true' && steps.read-config.outputs.repo_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
-            github.rest.actions.createWorkflowDispatch({
+            const result1 = await github.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'standard-build.yml',
               ref: context.ref,
-              inputs: { image: ${{ matrix.image }} }
-            })
-            github.rest.actions.createWorkflowDispatch({
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result1);
+            const result2 = await github.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'repo-build.yml',
               ref: context.ref,
-              inputs: { image: ${{ matrix.image }} }
-            })
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result2);
