@@ -1,4 +1,4 @@
-name: build-containers.yml
+name: Main Workflow
 
 on:
   push:

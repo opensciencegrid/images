@@ -47,6 +47,37 @@ jobs:
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "json=$image_json" >> $GITHUB_OUTPUT
 
+      - name: Check for build-config.json in ${{ matrix.image }}
+        id: check-jsonfile
+        run: |
+          if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
+            echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
+            mkdir -p "${{ matrix.image }}"
+            echo '{' > "${{ matrix.image }}/build-config.json"
+            echo '  "base_os": {' >> "${{ matrix.image }}/build-config.json"
+            echo '    "base_name": "el9",' >> "${{ matrix.image }}/build-config.json" # Default base OS
+            echo '    "base_version": "23"' >> "${{ matrix.image }}/build-config.json" # Default base OS version
+            echo '  },' >> "${{ matrix.image }}/build-config.json"
+            echo '  "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json" # Default base repo
+            echo '}' >> "${{ matrix.image }}/build-config.json"
+          else
+            echo "build-config.json exists in ${{ matrix.image }}"
+          fi
+
+      - name: Read build-config.json in ${{ matrix.image }}
+        id: read-jsonfile
+        run: |
+          config=$(cat ${{ matrix.image }}/build-config.json)
+          base_name=$(echo $config | jq -r '.base_os.base_name')
+          base_version=$(echo $config | jq -r '.base_os.base_version')
+          base_repo=$(echo $config | jq -r '.base_repo')
+          echo "Base name: $base_name"
+          echo "Base version: $base_version"
+          echo "Base repo: $base_repo"
+          echo "base_name=$base_name" >> $GITHUB_ENV
+          echo "base_version=$base_version" >> $GITHUB_ENV
+          echo "base_repo=$base_repo" >> $GITHUB_ENV
+
       - name: Build ${{ matrix.image }}:${{ env.base_name }}-${{ env.base_repo }}
         if: steps.check-jsonfile.conclusion == 'success'
         continue-on-error: ${{ env.base_repo == 'development' }}
@@ -111,24 +142,4 @@ jobs:
 
       - name: Push to Docker Hub (${{ env.base_version }}-testing)
         if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: testing
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push to Docker Hub (${{ env.base_version }}-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: release
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+        uses: openscience
