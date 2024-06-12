@@ -56,19 +56,19 @@ jobs:
           BASE_REPO: ${{ env.base_repo }}
 
       - name: Push to Harbor (${{ env.base_version }}-development)
-        if: env.base_repo == 'development'
+        if: env.base_version != '23'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
-          osg_series: ${{ matrix.series.name }} # OSG series name
-          context: ${{ matrix.image }} # Image context
-          base_os: ${{ matrix.series.os }} # Base operating system
+          osg_series: ${{ env.base_version }}
+          context: ${{ matrix.image }}
+          base_os: ${{ env.base_name }}# Base operating system
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Harbor (${{ env.base_version }}-testing)
-        if: env.base_repo == 'testing'
+        if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
@@ -80,7 +80,7 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Harbor (${{ env.base_version }}-release)
-        if: env.base_repo == 'release'
+        if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
@@ -92,19 +92,19 @@ jobs:
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
       - name: Push to Docker Hub (${{ env.base_version }}-development)
-        if: env.base_repo == 'development'
+        if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
-          osg_series: ${{ matrix.series.name }} # OSG series name
-          context: ${{ matrix.image }} # Image context
-          base_os: ${{ matrix.series.os }} # Base operating system
+          osg_series: ${{ env.base_version }}
+          context: ${{ matrix.image }}
+          base_os: ${{ env.base_name }} # Base operating system
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub (${{ env.base_version }}-testing)
-        if: env.base_repo == 'testing'
+        if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
@@ -116,7 +116,7 @@ jobs:
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub (${{ env.base_version }}-release)
-        if: env.base_repo == 'release'
+        if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
