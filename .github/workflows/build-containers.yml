@@ -115,11 +115,13 @@ jobs:
       - name: Combine configurations
         id: combine-config
         run: |
-          base_names=($(echo ${{ steps.read-config.outputs.base_names_standard || steps.set-defaults.outputs.base_names_standard }} | tr ',' ' '))
-          base_versions=($(echo ${{ steps.read-config.outputs.base_versions_standard || steps.set-defaults.outputs.base_versions_standard }} | tr ',' ' '))
+          base_names="${{ steps.read-config.outputs.base_names_standard || steps.set-defaults.outputs.base_names_standard }}"
+          base_versions="${{ steps.read-config.outputs.base_versions_standard || steps.set-defaults.outputs.base_versions_standard }}"
+          IFS=',' read -r -a base_names_array <<< "$base_names"
+          IFS=',' read -r -a base_versions_array <<< "$base_versions"
           combinations=()
-          for base_name in "${base_names[@]}"; do
-            for base_version in "${base_versions[@]}"; do
+          for base_name in "${base_names_array[@]}"; do
+            for base_version in "${base_versions_array[@]}"; do
               combinations+=("{\"base_name\":\"$base_name\",\"base_version\":\"$base_version\"}")
             done
           done
