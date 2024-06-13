@@ -90,6 +90,7 @@ jobs:
           else
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-config
