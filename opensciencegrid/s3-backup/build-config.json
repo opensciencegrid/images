@@ -9,7 +9,7 @@
   },
   
   "repo_build": {
-    "enabled": false,
+    "enabled": true,
     "base_os": {
       "base_name": "",
       "base_version": ""
