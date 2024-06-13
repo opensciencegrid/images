@@ -115,6 +115,7 @@ jobs:
           echo "base_repo_repo=$base_repo_repo" >> $GITHUB_OUTPUT
 
       - name: Set default values if build-config.json is missing
+        id: set-defaults
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
           echo "standard_enabled=true" >> $GITHUB_OUTPUT
@@ -127,7 +128,7 @@ jobs:
           echo "base_repo_repo=testing" >> $GITHUB_OUTPUT
 
       - name: Trigger standard build workflow
-        if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
+        if: steps.read-config.outputs.standard_enabled == 'true' || steps.set-defaults.outputs.standard_enabled == 'true'
         uses: actions/github-script@v4
         with:
           script: |
@@ -138,15 +139,15 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.image }}",
-                base_name: "${{ steps.read-config.outputs.base_name_standard }}",
-                base_version: "${{ steps.read-config.outputs.base_version_standard }}",
-                base_repo: "${{ steps.read-config.outputs.base_repo_standard }}"
+                base_name: "${{ steps.read-config.outputs.base_name_standard || steps.set-defaults.outputs.base_name_standard }}",
+                base_version: "${{ steps.read-config.outputs.base_version_standard || steps.set-defaults.outputs.base_version_standard }}",
+                base_repo: "${{ steps.read-config.outputs.base_repo_standard || steps.set-defaults.outputs.base_repo_standard }}"
               }
             });
             console.log(result);
 
       - name: Trigger repo build workflow
-        if: ${{ steps.read-config.outputs.repo_enabled == 'true' }}
+        if: steps.read-config.outputs.repo_enabled == 'true' || steps.set-defaults.outputs.repo_enabled == 'true'
         uses: actions/github-script@v4
         with:
           script: |
@@ -157,9 +158,9 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.image }}",
-                base_name: "${{ steps.read-config.outputs.base_name_repo }}",
-                base_version: "${{ steps.read-config.outputs.base_version_repo }}",
-                base_repo: "${{ steps.read-config.outputs.base_repo_repo }}"
+                base_name: "${{ steps.read-config.outputs.base_name_repo || steps.set-defaults.outputs.base_name_repo }}",
+                base_version: "${{ steps.read-config.outputs.base_version_repo || steps.set-defaults.outputs.base_version_repo }}",
+                base_repo: "${{ steps.read-config.outputs.base_repo_repo || steps.set-defaults.outputs.base_repo_repo }}"
               }
             });
             console.log(result);
