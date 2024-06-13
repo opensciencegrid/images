@@ -66,6 +66,9 @@ jobs:
     outputs:
       standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
       repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
+      base_name: ${{ steps.read-config.outputs.base_name }}
+      base_version: ${{ steps.read-config.outputs.base_version }}
+      base_repo: ${{ steps.read-config.outputs.base_repo }}
     strategy:
       fail-fast: false
       matrix:
@@ -75,8 +78,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for build-config.json in ${{ matrix.image }}
-        id: check-jsonfile
+      - name: Check and create build-config.json in ${{ matrix.image }}
+        id: check-and-create-jsonfile
         run: |
           if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
             echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
@@ -109,8 +112,14 @@ jobs:
           config=$(cat ${{ matrix.image }}/build-config.json)
           standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
           repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
+          base_name=$(echo $config | jq -r '.standard_build.base_os.base_name')
+          base_version=$(echo $config | jq -r '.standard_build.base_os.base_version')
+          base_repo=$(echo $config | jq -r '.standard_build.base_repo')
           echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
           echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
+          echo "base_name=$base_name" >> $GITHUB_OUTPUT
+          echo "base_version=$base_version" >> $GITHUB_OUTPUT
+          echo "base_repo=$base_repo" >> $GITHUB_OUTPUT
 
       - name: Trigger standard build workflow
         if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
@@ -123,7 +132,10 @@ jobs:
               workflow_id: 'standard-build.yml',
               ref: context.ref,
               inputs: {
-                image: "${{ matrix.image }}"
+                image: "${{ matrix.image }}",
+                base_name: "${{ steps.read-config.outputs.base_name }}",
+                base_version: "${{ steps.read-config.outputs.base_version }}",
+                base_repo: "${{ steps.read-config.outputs.base_repo }}"
               }
             });
             console.log(result);
@@ -155,7 +167,10 @@ jobs:
               workflow_id: 'standard-build.yml',
               ref: context.ref,
               inputs: {
-                image: "${{ matrix.image }}"
+                image: "${{ matrix.image }}",
+                base_name: "${{ steps.read-config.outputs.base_name }}",
+                base_version: "${{ steps.read-config.outputs.base_version }}",
+                base_repo: "${{ steps.read-config.outputs.base_repo }}"
               }
             });
             console.log(result1);
@@ -169,5 +184,3 @@ jobs:
               }
             });
             console.log(result2);
-
-
