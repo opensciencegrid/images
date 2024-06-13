@@ -28,109 +28,86 @@ jobs:
         id: mkdatetag
         run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
 
-      - name: Check for build-config.json in ${{ github.event.inputs.image }}
-        id: check-jsonfile
-        run: |
-          if [ -f "${{ github.event.inputs.image }}/build-config.json" ]; then
-            echo "build-config.json exists in ${{ github.event.inputs.image }}"
-            config=$(cat ${{ github.event.inputs.image }}/build-config.json)
-            base_name=$(echo $config | jq -r '.standard_build.base_os.base_name')
-            base_version=$(echo $config | jq -r '.standard_build.base_os.base_version')
-            base_repo=$(echo $config | jq -r '.standard_build.base_repo')
-            echo "Base name: $base_name"
-            echo "Base version: $base_version"
-            echo "Base repo: $base_repo"
-            echo "base_name=$base_name" >> $GITHUB_ENV
-            echo "base_version=$base_version" >> $GITHUB_ENV
-            echo "base_repo=$base_repo" >> $GITHUB_ENV
-          else
-            echo "No build-config.json found in ${{ github.event.inputs.image }}"
-            echo "base_name=${{ github.event.inputs.base_name }}" >> $GITHUB_ENV
-            echo "base_version=${{ github.event.inputs.base_version }}" >> $GITHUB_ENV
-            echo "base_repo=${{ github.event.inputs.base_repo }}" >> $GITHUB_ENV
-
-          fi
-          
-      - name: Build ${{ github.event.inputs.image }}:${{ env.base_name }}-${{ env.base_repo }}
+      - name: Build ${{ github.event.inputs.image }}:${{ github.event.inputs.base_name }}-${{ github.event.inputs.base_repo }}
         uses: opensciencegrid/build-container-action@v0.6.0
         with:
-          osg_series: ${{ env.base_version }}
-          osg_repo: ${{ env.base_repo }}
+          osg_series: ${{ github.event.inputs.base_version }}
+          osg_repo: ${{ github.event.inputs.base_repo }}
           context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          base_os: ${{ github.event.inputs.base_name }}
         env:
-          BASE_NAME: ${{ env.base_name }}
-          BASE_VERSION: ${{ env.base_version }}
-          BASE_REPO: ${{ env.base_repo }}
+          BASE_NAME: ${{ github.event.inputs.base_name }}
+          BASE_VERSION: ${{ github.event.inputs.base_version }}
+          BASE_REPO: ${{ github.event.inputs.base_repo }}
 
-      - name: Push to Harbor (${{ env.base_version }}-development)
-        if: env.base_version != '23'
+      - name: Push to Harbor (${{ github.event.inputs.base_version }}-development)
+        if: github.event.inputs.base_version != '23'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
-          osg_series: ${{ env.base_version }}
+          osg_series: ${{ github.event.inputs.base_version }}
           context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          base_os: ${{ github.event.inputs.base_name }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Harbor (${{ env.base_version }}-testing)
+      - name: Push to Harbor (${{ github.event.inputs.base_version }}-testing)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
-          osg_series: ${{ env.base_version }}
+          osg_series: ${{ github.event.inputs.base_version }}
           context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          base_os: ${{ github.event.inputs.base_name }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Harbor (${{ env.base_version }}-release)
+      - name: Push to Harbor (${{ github.event.inputs.base_version }}-release)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
-          osg_series: ${{ env.base_version }}
+          osg_series: ${{ github.event.inputs.base_version }}
           context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          base_os: ${{ github.event.inputs.base_name }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Docker Hub (${{ env.base_version }}-development)
+      - name: Push to Docker Hub (${{ github.event.inputs.base_version }}-development)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
-          osg_series: ${{ env.base_version }}
+          osg_series: ${{ github.event.inputs.base_version }}
           context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          base_os: ${{ github.event.inputs.base_name }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub (${{ env.base_version }}-testing)
+      - name: Push to Docker Hub (${{ github.event.inputs.base_version }}-testing)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
-          osg_series: ${{ env.base_version }}
+          osg_series: ${{ github.event.inputs.base_version }}
           context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          base_os: ${{ github.event.inputs.base_name }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub (${{ env.base_version }}-release)
+      - name: Push to Docker Hub (${{ github.event.inputs.base_version }}-release)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
-          osg_series: ${{ env.base_version }}
+          osg_series: ${{ github.event.inputs.base_version }}
           context: ${{ github.event.inputs.image }}
-          base_os: ${{ env.base_name }}
+          base_os: ${{ github.event.inputs.base_name }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
