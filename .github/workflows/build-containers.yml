@@ -83,7 +83,6 @@ jobs:
           else
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
-          fi
 
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-config
@@ -92,8 +91,8 @@ jobs:
           config=$(cat ${{ matrix.image }}/build-config.json)
           standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
           repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
-          base_names_standard=$(echo $config | jq -r '.standard_build.base_os.base_name' | jq -c '.[]')
-          base_versions_standard=$(echo $config | jq -r '.standard_build.base_os.base_version' | jq -c '.[]')
+          base_names_standard=$(echo $config | jq -r '.standard_build.base_os.base_name | join(",")')
+          base_versions_standard=$(echo $config | jq -r '.standard_build.base_os.base_version | join(",")')
           base_repo_standard=$(echo $config | jq -r '.standard_build.base_repo')
           echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
           echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
@@ -108,15 +107,15 @@ jobs:
           echo "standard_enabled=true" >> $GITHUB_OUTPUT
           echo "repo_enabled=true" >> $GITHUB_OUTPUT
 
-          echo "base_names_standard=[\"el9\"]" >> $GITHUB_OUTPUT
-          echo "base_versions_standard=[\"23\"]" >> $GITHUB_OUTPUT
+          echo "base_names_standard=el9" >> $GITHUB_OUTPUT
+          echo "base_versions_standard=23" >> $GITHUB_OUTPUT
           echo "base_repo_standard=testing" >> $GITHUB_OUTPUT
 
       - name: Combine configurations
         id: combine-config
         run: |
-          base_names=(${!{steps.read-config.outputs.base_names_standard[@]}})
-          base_versions=(${!{steps.read-config.outputs.base_versions_standard[@]}})
+          base_names=($(echo ${{ steps.read-config.outputs.base_names_standard || steps.set-defaults.outputs.base_names_standard }} | tr ',' ' '))
+          base_versions=($(echo ${{ steps.read-config.outputs.base_versions_standard || steps.set-defaults.outputs.base_versions_standard }} | tr ',' ' '))
           combinations=()
           for base_name in "${base_names[@]}"; do
             for base_version in "${base_versions[@]}"; do
@@ -131,7 +130,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const combinations = ${{ steps.combine-config.outputs.image_combinations }};
+            const combinations = JSON.parse(process.env.IMAGE_COMBINATIONS);
             for (const combination of combinations) {
               const result = await github.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
@@ -147,3 +146,5 @@ jobs:
               });
               console.log(result);
             }
+        env:
+          IMAGE_COMBINATIONS: ${{ steps.combine-config.outputs.image_combinations }}
