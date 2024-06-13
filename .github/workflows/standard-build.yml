@@ -49,6 +49,8 @@ jobs:
             echo "base_version=${{ github.event.inputs.base_version }}" >> $GITHUB_ENV
             echo "base_repo=${{ github.event.inputs.base_repo }}" >> $GITHUB_ENV
 
+          fi
+          
       - name: Build ${{ github.event.inputs.image }}:${{ env.base_name }}-${{ env.base_repo }}
         uses: opensciencegrid/build-container-action@v0.6.0
         with:
