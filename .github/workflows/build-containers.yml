@@ -78,51 +78,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check and create build-config.json in ${{ matrix.image }}
-        id: check-and-create-jsonfile
+      - name: Check for build-config.json in ${{ matrix.image }}
+        id: check-jsonfile
         run: |
-          if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
-            echo "No build-config.json found in ${{ matrix.image }}. Creating default build-config.json."
-            mkdir -p "${{ matrix.image }}"
-            echo '{' > "${{ matrix.image }}/build-config.json"
-            echo '  "standard_build": {' >> "${{ matrix.image }}/build-config.json"
-            echo '    "enabled": true,' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_os": {' >> "${{ matrix.image }}/build-config.json"
-            echo '      "base_name": "el9",' >> "${{ matrix.image }}/build-config.json"
-            echo '      "base_version": "23"' >> "${{ matrix.image }}/build-config.json"
-            echo '    },' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json"
-            echo '  },' >> "${{ matrix.image }}/build-config.json"
-            echo '  "repo_build": {' >> "${{ matrix.image }}/build-config.json"
-            echo '    "enabled": true,' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_os": {' >> "${{ matrix.image }}/build-config.json"
-            echo '      "base_name": "el9",' >> "${{ matrix.image }}/build-config.json"
-            echo '      "base_version": "23"' >> "${{ matrix.image }}/build-config.json"
-            echo '    },' >> "${{ matrix.image }}/build-config.json"
-            echo '    "base_repo": "testing"' >> "${{ matrix.image }}/build-config.json"
-            echo '  }' >> "${{ matrix.image }}/build-config.json"
-            echo '}' >> "${{ matrix.image }}/build-config.json"
-          else
+          if [ -f "${{ matrix.image }}/build-config.json" ]; then
             echo "build-config.json exists in ${{ matrix.image }}"
-          fi
-
-      - name: Read build-config.json in ${{ matrix.image }}
-        id: read-config
-        run: |
-          config=$(cat ${{ matrix.image }}/build-config.json)
-          standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
-          repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
-          base_name=$(echo $config | jq -r '.standard_build.base_os.base_name')
-          base_version=$(echo $config | jq -r '.standard_build.base_os.base_version')
-          base_repo=$(echo $config | jq -r '.standard_build.base_repo')
-          echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
-          echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
-          echo "base_name=$base_name" >> $GITHUB_OUTPUT
-          echo "base_version=$base_version" >> $GITHUB_OUTPUT
-          echo "base_repo=$base_repo" >> $GITHUB_OUTPUT
+            config=$(cat ${{ matrix.image }}/build-config.json)
+            standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
+            repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
+            base_name=$(echo $config | jq -r '.standard_build.base_os.base_name')
+            base_version=$(echo $config | jq -r '.standard_build.base_os.base_version')
+            base_repo=$(echo $config | jq -r '.standard_build.base_repo')
+            echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
+            echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
+            echo "base_name=$base_name" >> $GITHUB_OUTPUT
+            echo "base_version=$base_version" >> $GITHUB_OUTPUT
+            echo "base_repo=$base_repo" >> $GITHUB_OUTPUT
+          else
+            echo "No build-config.json found in ${{ matrix.image }}"
+            # Default parameters for standard build
+            echo "standard_enabled=true" >> $GITHUB_OUTPUT
+            echo "base_name_standard=el9" >> $GITHUB_OUTPUT
+            echo "base_version_standard=23" >> $GITHUB_OUTPUT
+            echo "base_repo_standard=testing" >> $GITHUB_OUTPUT
+            # Default parameters for repo build
+            echo "repo_enabled=true" >> $GITHUB_OUTPUT
+            echo "base_name_repo=el9" >> $GITHUB_OUTPUT
+            echo "base_version_repo=23" >> $GITHUB_OUTPUT
+            echo "base_repo_repo=testing" >> $GITHUB_OUTPUT
 
       - name: Trigger standard build workflow
-        if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
+        if: ${{ steps.check-jsonfile.outputs.standard_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -133,15 +119,15 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.image }}",
-                base_name: "${{ steps.read-config.outputs.base_name }}",
-                base_version: "${{ steps.read-config.outputs.base_version }}",
-                base_repo: "${{ steps.read-config.outputs.base_repo }}"
+                base_name: "${{ steps.check-jsonfile.outputs.base_name_standard }}",
+                base_version: "${{ steps.check-jsonfile.outputs.base_version_standard }}",
+                base_repo: "${{ steps.check-jsonfile.outputs.base_repo_standard }}"
               }
             });
             console.log(result);
 
       - name: Trigger repo build workflow
-        if: ${{ steps.read-config.outputs.repo_enabled == 'true' }}
+        if: ${{ steps.check-jsonfile.outputs.repo_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -151,36 +137,10 @@ jobs:
               workflow_id: 'repo-build.yml',
               ref: context.ref,
               inputs: {
-                image: "${{ matrix.image }}"
+                image: "${{ matrix.image }}",
+                base_name: "${{ steps.check-jsonfile.outputs.base_name_repo }}",
+                base_version: "${{ steps.check-jsonfile.outputs.base_version_repo }}",
+                base_repo: "${{ steps.check-jsonfile.outputs.base_repo_repo }}"
               }
             });
             console.log(result);
-
-      - name: Trigger both build workflows
-        if: ${{ steps.read-config.outputs.standard_enabled == 'true' && steps.read-config.outputs.repo_enabled == 'true' }}
-        uses: actions/github-script@v4
-        with:
-          script: |
-            const result1 = await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'standard-build.yml',
-              ref: context.ref,
-              inputs: {
-                image: "${{ matrix.image }}",
-                base_name: "${{ steps.read-config.outputs.base_name }}",
-                base_version: "${{ steps.read-config.outputs.base_version }}",
-                base_repo: "${{ steps.read-config.outputs.base_repo }}"
-              }
-            });
-            console.log(result1);
-            const result2 = await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'repo-build.yml',
-              ref: context.ref,
-              inputs: {
-                image: "${{ matrix.image }}"
-              }
-            });
-            console.log(result2);
