@@ -1,3 +1,5 @@
+name: Main Workflow
+
 on:
   push:
     branches:
@@ -20,7 +22,6 @@ jobs:
 
   build-image-list:
     runs-on: ubuntu-latest
-    needs: make-date-tag
     outputs:
       images: ${{ steps.image-list.outputs.json }}
     steps:
@@ -61,7 +62,10 @@ jobs:
 
   check-config:
     runs-on: ubuntu-latest
-    needs: build-image-list
+    needs: [make-date-tag, build-image-list]
+    outputs:
+      standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
+      repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
     strategy:
       fail-fast: false
       matrix:
@@ -71,7 +75,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for and create build-config.json in ${{ matrix.image }}
+      - name: Check for build-config.json in ${{ matrix.image }}
         id: check-jsonfile
         run: |
           if [ ! -f "${{ matrix.image }}/build-config.json" ]; then
@@ -99,154 +103,71 @@ jobs:
             echo "build-config.json exists in ${{ matrix.image }}"
           fi
 
-          - name: Read build-config.json in ${{ matrix.image }}
-          id: read-config
-          run: |
-            config=$(cat ${{ matrix.image }}/build-config.json)
-            standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
-            repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
-            echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
-            echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
+      - name: Read build-config.json in ${{ matrix.image }}
+        id: read-config
+        run: |
+          config=$(cat ${{ matrix.image }}/build-config.json)
+          standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
+          repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
+          echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
+          echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
 
-          - name: Trigger standard build workflow
-          if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
-          uses: actions/github-script@v4
-          with:
-            script: |
-              const result = await github.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'standard-build.yml',
-                ref: context.ref,
-                inputs: {
-                  image: "${{ matrix.image }}"
-                }
-              });
-              console.log(result);
-  
-          - name: Trigger repo build workflow
-            if: ${{ steps.read-config.outputs.repo_enabled == 'true' }}
-            uses: actions/github-script@v4
-            with:
-              script: |
-                const result = await github.actions.createWorkflowDispatch({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: 'repo-build.yml',
-                  ref: context.ref,
-                  inputs: {
-                    image: "${{ matrix.image }}"
-                  }
-                });
-                console.log(result);
-    
-          - name: Trigger both build workflows
-            if: ${{ steps.read-config.outputs.standard_enabled == 'true' && steps.read-config.outputs.repo_enabled == 'true' }}
-            uses: actions/github-script@v4
-            with:
-              script: |
-                const result1 = await github.actions.createWorkflowDispatch({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: 'standard-build.yml',
-                  ref: context.ref,
-                  inputs: {
-                    image: "${{ matrix.image }}"
-                  }
-                });
-                console.log(result1);
-                const result2 = await github.actions.createWorkflowDispatch({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: 'repo-build.yml',
-                  ref: context.ref,
-                  inputs: {
-                    image: "${{ matrix.image }}"
-                  }
-                });
-                console.log(result2);
-  
-  push:
-    runs-on: ubuntu-latest
-    if: >-
-      github.ref == 'refs/heads/main' && 
-      github.event_name != 'pull_request' && 
-      github.repository_owner == 'PPathu' &&
-      needs.build-image-list.outputs.images != '["dummy"]'
-    needs: [make-date-tag, build-image-list, check-config]
-    strategy:
-      fail-fast: false
-      matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
-    steps:
-      - name: Push to Harbor (${{ env.base_version }}-development)
-        if: env.base_version != '23'
-        uses: opensciencegrid/push-container-action@main
+      - name: Trigger standard build workflow
+        if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
+        uses: actions/github-script@v4
         with:
-          repo: development
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'standard-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result);
 
-      - name: Push to Harbor (${{ env.base_version }}-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Trigger repo build workflow
+        if: ${{ steps.read-config.outputs.repo_enabled == 'true' }}
+        uses: actions/github-script@v4
         with:
-          repo: testing
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repo-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result);
 
-      - name: Push to Harbor (${{ env.base_version }}-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Trigger both build workflows
+        if: ${{ steps.read-config.outputs.standard_enabled == 'true' && steps.read-config.outputs.repo_enabled == 'true' }}
+        uses: actions/github-script@v4
         with:
-          repo: release
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          script: |
+            const result1 = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'standard-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result1);
+            const result2 = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repo-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.image }}"
+              }
+            });
+            console.log(result2);
 
-      - name: Push to Docker Hub (${{ env.base_version }}-development)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: development
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub (${{ env.base_version }}-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: testing
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push to Docker Hub (${{ env.base_version }}-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: release
-          osg_series: ${{ env.base_version }}
-          context: ${{ matrix.image }}
-          base_os: ${{ env.base_name }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
