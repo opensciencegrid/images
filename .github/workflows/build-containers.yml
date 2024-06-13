@@ -120,9 +120,11 @@ jobs:
         run: |
           echo "standard_enabled=true" >> $GITHUB_OUTPUT
           echo "repo_enabled=true" >> $GITHUB_OUTPUT
+
           echo "base_name_standard=el9" >> $GITHUB_OUTPUT
           echo "base_version_standard=23" >> $GITHUB_OUTPUT
           echo "base_repo_standard=testing" >> $GITHUB_OUTPUT
+          
           echo "base_name_repo=el9" >> $GITHUB_OUTPUT
           echo "base_version_repo=23" >> $GITHUB_OUTPUT
           echo "base_repo_repo=testing" >> $GITHUB_OUTPUT
