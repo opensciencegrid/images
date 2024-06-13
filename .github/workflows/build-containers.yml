@@ -1,5 +1,3 @@
-name: Main Workflow
-
 on:
   push:
     branches:
@@ -101,14 +99,14 @@ jobs:
             echo "build-config.json exists in ${{ matrix.image }}"
           fi
 
-      - name: Read build-config.json in ${{ matrix.image }}
-        id: read-config
-        run: |
-          config=$(cat ${{ matrix.image }}/build-config.json)
-          standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
-          repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
-          echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
-          echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
+          - name: Read build-config.json in ${{ matrix.image }}
+          id: read-config
+          run: |
+            config=$(cat ${{ matrix.image }}/build-config.json)
+            standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
+            repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
+            echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
+            echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
 
           - name: Trigger standard build workflow
           if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
