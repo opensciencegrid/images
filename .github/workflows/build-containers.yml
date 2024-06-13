@@ -66,9 +66,12 @@ jobs:
     outputs:
       standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
       repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
-      base_name: ${{ steps.read-config.outputs.base_name }}
-      base_version: ${{ steps.read-config.outputs.base_version }}
-      base_repo: ${{ steps.read-config.outputs.base_repo }}
+      base_name_standard: ${{ steps.read-config.outputs.base_name_standard }}
+      base_version_standard: ${{ steps.read-config.outputs.base_version_standard }}
+      base_repo_standard: ${{ steps.read-config.outputs.base_repo_standard }}
+      base_name_repo: ${{ steps.read-config.outputs.base_name_repo }}
+      base_version_repo: ${{ steps.read-config.outputs.base_version_repo }}
+      base_repo_repo: ${{ steps.read-config.outputs.base_repo_repo }}
     strategy:
       fail-fast: false
       matrix:
@@ -91,9 +94,12 @@ jobs:
             base_repo=$(echo $config | jq -r '.standard_build.base_repo')
             echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
             echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
-            echo "base_name=$base_name" >> $GITHUB_OUTPUT
-            echo "base_version=$base_version" >> $GITHUB_OUTPUT
-            echo "base_repo=$base_repo" >> $GITHUB_OUTPUT
+            echo "base_name_standard=$base_name" >> $GITHUB_OUTPUT
+            echo "base_version_standard=$base_version" >> $GITHUB_OUTPUT
+            echo "base_repo_standard=$base_repo" >> $GITHUB_OUTPUT
+            echo "base_name_repo=$base_name" >> $GITHUB_OUTPUT
+            echo "base_version_repo=$base_version" >> $GITHUB_OUTPUT
+            echo "base_repo_repo=$base_repo" >> $GITHUB_OUTPUT
           else
             echo "No build-config.json found in ${{ matrix.image }}"
             # Default parameters for standard build
