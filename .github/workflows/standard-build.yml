@@ -28,21 +28,15 @@ jobs:
         id: mkdatetag
         run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
 
-
-
-      - name: Read build-config.json in ${{ github.event.inputs.image }}
-        id: read-jsonfile
+      - name: Check for build-config.json in ${{ github.event.inputs.image }}
+        id: check-jsonfile
         run: |
-          config=$(cat ${{ github.event.inputs.image }}/build-config.json)
-          base_name=$(echo $config | jq -r '.standard_build.base_os.base_name')
-          base_version=$(echo $config | jq -r '.standard_build.base_os.base_version')
-          base_repo=$(echo $config | jq -r '.standard_build.base_repo')
-          echo "Base name: $base_name"
-          echo "Base version: $base_version"
-          echo "Base repo: $base_repo"
-          echo "base_name=$base_name" >> $GITHUB_ENV
-          echo "base_version=$base_version" >> $GITHUB_ENV
-          echo "base_repo=$base_repo" >> $GITHUB_ENV
+          if [ ! -f "${{ github.event.inputs.image }}/build-config.json" ]; then
+            echo "No build-config.json found in ${{ github.event.inputs.image }}."
+            exit 1
+          else
+            echo "build-config.json exists in ${{ github.event.inputs.image }}"
+          fi
 
       - name: Build ${{ github.event.inputs.image }}:${{ github.event.inputs.base_name }}-${{ github.event.inputs.base_repo }}
         uses: opensciencegrid/build-container-action@v0.6.0
