@@ -64,14 +64,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [make-date-tag, build-image-list]
     outputs:
-      standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
-      repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
-      base_name_standard: ${{ steps.read-config.outputs.base_name_standard }}
-      base_version_standard: ${{ steps.read-config.outputs.base_version_standard }}
-      base_repo_standard: ${{ steps.read-config.outputs.base_repo_standard }}
-      base_name_repo: ${{ steps.read-config.outputs.base_name_repo }}
-      base_version_repo: ${{ steps.read-config.outputs.base_version_repo }}
-      base_repo_repo: ${{ steps.read-config.outputs.base_repo_repo }}
       image_matrix: ${{ steps.create-matrix.outputs.image_matrix }}
     strategy:
       fail-fast: false
