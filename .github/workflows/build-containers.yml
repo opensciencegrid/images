@@ -64,14 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [make-date-tag, build-image-list]
     outputs:
-      standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
-      repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
-      base_name_standard: ${{ steps.read-config.outputs.base_name_standard }}
-      base_version_standard: ${{ steps.read-config.outputs.base_version_standard }}
-      base_repo_standard: ${{ steps.read-config.outputs.base_repo_standard }}
-      base_name_repo: ${{ steps.read-config.outputs.base_name_repo }}
-      base_version_repo: ${{ steps.read-config.outputs.base_version_repo }}
-      base_repo_repo: ${{ steps.read-config.outputs.base_repo_repo }}
+      image_matrix: ${{ steps.create-matrix.outputs.image_matrix }}
     strategy:
       fail-fast: false
       matrix:
@@ -96,7 +89,7 @@ jobs:
         id: read-config
         if: steps.check-jsonfile.outputs.config_exists == 'true'
         run: |
-          config=$(cat opensciencegrid/s3-backup/build-config.json)
+          config=$(cat ${{ matrix.image }}/build-config.json)
           standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
           repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
           base_name_standard=$(echo $config | jq -r '.standard_build.base_os.base_name | join(",")')
@@ -118,27 +111,28 @@ jobs:
           if [[ "$standard_enabled" == "true" ]]; then
             for base_name in $(echo $base_name_standard | tr "," "\n"); do
               for base_version in $(echo $base_version_standard | tr "," "\n"); do
-                echo "{ \"image\": \"opensciencegrid/s3-backup\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
+                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
               done
             done
           fi
 
           if [[ "$repo_enabled" == "true" ]]; then
-            if [[ -n "$base_name_repo" && -n "$base_version_repo" ]]; then
-              for base_name in $(echo $base_name_repo | tr "," "\n"); do
-                for base_version in $(echo $base_version_repo | tr "," "\n"); do
-                  echo "{ \"image\": \"opensciencegrid/s3-backup\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
-                done
+            for base_name in $(echo $base_name_repo | tr "," "\n"); do
+              for base_version in $(echo $base_version_repo | tr "," "\n"); do
+                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
               done
-            fi
+            done
           fi
-
+        
 
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
           echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\" }" >> matrix.json
           echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\" }" >> matrix.json
+
+      - name: Debug matrix.json
+        run: cat matrix.json
 
       - name: Create build matrix
         id: create-matrix
@@ -154,6 +148,9 @@ jobs:
       matrix:
         build_config: ${{ fromJson(needs.check-config.outputs.image_matrix) }}
     steps:
+      - name: Debug build_config
+        run: echo ${{ matrix.build_config }}
+
       - name: Trigger standard build workflow
         if: ${{ matrix.build_config.build_type == 'standard' && (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
         uses: actions/github-script@v4
