@@ -187,3 +187,41 @@ jobs:
               }
             });
             console.log(result);
+
+      - name: Trigger default standard build workflow
+        if: ${{ steps.check-jsonfile.outputs.config_exists == 'false' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'standard-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "el9",
+                base_version: "23",
+                base_repo: "testing"
+              }
+            });
+            console.log(result);
+
+      - name: Trigger default repo build workflow
+        if: ${{ steps.check-jsonfile.outputs.config_exists == 'false' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repo-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "el9",
+                base_version: "23",
+                base_repo: "testing"
+              }
+            });
+            console.log(result);
