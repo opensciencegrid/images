@@ -85,13 +85,8 @@ jobs:
         id: check-jsonfile
         run: |
           if [ -f "${{ matrix.image }}/build-config.json" ]; then
-            if [ -s "${{ matrix.image }}/build-config.json" ]; then
-              echo "build-config.json exists and is not empty in ${{ matrix.image }}"
-              echo "config_exists=true" >> $GITHUB_OUTPUT
-            else
-              echo "build-config.json exists but is empty in ${{ matrix.image }}"
-              echo "config_exists=false" >> $GITHUB_OUTPUT
-            fi
+            echo "build-config.json exists in ${{ matrix.image }}"
+            echo "config_exists=true" >> $GITHUB_OUTPUT
           else
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
