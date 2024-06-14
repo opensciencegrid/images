@@ -188,8 +188,8 @@ jobs:
             });
             console.log(result);
 
-      - name: Trigger default standard build workflow
-        if: ${{ steps.check-jsonfile.outputs.config_exists == 'false' }}
+      - name: Trigger standard build workflow
+        if: ${{ (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -200,15 +200,14 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.build_config.image }}",
-                base_name: "el9",
-                base_version: "23",
-                base_repo: "testing"
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
               }
             });
             console.log(result);
-
-      - name: Trigger default repo build workflow
-        if: ${{ steps.check-jsonfile.outputs.config_exists == 'false' }}
+      - name: Trigger repo build workflow
+        if: ${{ (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -219,9 +218,9 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.build_config.image }}",
-                base_name: "el9",
-                base_version: "23",
-                base_repo: "testing"
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
               }
             });
             console.log(result);
