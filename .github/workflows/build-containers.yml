@@ -150,35 +150,46 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const result = await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'standard-build.yml',
-              ref: context.ref,
-              inputs: {
-                image: "${{ matrix.image }}",
-                base_name: "el9",
-                base_version: "23",
-                base_repo: "testing"
+            const imageMatrix = ${{ needs.check-config.outputs.image_matrix }};
+            imageMatrix.forEach(config => {
+              if (config.build_type === "standard") {
+                const result = await github.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'standard-build.yml',
+                  ref: context.ref,
+                  inputs: {
+                    image: config.image,
+                    base_name: config.base_name,
+                    base_version: config.base_version,
+                    base_repo: config.base_repo
+                  }
+                });
+                console.log(result);
               }
             });
-            console.log(result);
 
       - name: Trigger repo build workflow
         if: ${{ steps.check-jsonfile.outputs.config_exists == 'false' || steps.read-config.outputs.repo_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
-            const result = await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'repo-build.yml',
-              ref: context.ref,
-              inputs: {
-                image: "${{ matrix.image }}",
-                base_name: "el9",
-                base_version: "23",
-                base_repo: "testing"
+            const imageMatrix = ${{ needs.check-config.outputs.image_matrix }};
+            imageMatrix.forEach(config => {
+              if (config.build_type === "repo") {
+                const result = await github.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'repo-build.yml',
+                  ref: context.ref,
+                  inputs: {
+                    image: config.image,
+                    base_name: config.base_name,
+                    base_version: config.base_version,
+                    base_repo: config.base_repo
+                  }
+                });
+                console.log(result);
               }
             });
-            console.log(result);
+
