@@ -96,7 +96,7 @@ jobs:
         id: read-config
         if: steps.check-jsonfile.outputs.config_exists == 'true'
         run: |
-          config=$(cat ${{ matrix.image }}/build-config.json)
+          config=$(cat opensciencegrid/s3-backup/build-config.json)
           standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
           repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
           base_name_standard=$(echo $config | jq -r '.standard_build.base_os.base_name | join(",")')
@@ -118,18 +118,21 @@ jobs:
           if [[ "$standard_enabled" == "true" ]]; then
             for base_name in $(echo $base_name_standard | tr "," "\n"); do
               for base_version in $(echo $base_version_standard | tr "," "\n"); do
-                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
+                echo "{ \"image\": \"opensciencegrid/s3-backup\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
               done
             done
           fi
 
           if [[ "$repo_enabled" == "true" ]]; then
-            for base_name in $(echo $base_name_repo | tr "," "\n"); do
-              for base_version in $(echo $base_version_repo | tr "," "\n"); do
-                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
+            if [[ -n "$base_name_repo" && -n "$base_version_repo" ]]; then
+              for base_name in $(echo $base_name_repo | tr "," "\n"); do
+                for base_version in $(echo $base_version_repo | tr "," "\n"); do
+                  echo "{ \"image\": \"opensciencegrid/s3-backup\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
+                done
               done
-            done
+            fi
           fi
+
 
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
