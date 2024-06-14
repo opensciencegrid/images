@@ -15,6 +15,9 @@ on:
       base_repo:
         description: 'Base repository'
         required: true
+      build_type:
+        description: 'Build type'
+        required: true
 
 jobs:
   build-standard:
