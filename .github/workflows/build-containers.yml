@@ -157,9 +157,9 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.image }}",
-                base_name: "${{ matrix.build_config.base_name }}",
-                base_version: "${{ matrix.build_config.base_version }}",
-                base_repo: "${{ matrix.build_config.base_repo }}"
+                base_name: "el9",
+                base_version: "23",
+                base_repo: "testing"
               }
             });
             console.log(result);
@@ -176,9 +176,9 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.image }}",
-                base_name: "${{ matrix.build_config.base_name }}",
-                base_version: "${{ matrix.build_config.base_version }}",
-                base_repo: "${{ matrix.build_config.base_repo }}"
+                base_name: "el9",
+                base_version: "23",
+                base_repo: "testing"
               }
             });
             console.log(result);
