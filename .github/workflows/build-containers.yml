@@ -150,8 +150,8 @@ jobs:
       - name: Debug build_config
         run: echo ${{ matrix.build_config }}
 
-      - name: Trigger standard build workflow
-        if: ${{ matrix.build_config.build_type == 'standard' }}
+      - name: Trigger standard build workflow (if enabled)
+        if: ${{ matrix.build_config.build_type == 'standard' && needs.check-config.outputs.standard_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -169,8 +169,8 @@ jobs:
             });
             console.log(result);
 
-      - name: Trigger repo build workflow
-        if: ${{ matrix.build_config.build_type == 'repo' }}
+      - name: Trigger repo build workflow (if enabled)
+        if: ${{ matrix.build_config.build_type == 'repo' && needs.check-config.outputs.repo_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -188,8 +188,8 @@ jobs:
             });
             console.log(result);
 
-      - name: Trigger standard build workflow
-        if: ${{ (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
+      - name: Trigger standard build workflow (default)
+        if: ${{ steps.check-jsonfile.outputs.config_exists == 'false' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -206,8 +206,9 @@ jobs:
               }
             });
             console.log(result);
-      - name: Trigger repo build workflow
-        if: ${{ (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
+
+      - name: Trigger repo build workflow (default)
+        if: ${{ steps.check-jsonfile.outputs.config_exists == 'false' }}
         uses: actions/github-script@v4
         with:
           script: |
