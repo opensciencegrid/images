@@ -1,13 +1,14 @@
 ARG BASE_YUM_REPO=release
-ARG BASE_OSG_SERIES=3.6
+ARG BASE_OSG_SERIES=23
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el9-$BASE_YUM_REPO
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
 RUN yum -y clean all && \
     rm -r /var/cache/dnf && \
-    yum -y install \
+    yum -y upgrade && \
+    yum -y --allowerasing install \
            curl \
            python3-devel \
            python3-pip \
