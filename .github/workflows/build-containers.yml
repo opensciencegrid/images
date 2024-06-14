@@ -190,6 +190,4 @@ jobs:
                   }
                 });
                 console.log(result);
-              }
-            });
 
