@@ -161,7 +161,7 @@ jobs:
         run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow
-        if: needs.check-config.outputs.standard_build_enabled == 'true'
+        if: ${{ needs.check-config.outputs.standard_build_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -180,7 +180,7 @@ jobs:
             console.log(result);
 
       - name: Trigger repo build workflow
-        if: needs.check-config.outputs.repo_build_enabled == 'true'
+        if: ${{ needs.check-config.outputs.repo_build_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
