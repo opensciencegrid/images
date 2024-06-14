@@ -150,7 +150,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const imageMatrix = JSON.parse(`{{ steps.create-matrix.outputs.image_matrix }}`);
+            const imageMatrix = JSON.parse(process.env.image_matrix);
             imageMatrix.forEach(async config => {
               if (config.build_type === "standard") {
                 const result = await github.actions.createWorkflowDispatch({
@@ -174,7 +174,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const imageMatrix = JSON.parse(`{{ steps.create-matrix.outputs.image_matrix }}`);
+            const imageMatrix = JSON.parse(process.env.image_matrix);
             imageMatrix.forEach(async config => {
               if (config.build_type === "repo") {
                 const result = await github.actions.createWorkflowDispatch({
