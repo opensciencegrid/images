@@ -59,12 +59,18 @@ jobs:
           fi
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "json=$image_json" >> $GITHUB_OUTPUT
-
   check-config:
     runs-on: ubuntu-latest
     needs: [make-date-tag, build-image-list]
     outputs:
-      image_combinations: ${{ steps.combine-config.outputs.image_combinations }}
+      standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
+      repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
+      base_name_standard: ${{ steps.read-config.outputs.base_name_standard }}
+      base_version_standard: ${{ steps.read-config.outputs.base_version_standard }}
+      base_repo_standard: ${{ steps.read-config.outputs.base_repo_standard }}
+      base_name_repo: ${{ steps.read-config.outputs.base_name_repo }}
+      base_version_repo: ${{ steps.read-config.outputs.base_version_repo }}
+      base_repo_repo: ${{ steps.read-config.outputs.base_repo_repo }}
     strategy:
       fail-fast: false
       matrix:
@@ -84,7 +90,6 @@ jobs:
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-config
         if: steps.check-jsonfile.outputs.config_exists == 'true'
@@ -92,64 +97,64 @@ jobs:
           config=$(cat ${{ matrix.image }}/build-config.json)
           standard_enabled=$(echo $config | jq -r '.standard_build.enabled')
           repo_enabled=$(echo $config | jq -r '.repo_build.enabled')
-          base_names_standard=$(echo $config | jq -r '.standard_build.base_os.base_name | join(",")')
-          base_versions_standard=$(echo $config | jq -r '.standard_build.base_os.base_version | join(",")')
+          base_name_standard=$(echo $config | jq -r '.standard_build.base_os.base_name')
+          base_version_standard=$(echo $config | jq -r '.standard_build.base_os.base_version')
           base_repo_standard=$(echo $config | jq -r '.standard_build.base_repo')
+          base_name_repo=$(echo $config | jq -r '.repo_build.base_os.base_name')
+          base_version_repo=$(echo $config | jq -r '.repo_build.base_os.base_version')
+          base_repo_repo=$(echo $config | jq -r '.repo_build.base_repo')
           echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
           echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
-          echo "base_names_standard=$base_names_standard" >> $GITHUB_OUTPUT
-          echo "base_versions_standard=$base_versions_standard" >> $GITHUB_OUTPUT
+          echo "base_name_standard=$base_name_standard" >> $GITHUB_OUTPUT
+          echo "base_version_standard=$base_version_standard" >> $GITHUB_OUTPUT
           echo "base_repo_standard=$base_repo_standard" >> $GITHUB_OUTPUT
-
+          echo "base_name_repo=$base_name_repo" >> $GITHUB_OUTPUT
+          echo "base_version_repo=$base_version_repo" >> $GITHUB_OUTPUT
+          echo "base_repo_repo=$base_repo_repo" >> $GITHUB_OUTPUT
       - name: Set default values if build-config.json is missing
-        id: set-defaults
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
           echo "standard_enabled=true" >> $GITHUB_OUTPUT
           echo "repo_enabled=true" >> $GITHUB_OUTPUT
-          echo "base_names_standard=el9" >> $GITHUB_OUTPUT
-          echo "base_versions_standard=23" >> $GITHUB_OUTPUT
+          echo "base_name_standard=el9" >> $GITHUB_OUTPUT
+          echo "base_version_standard=23" >> $GITHUB_OUTPUT
           echo "base_repo_standard=testing" >> $GITHUB_OUTPUT
-
-      - name: Combine configurations
-        id: combine-config
-        run: |
-          base_names="${{ steps.read-config.outputs.base_names_standard || steps.set-defaults.outputs.base_names_standard }}"
-          base_versions="${{ steps.read-config.outputs.base_versions_standard || steps.set-defaults.outputs.base_versions_standard }}"
-          IFS=',' read -r -a base_names_array <<< "$base_names"
-          IFS=',' read -r -a base_versions_array <<< "$base_versions"
-          combinations=()
-          for base_name in "${base_names_array[@]}"; do
-            for base_version in "${base_versions_array[@]}"; do
-              combinations+=("{\"base_name\":\"$base_name\",\"base_version\":\"$base_version\"}")
-            done
-          done
-          combinations_json=$(printf '%s\n' "${combinations[@]}" | jq -R . | jq -s .)
-          echo "image_combinations=$combinations_json" >> $GITHUB_OUTPUT
-
-      - name: Debug image combinations
-        run: echo "${{ steps.combine-config.outputs.image_combinations }}"
-      
+          echo "base_name_repo=el9" >> $GITHUB_OUTPUT
+          echo "base_version_repo=23" >> $GITHUB_OUTPUT
+          echo "base_repo_repo=testing" >> $GITHUB_OUTPUT
       - name: Trigger standard build workflow
-        if: steps.read-config.outputs.standard_enabled == 'true' || steps.set-defaults.outputs.standard_enabled == 'true'
+        if: ${{ steps.read-config.outputs.standard_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
-            const combinations = JSON.parse(process.env.IMAGE_COMBINATIONS);
-            for (const combination of combinations) {
-              const result = await github.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'standard-build.yml',
-                ref: context.ref,
-                inputs: {
-                  image: "${{ matrix.image }}",
-                  base_name: combination.base_name,
-                  base_version: combination.base_version,
-                  base_repo: "${{ steps.read-config.outputs.base_repo_standard || steps.set-defaults.outputs.base_repo_standard }}"
-                }
-              });
-              console.log(result);
-            }
-        env:
-          IMAGE_COMBINATIONS: ${{ steps.combine-config.outputs.image_combinations }}
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'standard-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.image }}",
+                base_name: "${{ steps.read-config.outputs.base_name_standard }}",
+                base_version: "${{ steps.read-config.outputs.base_version_standard }}",
+                base_repo: "${{ steps.read-config.outputs.base_repo_standard }}"
+              }
+            });
+            console.log(result);
+      - name: Trigger repo build workflow
+        if: ${{ steps.read-config.outputs.repo_enabled == 'true' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repo-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.image }}",
+                base_name: "${{ steps.read-config.outputs.base_name_repo }}",
+                base_version: "${{ steps.read-config.outputs.base_version_repo }}",
+                base_repo: "${{ steps.read-config.outputs.base_repo_repo }}"
+              }
+            });
+            console.log(result);
