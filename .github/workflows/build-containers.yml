@@ -126,7 +126,7 @@ jobs:
             done
           done
           combinations_json=$(printf '%s\n' "${combinations[@]}" | jq -R . | jq -s .)
-          echo "image_combinations=$combinations_json" >> $GITHUB_OUTPUT
+          echo "image_combinations=${combinations_json}" >> $GITHUB_OUTPUT
 
       - name: Trigger standard build workflow
         if: steps.read-config.outputs.standard_enabled == 'true' || steps.set-defaults.outputs.standard_enabled == 'true'
