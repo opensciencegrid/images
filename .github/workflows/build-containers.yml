@@ -107,7 +107,6 @@ jobs:
         run: |
           echo "standard_enabled=true" >> $GITHUB_OUTPUT
           echo "repo_enabled=true" >> $GITHUB_OUTPUT
-
           echo "base_names_standard=el9" >> $GITHUB_OUTPUT
           echo "base_versions_standard=23" >> $GITHUB_OUTPUT
           echo "base_repo_standard=testing" >> $GITHUB_OUTPUT
@@ -126,8 +125,11 @@ jobs:
             done
           done
           combinations_json=$(printf '%s\n' "${combinations[@]}" | jq -R . | jq -s .)
-          echo "image_combinations=${combinations_json}" >> $GITHUB_OUTPUT
+          echo "image_combinations=$combinations_json" >> $GITHUB_OUTPUT
 
+      - name: Debug image combinations
+        run: echo "${{ steps.combine-config.outputs.image_combinations }}"
+      
       - name: Trigger standard build workflow
         if: steps.read-config.outputs.standard_enabled == 'true' || steps.set-defaults.outputs.standard_enabled == 'true'
         uses: actions/github-script@v4
