@@ -150,8 +150,8 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const imageMatrix = ${{ needs.check-config.outputs.image_matrix }};
-            imageMatrix.forEach(config => {
+            const imageMatrix = JSON.parse(`{{ steps.create-matrix.outputs.image_matrix }}`);
+            imageMatrix.forEach(async config => {
               if (config.build_type === "standard") {
                 const result = await github.actions.createWorkflowDispatch({
                   owner: context.repo.owner,
@@ -174,8 +174,8 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const imageMatrix = ${{ needs.check-config.outputs.image_matrix }};
-            imageMatrix.forEach(config => {
+            const imageMatrix = JSON.parse(`{{ steps.create-matrix.outputs.image_matrix }}`);
+            imageMatrix.forEach(async config => {
               if (config.build_type === "repo") {
                 const result = await github.actions.createWorkflowDispatch({
                   owner: context.repo.owner,
@@ -190,4 +190,5 @@ jobs:
                   }
                 });
                 console.log(result);
-
+              }
+            });
