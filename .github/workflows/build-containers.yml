@@ -64,6 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [make-date-tag, build-image-list]
     outputs:
+      standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
+      repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
+      base_name_standard: ${{ steps.read-config.outputs.base_name_standard }}
+      base_version_standard: ${{ steps.read-config.outputs.base_version_standard }}
+      base_repo_standard: ${{ steps.read-config.outputs.base_repo_standard }}
+      base_name_repo: ${{ steps.read-config.outputs.base_name_repo }}
+      base_version_repo: ${{ steps.read-config.outputs.base_version_repo }}
+      base_repo_repo: ${{ steps.read-config.outputs.base_repo_repo }}
       image_matrix: ${{ steps.create-matrix.outputs.image_matrix }}
     strategy:
       fail-fast: false
@@ -111,7 +119,7 @@ jobs:
           if [[ "$standard_enabled" == "true" ]]; then
             for base_name in $(echo $base_name_standard | tr "," "\n"); do
               for base_version in $(echo $base_version_standard | tr "," "\n"); do
-                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\" }" >> matrix.json
+                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
               done
             done
           fi
@@ -119,7 +127,7 @@ jobs:
           if [[ "$repo_enabled" == "true" ]]; then
             for base_name in $(echo $base_name_repo | tr "," "\n"); do
               for base_version in $(echo $base_version_repo | tr "," "\n"); do
-                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\" }" >> matrix.json
+                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
               done
             done
           fi
@@ -127,8 +135,8 @@ jobs:
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
-          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\" }" >> matrix.json
-          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\" }" >> matrix.json
+          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\" }" >> matrix.json
+          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\" }" >> matrix.json
 
       - name: Debug matrix.json
         run: cat matrix.json
@@ -151,7 +159,7 @@ jobs:
         run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow
-        if: ${{ (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
+        if: ${{ matrix.build_config.build_type == 'standard' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -170,7 +178,7 @@ jobs:
             console.log(result);
 
       - name: Trigger repo build workflow
-        if: ${{ (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
+        if: ${{ matrix.build_config.build_type == 'repo' }}
         uses: actions/github-script@v4
         with:
           script: |
