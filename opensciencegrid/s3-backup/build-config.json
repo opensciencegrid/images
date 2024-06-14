@@ -10,8 +10,8 @@
   "repo_build": {
     "enabled": false,
     "base_os": {
-      "base_name": "",
-      "base_version": ""
+      "base_name": ["el7", "el8"],
+      "base_version": ["3.6", "23"]
     },
     "base_repo": ""
   }
