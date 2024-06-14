@@ -59,12 +59,19 @@ jobs:
           fi
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "json=$image_json" >> $GITHUB_OUTPUT
-          
+
   check-config:
     runs-on: ubuntu-latest
     needs: [make-date-tag, build-image-list]
     outputs:
-      image_matrix: ${{ steps.create-matrix.outputs.image_matrix }}
+      standard_enabled: ${{ steps.read-config.outputs.standard_enabled }}
+      repo_enabled: ${{ steps.read-config.outputs.repo_enabled }}
+      base_name_standard: ${{ steps.read-config.outputs.base_name_standard }}
+      base_version_standard: ${{ steps.read-config.outputs.base_version_standard }}
+      base_repo_standard: ${{ steps.read-config.outputs.base_repo_standard }}
+      base_name_repo: ${{ steps.read-config.outputs.base_name_repo }}
+      base_version_repo: ${{ steps.read-config.outputs.base_version_repo }}
+      base_repo_repo: ${{ steps.read-config.outputs.base_repo_repo }}
     strategy:
       fail-fast: false
       matrix:
@@ -78,8 +85,13 @@ jobs:
         id: check-jsonfile
         run: |
           if [ -f "${{ matrix.image }}/build-config.json" ]; then
-            echo "build-config.json exists in ${{ matrix.image }}"
-            echo "config_exists=true" >> $GITHUB_OUTPUT
+            if [ -s "${{ matrix.image }}/build-config.json" ]; then
+              echo "build-config.json exists and is not empty in ${{ matrix.image }}"
+              echo "config_exists=true" >> $GITHUB_OUTPUT
+            else
+              echo "build-config.json exists but is empty in ${{ matrix.image }}"
+              echo "config_exists=false" >> $GITHUB_OUTPUT
+            fi
           else
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
