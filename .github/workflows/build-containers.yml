@@ -65,6 +65,8 @@ jobs:
     needs: [make-date-tag, build-image-list]
     outputs:
       image_matrix: ${{ steps.create-matrix.outputs.image_matrix }}
+      standard_build_enabled: ${{ steps.read-config.outputs.standard_enabled }}
+      repo_build_enabled: ${{ steps.read-config.outputs.repo_enabled }}
     strategy:
       fail-fast: false
       matrix:
@@ -77,7 +79,7 @@ jobs:
       - name: Check for build-config.json in ${{ matrix.image }}
         id: check-jsonfile
         run: |
-          if [ -f "${{ matrix.image }}/build-config.json" ]]; then
+          if [ -f "${{ matrix.image }}/build-config.json" ]; then
             echo "build-config.json exists in ${{ matrix.image }}"
             echo "config_exists=true" >> $GITHUB_OUTPUT
           else
@@ -109,24 +111,32 @@ jobs:
           echo "base_repo_repo=$base_repo_repo" >> $GITHUB_OUTPUT
 
           if [[ "$standard_enabled" == "true" ]]; then
+            echo "standard_enabled=true" >> $GITHUB_OUTPUT
             for base_name in $(echo $base_name_standard | tr "," "\n"); do
               for base_version in $(echo $base_version_standard | tr "," "\n"); do
                 echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
               done
             done
+          else
+            echo "standard_enabled=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$repo_enabled" == "true" ]]; then
+            echo "repo_enabled=true" >> $GITHUB_OUTPUT
             for base_name in $(echo $base_name_repo | tr "," "\n"); do
               for base_version in $(echo $base_version_repo | tr "," "\n"); do
                 echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
               done
             done
+          else
+            echo "repo_enabled=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
+          echo "standard_enabled=true" >> $GITHUB_OUTPUT
+          echo "repo_enabled=true" >> $GITHUB_OUTPUT
           echo "[{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\" },
                 { \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\" }]" >> matrix.json
 
@@ -151,7 +161,7 @@ jobs:
         run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow
-        if: ${{ matrix.build_config.build_type == 'standard' }}
+        if: needs.check-config.outputs.standard_build_enabled == 'true'
         uses: actions/github-script@v4
         with:
           script: |
@@ -170,7 +180,7 @@ jobs:
             console.log(result);
 
       - name: Trigger repo build workflow
-        if: ${{ matrix.build_config.build_type == 'repo' }}
+        if: needs.check-config.outputs.repo_build_enabled == 'true'
         uses: actions/github-script@v4
         with:
           script: |
