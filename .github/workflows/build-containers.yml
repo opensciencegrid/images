@@ -148,7 +148,7 @@ jobs:
         run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow
-        if: ${{ matrix.build_config.build_type == 'standard' && matrix.build_config.default != true }}
+        if: ${{ matrix.build_config.build_type == 'standard' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -167,7 +167,7 @@ jobs:
             console.log(result);
 
       - name: Trigger repo build workflow
-        if: ${{ matrix.build_config.build_type == 'repo' && matrix.build_config.default != true }}
+        if: ${{ matrix.build_config.build_type == 'repo' }}
         uses: actions/github-script@v4
         with:
           script: |
