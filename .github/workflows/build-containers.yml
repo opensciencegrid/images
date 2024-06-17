@@ -148,7 +148,7 @@ jobs:
         run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow
-        if: ${{ matrix.build_config.build_type == 'standard' && (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
+        if: ${{ matrix.build_config.build_type == 'standard' && needs.check-config.outputs.standard_enabled == 'true' }}
         uses: actions/github-script@v4
         with:
           script: |
