@@ -170,6 +170,7 @@ jobs:
               }
             });
             console.log(result);
+            
       - name: Trigger repo build workflow
         if: ${{ needs.check-config.outputs.repo_build_enabled == 'true' }}
         uses: actions/github-script@v4
