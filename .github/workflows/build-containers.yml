@@ -59,10 +59,11 @@ jobs:
           fi
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "json=$image_json" >> $GITHUB_OUTPUT
-
   check-config:
     runs-on: ubuntu-latest
     needs: [make-date-tag, build-image-list]
+    outputs:
+      image_matrix: ${{ steps.create-matrix.outputs.image_matrix }}
     strategy:
       fail-fast: false
       matrix:
@@ -82,7 +83,6 @@ jobs:
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-config
         if: steps.check-jsonfile.outputs.config_exists == 'true'
@@ -96,7 +96,6 @@ jobs:
           base_name_repo=$(echo $config | jq -r '.repo_build.base_os.base_name | join(",")')
           base_version_repo=$(echo $config | jq -r '.repo_build.base_os.base_version | join(",")')
           base_repo_repo=$(echo $config | jq -r '.repo_build.base_repo')
-
           echo "standard_enabled=$standard_enabled" >> $GITHUB_OUTPUT
           echo "repo_enabled=$repo_enabled" >> $GITHUB_OUTPUT
           echo "base_name_standard=$base_name_standard" >> $GITHUB_OUTPUT
@@ -105,98 +104,114 @@ jobs:
           echo "base_name_repo=$base_name_repo" >> $GITHUB_OUTPUT
           echo "base_version_repo=$base_version_repo" >> $GITHUB_OUTPUT
           echo "base_repo_repo=$base_repo_repo" >> $GITHUB_OUTPUT
-
-          matrix_json="[]"
           if [[ "$standard_enabled" == "true" ]]; then
-            echo "standard_enabled=true" >> $GITHUB_OUTPUT
             for base_name in $(echo $base_name_standard | tr "," "\n"); do
               for base_version in $(echo $base_version_standard | tr "," "\n"); do
-                matrix_json=$(echo $matrix_json | jq ". += [{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }]")
+                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
               done
             done
-          else
-            echo "standard_enabled=false" >> $GITHUB_OUTPUT
           fi
-
           if [[ "$repo_enabled" == "true" ]]; then
-            echo "repo_enabled=true" >> $GITHUB_OUTPUT
             for base_name in $(echo $base_name_repo | tr "," "\n"); do
               for base_version in $(echo $base_version_repo | tr "," "\n"); do
-                matrix_json=$(echo $matrix_json | jq ". += [{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }]")
+                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
               done
             done
-          else
-            echo "repo_enabled=false" >> $GITHUB_OUTPUT
           fi
-
-          echo "$matrix_json" > matrix.json
-
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
-          matrix_json=$(echo '[
-            { "image": "${{ matrix.image }}", "base_name": "el9", "base_version": "23", "base_repo": "testing", "build_type": "standard" },
-            { "image": "${{ matrix.image }}", "base_name": "el9", "base_version": "23", "base_repo": "testing", "build_type": "repo" }
-          ]')
-          echo "$matrix_json" > matrix.json
-
+          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\" }" >> matrix.json
+          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\" }" >> matrix.json
       - name: Debug matrix.json
         run: cat matrix.json
 
       - name: Create build matrix
         id: create-matrix
         run: |
-          matrix=$(jq -c -s 'add' matrix.json)
+          matrix=$(jq -c -s '.' matrix.json)
           echo "image_matrix=$matrix" >> $GITHUB_OUTPUT
+  trigger-builds:
+    needs: check-config
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_config: ${{ fromJson(needs.check-config.outputs.image_matrix) }}
+    steps:
+      - name: Debug build_config
+        run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow
-        if: ${{ (steps.check-jsonfile.outputs.config_exists == 'false' && steps.read-config.outputs.standard_enabled == 'true') ||
-                (steps.check-jsonfile.outputs.config_exists == 'true' && steps.read-config.outputs.standard_enabled == 'false') }}
-                
+        if: ${{ matrix.build_config.build_type == 'standard' && (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
         uses: actions/github-script@v4
         with:
           script: |
-            const imageMatrix = JSON.parse(process.env.image_matrix);
-            imageMatrix.forEach(async config => {
-              if (config.build_type === "standard") {
-                const result = await github.actions.createWorkflowDispatch({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: 'standard-build.yml',
-                  ref: context.ref,
-                  inputs: {
-                    image: config.image,
-                    base_name: config.base_name,
-                    base_version: config.base_version,
-                    base_repo: config.base_repo
-                  }
-                });
-                console.log(result);
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'standard-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
               }
             });
-
+            console.log(result);
       - name: Trigger repo build workflow
-        if: ${{ (steps.check-jsonfile.outputs.config_exists == 'false' && steps.read-config.outputs.repo_enabled == 'true')
-                || (steps.check-jsonfile.outputs.config_exists == 'true' && steps.read-config.outputs.repo_enabled == 'false')}}
-
+        if: ${{ matrix.build_config.build_type == 'repo' && (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
         uses: actions/github-script@v4
         with:
           script: |
-            const imageMatrix = JSON.parse(process.env.image_matrix);
-            imageMatrix.forEach(async config => {
-              if (config.build_type === "repo") {
-                const result = await github.actions.createWorkflowDispatch({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: 'repo-build.yml',
-                  ref: context.ref,
-                  inputs: {
-                    image: config.image,
-                    base_name: config.base_name,
-                    base_version: config.base_version,
-                    base_repo: config.base_repo
-                  }
-                });
-                console.log(result);
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repo-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
               }
             });
+            console.log(result);
+
+      - name: Trigger standard build workflow
+        if: ${{ matrix.build_config.build_type == 'standard' && (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'true') }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'standard-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
+              }
+            });
+            console.log(result);
+      - name: Trigger repo build workflow
+        if: ${{ matrix.build_config.build_type == 'repo' && (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'true') }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repo-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
+              }
+            });
+            console.log(result);
