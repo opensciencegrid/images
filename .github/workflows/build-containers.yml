@@ -59,6 +59,7 @@ jobs:
           fi
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
           echo "json=$image_json" >> $GITHUB_OUTPUT
+
   check-config:
     runs-on: ubuntu-latest
     needs: [make-date-tag, build-image-list]
@@ -83,6 +84,7 @@ jobs:
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
           fi
+
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-config
         if: steps.check-jsonfile.outputs.config_exists == 'true'
@@ -118,11 +120,13 @@ jobs:
               done
             done
           fi
+
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
           echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\" }" >> matrix.json
           echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\" }" >> matrix.json
+
       - name: Debug matrix.json
         run: cat matrix.json
 
@@ -131,6 +135,7 @@ jobs:
         run: |
           matrix=$(jq -c -s '.' matrix.json)
           echo "image_matrix=$matrix" >> $GITHUB_OUTPUT
+
   trigger-builds:
     needs: check-config
     runs-on: ubuntu-latest
@@ -143,7 +148,7 @@ jobs:
         run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow
-        if: ${{ matrix.build_config.build_type == 'standard' && (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'true') }}
+        if: ${{ matrix.build_config.build_type == 'standard' && (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -160,8 +165,9 @@ jobs:
               }
             });
             console.log(result);
+
       - name: Trigger repo build workflow
-        if: ${{ matrix.build_config.build_type == 'repo' && (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'true') }}
+        if: ${{ matrix.build_config.build_type == 'repo' && (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'false') }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -178,5 +184,3 @@ jobs:
               }
             });
             console.log(result);
-
-      
