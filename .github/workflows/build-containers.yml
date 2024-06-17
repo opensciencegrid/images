@@ -77,7 +77,7 @@ jobs:
       - name: Check for build-config.json in ${{ matrix.image }}
         id: check-jsonfile
         run: |
-          if [ -f "${{ matrix.image }}/build-config.json" ]]; then
+          if [ -f "${{ matrix.image }}/build-config.json" ]; then
             echo "build-config.json exists in ${{ matrix.image }}"
             echo "config_exists=true" >> $GITHUB_OUTPUT
           else
@@ -106,13 +106,15 @@ jobs:
           echo "base_name_repo=$base_name_repo" >> $GITHUB_OUTPUT
           echo "base_version_repo=$base_version_repo" >> $GITHUB_OUTPUT
           echo "base_repo_repo=$base_repo_repo" >> $GITHUB_OUTPUT
+
           if [[ "$standard_enabled" == "true" ]]; then
             for base_name in $(echo $base_name_standard | tr "," "\n"); do
               for base_version in $(echo $base_version_standard | tr "," "\n"); do
                 echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
-              done
+              end
             done
           fi
+
           if [[ "$repo_enabled" == "true" ]]; then
             for base_name in $(echo $base_name_repo | tr "," "\n"); do
               for base_version in $(echo $base_version_repo | tr "," "\n"); do
@@ -124,9 +126,9 @@ jobs:
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
-          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\", \"default\": true }" >> matrix.json
-          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\", \"default\": true }" >> matrix.json
-
+          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\" }" >> matrix.json
+          echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\" }" >> matrix.json
+          
       - name: Debug matrix.json
         run: cat matrix.json
 
@@ -193,12 +195,12 @@ jobs:
       matrix:
         build_config: ${{ fromJson(needs.check-config.outputs.image_matrix) }}
     steps:
-      - name: Debug build_config
-        if: ${{ matrix.build_config.default == true }}
-        run: echo ${{ matrix.build_config }}
+      - name: Check if build-config.json is missing
+        id: check-default
+        run: echo ${{ matrix.build_config.config_exists }}
 
-      - name: Trigger standard build workflow for default
-        if: ${{ matrix.build_config.build_type == 'standard' && matrix.build_config.default == true }}
+      - name: Trigger default standard build workflow
+        if: ${{ steps.check-default.outputs.config_exists == 'false' && matrix.build_config.build_type == 'standard' }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -209,28 +211,28 @@ jobs:
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.build_config.image }}",
-                base_name: "${{ matrix.build_config.base_name }}",
-                base_version: "${{ matrix.build_config.base_version }}",
-                base_repo: "${{ matrix.build_config.base_repo }}"
+                base_name: "el9",
+                base_version: "23",
+                base_repo: "testing"
               }
             });
             console.log(result);
 
-      - name: Trigger repo build workflow for default
-        if: ${{ matrix.build_config.build_type == 'repo' && matrix.build_config.default == true }}
+      - name: Trigger default repo build workflow
+        if: ${{ steps.check-default.outputs.config_exists == 'false' && matrix.build_config.build_type == 'repo' }}
         uses: actions/github-script@v4
         with:
           script: |
             const result = await github.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'standard-build.yml',
+              workflow_id: 'repo-build.yml',
               ref: context.ref,
               inputs: {
                 image: "${{ matrix.build_config.image }}",
-                base_name: "${{ matrix.build_config.base_name }}",
-                base_version: "${{ matrix.build_config.base_version }}",
-                base_repo: "${{ matrix.build_config.base_repo }}"
+                base_name: "el9",
+                base_version: "23",
+                base_repo: "testing"
               }
             });
             console.log(result);
