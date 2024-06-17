@@ -106,11 +106,12 @@ jobs:
           echo "base_version_repo=$base_version_repo" >> $GITHUB_OUTPUT
           echo "base_repo_repo=$base_repo_repo" >> $GITHUB_OUTPUT
 
+          matrix_json="[]"
           if [[ "$standard_enabled" == "true" ]]; then
             echo "standard_enabled=true" >> $GITHUB_OUTPUT
             for base_name in $(echo $base_name_standard | tr "," "\n"); do
               for base_version in $(echo $base_version_standard | tr "," "\n"); do
-                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }" >> matrix.json
+                matrix_json=$(echo $matrix_json | jq ". += [{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_standard\", \"build_type\": \"standard\" }]")
               done
             done
           else
@@ -121,20 +122,23 @@ jobs:
             echo "repo_enabled=true" >> $GITHUB_OUTPUT
             for base_name in $(echo $base_name_repo | tr "," "\n"); do
               for base_version in $(echo $base_version_repo | tr "," "\n"); do
-                echo "{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }" >> matrix.json
+                matrix_json=$(echo $matrix_json | jq ". += [{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"$base_name\", \"base_version\": \"$base_version\", \"base_repo\": \"$base_repo_repo\", \"build_type\": \"repo\" }]")
               done
             done
           else
             echo "repo_enabled=false" >> $GITHUB_OUTPUT
           fi
 
+          echo "$matrix_json" > matrix.json
+
       - name: Set default values if build-config.json is missing
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
-          echo "standard_enabled=true" >> $GITHUB_OUTPUT
-          echo "repo_enabled=true" >> $GITHUB_OUTPUT
-          echo "[{ \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"standard\" },
-                { \"image\": \"${{ matrix.image }}\", \"base_name\": \"el9\", \"base_version\": \"23\", \"base_repo\": \"testing\", \"build_type\": \"repo\" }]" >> matrix.json
+          matrix_json=$(echo '[
+            { "image": "${{ matrix.image }}", "base_name": "el9", "base_version": "23", "base_repo": "testing", "build_type": "standard" },
+            { "image": "${{ matrix.image }}", "base_name": "el9", "base_version": "23", "base_repo": "testing", "build_type": "repo" }
+          ]')
+          echo "$matrix_json" > matrix.json
 
       - name: Debug matrix.json
         run: cat matrix.json
