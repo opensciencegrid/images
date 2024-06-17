@@ -77,7 +77,7 @@ jobs:
       - name: Check for build-config.json in ${{ matrix.image }}
         id: check-jsonfile
         run: |
-          if [ -f "${{ matrix.image }}/build-config.json" ]]; then
+          if [ -f "${{ matrix.image }}/build-config.json" ]; then
             echo "build-config.json exists in ${{ matrix.image }}"
             echo "config_exists=true" >> $GITHUB_OUTPUT
           else
