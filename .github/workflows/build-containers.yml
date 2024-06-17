@@ -179,39 +179,4 @@ jobs:
             });
             console.log(result);
 
-      - name: Trigger standard build workflow
-        if: ${{ matrix.build_config.build_type == 'standard' && (needs.check-config.outputs.standard_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'true') }}
-        uses: actions/github-script@v4
-        with:
-          script: |
-            const result = await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'standard-build.yml',
-              ref: context.ref,
-              inputs: {
-                image: "${{ matrix.build_config.image }}",
-                base_name: "${{ matrix.build_config.base_name }}",
-                base_version: "${{ matrix.build_config.base_version }}",
-                base_repo: "${{ matrix.build_config.base_repo }}"
-              }
-            });
-            console.log(result);
-      - name: Trigger repo build workflow
-        if: ${{ matrix.build_config.build_type == 'repo' && (needs.check-config.outputs.repo_enabled == 'true' || steps.check-jsonfile.outputs.config_exists == 'true') }}
-        uses: actions/github-script@v4
-        with:
-          script: |
-            const result = await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'repo-build.yml',
-              ref: context.ref,
-              inputs: {
-                image: "${{ matrix.build_config.image }}",
-                base_name: "${{ matrix.build_config.base_name }}",
-                base_version: "${{ matrix.build_config.base_version }}",
-                base_repo: "${{ matrix.build_config.base_repo }}"
-              }
-            });
-            console.log(result);
+      
