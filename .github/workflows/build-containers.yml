@@ -150,7 +150,9 @@ jobs:
           echo "image_matrix=$matrix" >> $GITHUB_OUTPUT
 
       - name: Trigger standard build workflow
-        if: ${{ steps.check-jsonfile.outputs.config_exists == 'true' || steps.read-config.outputs.standard_enabled == 'true' }}
+        if: ${{ (steps.check-jsonfile.outputs.config_exists == 'false' && steps.read-config.outputs.standard_enabled == 'true') ||
+                (steps.check-jsonfile.outputs.config_exists == 'true' && steps.read-config.outputs.standard_enabled == 'false') }}
+                
         uses: actions/github-script@v4
         with:
           script: |
@@ -174,7 +176,9 @@ jobs:
             });
 
       - name: Trigger repo build workflow
-        if: ${{ steps.check-jsonfile.outputs.config_exists == 'true' || steps.read-config.outputs.repo_enabled == 'true' }}
+        if: ${{ (steps.check-jsonfile.outputs.config_exists == 'false' && steps.read-config.outputs.repo_enabled == 'true')
+                || (steps.check-jsonfile.outputs.config_exists == 'true' && steps.read-config.outputs.repo_enabled == 'false')}}
+
         uses: actions/github-script@v4
         with:
           script: |
