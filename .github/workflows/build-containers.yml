@@ -246,8 +246,6 @@ jobs:
       matrix:
         build_config: ${{ fromJson(needs.check-config.outputs.default_image_matrix) }}
     steps:
-      - name: Debug build_config
-        run: echo ${{ matrix.build_config }}
 
       - name: Trigger standard build workflow (default)
         if: ${{ matrix.build_config.build_type == 'standard' }}
