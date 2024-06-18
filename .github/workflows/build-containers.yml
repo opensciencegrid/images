@@ -84,7 +84,6 @@ jobs:
           else
             echo "No build-config.json found in ${{ matrix.image }}"
             echo "config_exists=false" >> $GITHUB_OUTPUT
-          fi
 
       - name: Read build-config.json in ${{ matrix.image }}
         id: read-config
@@ -274,3 +273,14 @@ jobs:
               }
             });
             console.log(result);
+
+  debug-matrices:
+    needs: [trigger-builds, trigger-default-builds]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print build matrices
+        run: |
+          echo "Build matrix for build-config.json:"
+          echo "${{ needs.check-config.outputs.image_matrix }}"
+          echo "Build matrix for default-build-config.json:"
+          echo "${{ needs.check-config.outputs.default_image_matrix }}"
