@@ -65,6 +65,7 @@ jobs:
     needs: [make-date-tag, build-image-list]
     outputs:
       image_matrix: ${{ steps.create-matrix.outputs.image_matrix }}
+      default_image_matrix: ${{ steps.create-default-matrix.outputs.image_matrix }}
     strategy:
       fail-fast: false
       matrix:
@@ -124,7 +125,14 @@ jobs:
             done
           fi
 
-      - name: Set values from default-build-config.json if build-config.json is missing
+      - name: Create build matrix
+        id: create-matrix
+        if: steps.check-jsonfile.outputs.config_exists == 'true'
+        run: |
+          matrix=$(jq -c -s '.' matrix.json)
+          echo "image_matrix=$matrix" >> $GITHUB_OUTPUT
+
+      - name: Read default-build-config.json
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
           default_config=$(cat opensciencegrid/default-build-config.json)
@@ -162,19 +170,12 @@ jobs:
             done
           fi
 
-      - name: Create build matrix from default config
+      - name: Create default build matrix
         id: create-default-matrix
         if: steps.check-jsonfile.outputs.config_exists == 'false'
         run: |
           matrix_default=$(jq -c -s '.' matrix_default.json)
           echo "image_matrix=$matrix_default" >> $GITHUB_OUTPUT
-
-      - name: Create build matrix
-        id: create-matrix
-        if: steps.check-jsonfile.outputs.config_exists == 'true'
-        run: |
-          matrix=$(jq -c -s '.' matrix.json)
-          echo "image_matrix=$matrix" >> $GITHUB_OUTPUT
 
   trigger-builds:
     needs: check-config
@@ -207,6 +208,55 @@ jobs:
             console.log(result);
 
       - name: Trigger repo build workflow
+        if: ${{ matrix.build_config.build_type == 'repo' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repo-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
+              }
+            });
+            console.log(result);
+
+  trigger-default-builds:
+    needs: check-config
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_config: ${{ fromJson(needs.check-config.outputs.default_image_matrix) }}
+    steps:
+      - name: Debug build_config
+        run: echo ${{ matrix.build_config }}
+
+      - name: Trigger standard build workflow (default)
+        if: ${{ matrix.build_config.build_type == 'standard' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const result = await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'standard-build.yml',
+              ref: context.ref,
+              inputs: {
+                image: "${{ matrix.build_config.image }}",
+                base_name: "${{ matrix.build_config.base_name }}",
+                base_version: "${{ matrix.build_config.base_version }}",
+                base_repo: "${{ matrix.build_config.base_repo }}"
+              }
+            });
+            console.log(result);
+
+      - name: Trigger repo build workflow (default)
         if: ${{ matrix.build_config.build_type == 'repo' }}
         uses: actions/github-script@v4
         with:
