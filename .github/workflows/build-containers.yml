@@ -177,6 +177,18 @@ jobs:
           matrix_default=$(jq -c -s '.' matrix_default.json)
           echo "image_matrix=$matrix_default" >> $GITHUB_OUTPUT
 
+      - name: Print build matrix
+        if: steps.check-jsonfile.outputs.config_exists == 'true'
+        run: |
+          echo "Build matrix for build-config.json:"
+          cat matrix.json
+
+      - name: Print default build matrix
+        if: steps.check-jsonfile.outputs.config_exists == 'false'
+        run: |
+          echo "Build matrix for default-build-config.json:"
+          cat matrix_default.json
+
   trigger-builds:
     needs: check-config
     runs-on: ubuntu-latest
@@ -274,14 +286,3 @@ jobs:
               }
             });
             console.log(result);
-
-  debug-matrices:
-    needs: [trigger-builds, trigger-default-builds]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print build matrices
-        run: |
-          echo "Build matrix for build-config.json:"
-          echo "${{ needs.check-config.outputs.image_matrix }}"
-          echo "Build matrix for default-build-config.json:"
-          echo "${{ needs.check-config.outputs.default_image_matrix }}"
