@@ -1,1 +1,17 @@
-
+name: Repo_Build
+on:
+  push:
+    branches:
+        - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build project
+        run: |
+        # Add build commands here
+      - name: Run tests
+        run: |
+        # Add test commands here
