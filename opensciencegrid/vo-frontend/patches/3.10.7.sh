@@ -13,7 +13,7 @@ index f88353830..80e0c943a 100644
 
          fd.write("\n# Force GSI authentication\n")
 -        fd.write("SEC_DEFAULT_AUTHENTICATION_METHODS = IDTOKENS, GSI\n")
-+        fd.write("SEC_DEFAULT_AUTHENTICATION_METHODS = IDTOKENS, SSL, GSI\n")
++        fd.write("SEC_DEFAULT_AUTHENTICATION_METHODS = IDTOKENS, SSL\n")
          fd.write("SEC_DEFAULT_AUTHENTICATION = REQUIRED\n")
 
          fd.write("\n#################################\n")
