@@ -1,10 +1,10 @@
 ARG BASE_YUM_REPO=release
-ARG BASE_OSG_SERIES=3.6
+ARG BASE_OSG_SERIES=23
 ARG BASE_OS=el9
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 
-LABEL maintainer OSG Software <help@opensciencegrid.org>
+LABEL maintainer OSG Software <support@osg-htc.org>
 
 # Create the frontend user with a fixed GID/UID
 # This is important so that we can use the same IDs in the persistent volume used for
@@ -29,7 +29,6 @@ RUN rm -rf /var/log/gwms-frontend/*
 
 # patch gwms (but only for certain versions)
 ADD patches /opt/gwms-patches
-#RUN if rpm -qa | grep glideinwms-libs-3.9.4; then /tmp/patch_gwms.sh; fi
 RUN VERSION=$(rpm -qa | grep glideinwms-libs | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+') && \
     if [ -e /opt/gwms-patches/$VERSION.sh ]; then \
         /opt/gwms-patches/$VERSION.sh; \
