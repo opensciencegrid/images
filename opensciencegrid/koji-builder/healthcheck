@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# bit overkill but there may be more checks in the future
-ret=0
-pgrep -f /usr/sbin/kojid > /dev/null; (( ret = ret || $? ))
-exit $ret
