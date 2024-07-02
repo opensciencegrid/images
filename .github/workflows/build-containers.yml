@@ -89,7 +89,7 @@ jobs:
         yum_repo: ['development', 'testing', 'release']
         series:
           - name: '3.6'
-            os: 'el7'
+            os: 'el9'
           - name: '23'
             os: 'el9'
     steps:
@@ -116,7 +116,7 @@ jobs:
         image: ${{ fromJson(needs.build-image-list.outputs.images) }}
         series:
           - name: '3.6'
-            os: 'el7'
+            os: 'el9'
           - name: '23'
             os: 'el9'
     steps:
