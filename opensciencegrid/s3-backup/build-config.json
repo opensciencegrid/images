@@ -1,0 +1,7 @@
+{
+  "base_os": {
+    "base_name": ["el7, el9"],
+  "base_version": ["3.6, 23"]
+  },
+  "base_repo": "testing"
+}
