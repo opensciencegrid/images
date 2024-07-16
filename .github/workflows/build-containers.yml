@@ -143,6 +143,7 @@ jobs:
           matrix_default=$(jq -c -s '.' matrix_default.json)
           echo "default_image_matrix=$matrix_default" >> $GITHUB_OUTPUT
   
+          
       - name: Create default build matrix
         id: create-default-matrix
         if: steps.check-jsonfile.outputs.config_exists == 'false'
@@ -150,6 +151,7 @@ jobs:
           matrix_default=$(jq -c -s '.' matrix_default.json)
           echo "default_image_matrix=$matrix_default" >> $GITHUB_OUTPUT
   
+
   combine-matrices:
     runs-on: ubuntu-latest
     needs: check-config
