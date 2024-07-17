@@ -12,6 +12,8 @@ def main(image_list_file):
     with open(image_list_file, 'r') as file:
         image_dirs = json.load(file)
 
+    print("Image directories:", image_dirs)  # Add this line to print the directories
+
     # Load the default build config
     default_config_path = 'opensciencegrid/default-build-config.json'
     default_config = load_config(default_config_path)
@@ -33,17 +35,12 @@ def main(image_list_file):
         # Get the image name from the directory
         image_name = os.path.basename(image_dir)
 
-        # Add the configuration to the matrix with explicit field handling
-        image_matrix[image_name] = {
-            "standard_build": config.get("standard_build", False),
-            "repo_build": config.get("repo_build", False),
-            "base_os": config.get("base_os", []),
-            "osg_series": config.get("osg_series", []),
-            "base_repo": config.get("base_repo", [])
-        }
+        # Add the configuration to the matrix
+        image_matrix[image_name] = config
 
     # Output the resulting JSON matrix
-    print(json.dumps(image_matrix, indent=4))
+    output_json = json.dumps(image_matrix, indent=4)
+    print(output_json)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
