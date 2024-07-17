@@ -1,4 +1,3 @@
----
 name: Build and push container images
 
 on:
@@ -72,8 +71,24 @@ jobs:
           # Ensure that the generated JSON array has a member,
           # otherwise GHA will throw an error about an empty matrix
           # vector in subsequent steps
-          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
-          echo "json=$image_json" >> $GITHUB_OUTPUT
+          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
+          
+          # Save the JSON to a file and pass it to a python script
+          echo "$image_json" > image_list.json
+
+      - name: Display image list
+        run: cat image_list.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Run build-images-json script
+        id: run-python-script
+        run: |
+          python scripts/build-images-json.py image_list.json > output.json
+          cat output.json
 
   build:
     runs-on: ubuntu-latest
