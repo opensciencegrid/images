@@ -20,7 +20,7 @@ jobs:
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.image-list.outputs.json }}
+      images: ${{ steps.image-list.outputs.images }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -46,9 +46,6 @@ jobs:
                else
                    BASE=origin/main
                fi
-               # List image root dirs where files have changed and the
-               # root dir exists. Example value:
-               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
                images=$(git diff --name-only \
                                  "$BASE" \
                                  "$GITHUB_SHA" |
@@ -68,13 +65,11 @@ jobs:
                                       -printf "$ORG_DIR/%P\n")
           fi
 
-          # Ensure that the generated JSON array has a member,
-          # otherwise GHA will throw an error about an empty matrix
-          # vector in subsequent steps
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
-          
+
           # Save the JSON to a file and pass it to a python script
           echo "$image_json" > image_list.json
+          echo "images=$(echo $images | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
       - name: Display image list
         run: cat image_list.json
@@ -84,18 +79,16 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run build-images-json script
+      - name: Run build-job-matrix script
         id: run-python-script
         run: |
-          python scripts/build-images-json.py image_list.json > output.json
+          python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }} > output.json
           cat output.json
 
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
     if: needs.build-image-list.outputs.images != '["dummy"]'
-    # Prevent a single build failure from killing the workflow.
-    # This is safe since subsequent pushes should fail on cache load
     continue-on-error: true
     strategy:
       fail-fast: false
@@ -136,7 +129,6 @@ jobs:
             os: 'el9'
     steps:
       - name: Push to Harbor (${{ matrix.series }}-development)
-        # FIXME: reenable for OSG 23 development when available
         if: matrix.series.name != '23'
         uses: opensciencegrid/push-container-action@main
         with:
