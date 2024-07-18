@@ -82,7 +82,7 @@ jobs:
       - name: Run build-job-matrix script
         id: run-python-script
         run: |
-          python scripts/build-job-matrix.py ${{ needs.build-image-list.outputs.images }} > output.json
+          python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }} > output.json
           cat output.json
 
   build:
