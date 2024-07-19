@@ -11,5 +11,5 @@
  {"name":"sssd","base_os":"el9","osg_series":"23","base_repo":"development","standard_build":true,"repo_build":false},
  {"name":"sssd","base_os":"el9","osg_series":"23","base_repo":"testing","standard_build":true,"repo_build":false},
  {"name":"sssd","base_os":"el9","osg_series":"23","base_repo":"release","standard_build":true,"repo_build":false},
- {"name":"s3-backup","base_os":"el7","osg_series":"3.6","base_repo":"development","standard_build":true,"repo_build":false}
+ {"name": "s3-backup", "base_os": "el7", "osg_series": "3.6", "base_repo": "development", "standard_build": true, "repo_build": false}
 ]
