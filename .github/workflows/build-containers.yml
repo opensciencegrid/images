@@ -29,14 +29,6 @@ jobs:
       - id: image-list
         run: |
           ORG_DIR=opensciencegrid
-          # Get the list of files changed based on the type of event
-          # kicking off the GHA:
-          # 1. For the main branch, diff the previous state of main vs
-          #    the current commit
-          # 2. For other branches (i.e., on someone's fork), diff main
-          #    vs the current commit
-          # 3. For PRs, diff the base ref vs the current commit
-          # 4. For everything else (e.g., dispatches), build all images
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
              [[ $GITHUB_EVENT_NAME == 'push' ]]; then
                if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
@@ -57,8 +49,6 @@ jobs:
                                            -wholename ./{} \
                                            -printf "%P\n")
           else
-               # List all image root dirs. Example value:
-               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
                images=$(find $ORG_DIR -mindepth 1 \
                                       -maxdepth 1 \
                                       -type d \
@@ -66,8 +56,6 @@ jobs:
           fi
 
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
-
-          # Save the JSON to a file and pass it to a python script
           echo "$image_json" > image_list.json
           echo "images=$(echo $images | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
@@ -87,8 +75,9 @@ jobs:
 
       - id: generate-matrix
         run: |
-          matrix=$(cat output.json)
-          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+          echo "matrix=$(cat output.json)" >> $GITHUB_OUTPUT
+        env:
+          matrix: $(cat output.json)
 
   build:
     runs-on: ubuntu-latest
@@ -119,7 +108,7 @@ jobs:
       matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
-        if: matrix.series.name != '23'
+        if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
