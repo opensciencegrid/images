@@ -80,7 +80,8 @@ jobs:
 
       - id: set-matrix
         run: |
-          echo "matrix=$(cat output.json)" >> $GITHUB_ENV
+          cat output.json | jq -c . > matrix.json
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_ENV
         shell: bash
 
   build:
