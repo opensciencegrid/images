@@ -78,9 +78,15 @@ jobs:
           echo "Content of output.json:"
           cat output.json
 
+      - name: Verify JSON formatting
+        run: |
+          cat output.json | jq . > formatted_output.json
+          cat formatted_output.json
+
       - id: set-matrix
         run: |
-          python -c "import json, os; print(f'matrix={json.dumps(json.load(open(\"output.json\")))}')" >> $GITHUB_ENV
+          cat formatted_output.json | jq -c . > matrix.json
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_ENV
         shell: bash
 
   build:
