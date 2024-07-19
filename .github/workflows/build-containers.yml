@@ -84,28 +84,40 @@ jobs:
         id: run-python-script
         run: |
           python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
-          echo "Generated scripts/output.json:"
-          cat scripts/output.json
-
+          matrix=$(cat scripts/output.json)
+          echo "matrix=$matrix" >> $GITHUB_ENV  # ensure no newline characters are causing issues
+  
+      - name: Generate Matrix Configuration
+        run: python scripts/build-job-matrix.py opensciencegrid/s3-backup
+  
+      - name: Read JSON and set as output
+        id: set_matrix
+        run: |
+          json_content=$(cat scripts/output.json)
+          echo "::set-output name=matrix::$json_content"
+  
       - name: Verify scripts/output.json
         run: |
           echo "Content of scripts/output.json:"
           cat scripts/output.json
+  
+      
 
-      - id: set-matrix
+      - name: Print matrix output
         run: |
-          MATRIX=$(cat scripts/output.json | jq -c .)
-          echo "matrix=$MATRIX" >> $GITHUB_ENV
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT  # Debug line to print the matrix
-        shell: bash
+          echo "Matrix output: ${{ steps.set_matrix.outputs.matrix }}"
+  
 
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson('[{"name":"test","base_os":"el7","osg_series":"3.6","base_repo":"development"}]') }}
     steps:
+      - name: Print matrix output
+        run: |
+          echo "Matrix output: ${{ toJson(matrix) }}"
       - name: Build ${{ matrix.name }}:${{ matrix.osg_series }}-${{ matrix.base_repo }}
         uses: opensciencegrid/build-container-action@v0.6.0
         with:
@@ -113,6 +125,7 @@ jobs:
           osg_repo: ${{ matrix.base_repo }}
           context: ${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
+      
 
   push:
     runs-on: ubuntu-latest
