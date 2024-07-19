@@ -92,12 +92,13 @@ jobs:
           echo "Content of scripts/output.json:"
           cat scripts/output.json
 
-      - name: Build-matrix
+      - name: Build matrix
         id: set-matrix
         run: |
-          MATRIX=$(cat scripts/output.json | jq -c .)
-          echo "::set-output name=matrix::$MATRIX"  # Set job-level output
+          MATRIX_JSON=$(cat scripts/output.json | jq -c)
+          echo "::set-output name=matrix::${MATRIX_JSON}"  # Set job-level output
         shell: bash
+
       - name: Print matrix output
         run: |
           echo "Matrix output: ${{ steps.set-matrix.outputs.matrix }}"
