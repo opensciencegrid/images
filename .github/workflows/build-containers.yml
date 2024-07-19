@@ -75,9 +75,8 @@ jobs:
 
       - id: generate-matrix
         run: |
-          echo "matrix=$(cat output.json)" >> $GITHUB_OUTPUT
-        env:
-          matrix: $(cat output.json)
+          echo "::set-output name=matrix::$(cat output.json)"
+        shell: bash
 
   build:
     runs-on: ubuntu-latest
@@ -108,7 +107,7 @@ jobs:
       matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
-        if: always()
+        if: matrix.series.name != '23'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
