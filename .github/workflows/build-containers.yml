@@ -20,7 +20,7 @@ jobs:
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.image-list.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -109,7 +109,7 @@ jobs:
     needs: build-image-list
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson('[{"name":"s3-backup","base_os":"el7","osg_series":"3.6","base_repo":"development"}]') }}
+      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Print matrix output
         run: |
