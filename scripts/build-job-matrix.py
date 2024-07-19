@@ -15,8 +15,6 @@ def main(image_dirs):
     default_config_path = 'opensciencegrid/default-build-config.json'
     default_config = load_config(default_config_path)
 
-    image_matrix = []
-
     for image_dir in image_dirs:
         # Check if the image directory exists
         if not os.path.isdir(image_dir):
@@ -46,18 +44,18 @@ def main(image_dirs):
         )
 
         for base_os, osg_series, base_repo in combinations:
-            image_matrix.append({
+            image_matrix = {
                 "name": image_name,
                 "base_os": base_os,
                 "osg_series": osg_series,
                 "base_repo": base_repo,
                 "standard_build": config['standard_build'],
                 "repo_build": config['repo_build']
-            })
+            }
 
-    # Output the resulting JSON matrix
-    output_json = json.dumps(image_matrix, indent=4)
-    print(output_json)
+            # Output each JSON object separately
+            output_json = json.dumps(image_matrix, indent=4)
+            print(output_json)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
