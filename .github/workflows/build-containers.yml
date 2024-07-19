@@ -80,7 +80,7 @@ jobs:
 
       - id: set-matrix
         run: |
-          echo "matrix=$(cat output.json)" >> $GITHUB_ENV
+          python -c "import json, os; print(f'matrix={json.dumps(json.load(open(\"output.json\")))}')" >> $GITHUB_ENV
         shell: bash
 
   build:
