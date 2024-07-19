@@ -60,13 +60,7 @@ def main(image_dirs):
     output_path = os.path.join('scripts', 'output.json')
     os.makedirs('scripts', exist_ok=True)
     with open(output_path, 'w+') as outfile:
-        outfile.write('[')
-        for i, matrix in enumerate(image_matrices):
-            json_str = json.dumps(matrix, separators=(',', ':'))
-            if i != 0:
-                outfile.write(',')
-            outfile.write('\n ' + json_str)
-        outfile.write('\n]')
+        json.dump(image_matrices, outfile, separators=(',', ':'))
     print(f"Generated {output_path} with image matrix")
 
 if __name__ == "__main__":
