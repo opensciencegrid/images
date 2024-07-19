@@ -105,7 +105,7 @@ jobs:
 
       - name: Print matrix output
         run: |
-          echo "Matrix output: ${{ steps.set-matrix.outputs.matrix }}"
+          echo "Matrix output: ${{ steps.set_matrix.outputs.matrix }}"
   
 
   build:
