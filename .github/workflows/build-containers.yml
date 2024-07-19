@@ -92,31 +92,30 @@ jobs:
           echo "Content of scripts/output.json:"
           cat scripts/output.json
 
-      - name: Build matrix
-        id: set-matrix
-        run: |
-          MATRIX_JSON=$(cat scripts/output.json | jq -c)
-          echo "::set-output name=matrix::${MATRIX_JSON}"  # Set job-level output
-        shell: bash
+      
 
       - name: Print matrix output
         run: |
           echo "Matrix output: ${{ steps.set-matrix.outputs.matrix }}"
   
 
-  
   build:
     runs-on: ubuntu-latest
+    needs: build-image-list
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.setup-matrix.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Build and push container images
+      - name: Print matrix output
         run: |
-          docker build -t my-image:${{ matrix.base_os }}-${{ matrix.osg_series }} ${{ github.workspace }}
-          docker push my-image:${{ matrix.base_os }}-${{ matrix.osg_series }}
+          echo "Matrix output: ${{ toJson(matrix) }}"
+      - name: Build ${{ matrix.name }}:${{ matrix.osg_series }}-${{ matrix.base_repo }}
+        uses: opensciencegrid/build-container-action@v0.6.0
+        with:
+          osg_series: ${{ matrix.osg_series }}
+          osg_repo: ${{ matrix.base_repo }}
+          context: ${{ matrix.name }}
+          base_os: ${{ matrix.base_os }}
       
 
   push:
