@@ -76,12 +76,8 @@ jobs:
       - name: Verify output.json
         run: |
           echo "Content of output.json:"
-          cat output.json | jq
-
-      - id: generate-matrix
-        run: |
-          matrix=$(cat output.json)
-          echo "::set-output name=matrix::${matrix}"
+          cat output.json
+          echo "::set-output name=matrix::$(cat output.json)"
         shell: bash
 
   build:
