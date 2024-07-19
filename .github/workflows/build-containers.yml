@@ -20,7 +20,7 @@ jobs:
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -77,7 +77,10 @@ jobs:
         run: |
           echo "Content of output.json:"
           cat output.json
-          echo "::set-output name=matrix::$(cat output.json)"
+
+      - id: set-matrix
+        run: |
+          echo "matrix=$(cat output.json)" >> $GITHUB_ENV
         shell: bash
 
   build:
