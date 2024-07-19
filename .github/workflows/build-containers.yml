@@ -13,7 +13,6 @@ jobs:
     outputs:
       dtag: ${{ steps.mkdatetag.outputs.dtag }}
     steps:
-      - uses: actions/checkout@v3
       - name: make date tag
         id: mkdatetag
         run: echo "dtag=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
@@ -24,27 +23,24 @@ jobs:
       images: ${{ steps.image-list.outputs.images }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Generate Image List
         id: image-list
         run: |
           ORG_DIR=opensciencegrid
-          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
-             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-                   BASE=${{github.event.before}}
-               else
-                   BASE=origin/main
-               fi
-               images=$(git diff --name-only "$BASE" "$GITHUB_SHA" |
-                        egrep "^$ORG_DIR/" |
-                        cut -d/ -f -2 |
-                        sort |
-                        uniq |
-                        xargs -I {} find . -type d -wholename ./{} -printf "%P\n")
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] || [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+            if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+              BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+              BASE=${{github.event.before}}
+            else
+              BASE=origin/main
+            fi
+            images=$(git diff --name-only "$BASE" "$GITHUB_SHA" | egrep "^$ORG_DIR/" | cut -d/ -f -2 | sort | uniq | xargs -I {} find . -type d -wholename ./{} -printf "%P\n")
           else
-               images=$(find $ORG_DIR -mindepth 1 -maxdepth 1 -type d -printf "$ORG_DIR/%P\n")
+            images=$(find $ORG_DIR -mindepth 1 -maxdepth 1 -type d -printf "$ORG_DIR/%P\n")
           fi
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
           echo "images=$image_json" >> $GITHUB_OUTPUT
@@ -56,12 +52,13 @@ jobs:
     outputs:
       matrix: ${{ steps.run-python-script.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.x'
+
       - name: Run build-job-matrix script
+        id: run-python-script
         run: |
           python scripts/build-job-matrix.py ${{ needs.build-image-list.outputs.images }} > matrix.json
           echo "::set-output name=matrix::$(cat matrix.json)"
@@ -73,9 +70,8 @@ jobs:
     if: needs.generate-build-matrix.outputs.matrix != '["dummy"]'
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.generate-build-matrix.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.generate-build-matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v3
       - name: Build ${{ matrix.name }}:${{ matrix.osg_series }}-${{ matrix.base_repo }}
         continue-on-error: ${{ matrix.base_repo == 'development' }}
         uses: opensciencegrid/build-container-action@v0.6.0
@@ -95,13 +91,11 @@ jobs:
     needs: [build, make-date-tag]
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.generate-build-matrix.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.generate-build-matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v3
       - name: Push to Harbor and Docker Hub
         run: |
           echo "Pushing ${matrix.name} images to repositories"
-          # Use appropriate actions or commands for pushing images here
 
       - name: Push to Harbor (${matrix.series.name}-development)
         if: matrix.series.name != '23'
