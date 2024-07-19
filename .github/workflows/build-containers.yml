@@ -70,6 +70,7 @@ jobs:
         run: |
           MATRIX=$(cat scripts/output.json | jq -c .)
           echo "matrix=$MATRIX" >> $GITHUB_ENV
+          echo "MATRIX=$MATRIX"  # Debug line to print the matrix
         shell: bash
 
   build:
