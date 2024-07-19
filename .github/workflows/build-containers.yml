@@ -87,9 +87,13 @@ jobs:
           matrix=$(cat scripts/output.json)
           echo "matrix=$matrix" >> $GITHUB_ENV  # ensure no newline characters are causing issues
   
-      - name: Set matrix output
-        run: echo "::set-output name=matrix::$(echo $matrix | jq -c .)"
-
+      - name: Output JSON to Environment File
+        run: |
+          echo "MATRIX_JSON=$(<scripts/output.json)" >> $GITHUB_ENV
+  
+      - name: Read JSON and setup matrix
+        run: echo "MATRIX=$(echo $MATRIX_JSON | jq .)" >> $GITHUB_ENV
+  
       - name: Verify scripts/output.json
         run: |
           echo "Content of scripts/output.json:"
