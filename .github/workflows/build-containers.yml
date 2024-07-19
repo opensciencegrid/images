@@ -81,6 +81,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
+      - name: Print Matrix
+        run: echo "Matrix: ${{ needs.build-image-list.outputs.matrix }}"
       - name: Build ${{ matrix.name }}:${{ matrix.osg_series }}-${{ matrix.base_repo }}
         uses: opensciencegrid/build-container-action@v0.6.0
         with:
@@ -100,6 +102,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
+      - name: Print Matrix
+        run: echo "Matrix: ${{ needs.build-image-list.outputs.matrix }}"
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
         if: matrix.osg_series != '23'
         uses: opensciencegrid/push-container-action@main
