@@ -73,9 +73,15 @@ jobs:
           python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }} > output.json
           cat output.json
 
+      - name: Verify output.json
+        run: |
+          echo "Content of output.json:"
+          cat output.json | jq
+
       - id: generate-matrix
         run: |
-          echo "::set-output name=matrix::$(cat output.json)"
+          matrix=$(cat output.json)
+          echo "::set-output name=matrix::${matrix}"
         shell: bash
 
   build:
