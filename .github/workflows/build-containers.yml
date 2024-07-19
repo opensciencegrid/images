@@ -113,6 +113,7 @@ jobs:
           osg_repo: ${{ matrix.base_repo }}
           context: ${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
+      - run: echo "${{ needs.build-image-list.outputs.matrix }}"
 
   push:
     runs-on: ubuntu-latest
