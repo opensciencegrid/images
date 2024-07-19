@@ -29,30 +29,17 @@ jobs:
       - id: image-list
         run: |
           ORG_DIR=opensciencegrid
-          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
-             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-                   BASE=${{github.event.before}}
-               else
-                   BASE=origin/main
-               fi
-               images=$(git diff --name-only \
-                                 "$BASE" \
-                                 "$GITHUB_SHA" |
-                        egrep "^$ORG_DIR/" |
-                        cut -d/ -f -2 |
-                        sort |
-                        uniq |
-                        xargs -I {} find . -type d \
-                                           -wholename ./{} \
-                                           -printf "%P\n")
+          if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] || [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+            if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+              BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+              BASE=${{ github.event.before }}
+            else
+              BASE=origin/main
+            fi
+            images=$(git diff --name-only "$BASE" "$GITHUB_SHA" | egrep "^$ORG_DIR/" | cut -d/ -f -2 | sort | uniq | xargs -I {} find . -type d -wholename ./{} -printf "%P\n")
           else
-               images=$(find $ORG_DIR -mindepth 1 \
-                                      -maxdepth 1 \
-                                      -type d \
-                                      -printf "$ORG_DIR/%P\n")
+            images=$(find $ORG_DIR -mindepth 1 -maxdepth 1 -type d -printf "$ORG_DIR/%P\n")
           fi
 
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
@@ -70,14 +57,14 @@ jobs:
       - name: Run build-job-matrix script
         id: run-python-script
         run: |
-            python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }} > output.json
-            echo "Generated output.json:"
-            cat output.json
+          python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
+          echo "Generated output.json:"
+          cat output.json
         
       - name: Verify output.json
         run: |
-            echo "Content of output.json:"
-            cat output.json
+          echo "Content of output.json:"
+          cat output.json
 
       - id: set-matrix
         run: |
@@ -114,7 +101,7 @@ jobs:
       matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
-        if: matrix.series.name != '23'
+        if: matrix.osg_series != '23'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
