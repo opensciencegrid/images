@@ -56,10 +56,12 @@ def main(image_dirs):
             }
             image_matrices.append(image_matrix)
 
-    # Output all JSON objects to a single JSON file
-    with open('output.json', 'w') as outfile:
+    # Output all JSON objects to a single JSON file in the scripts directory
+    output_path = os.path.join('scripts', 'output.json')
+    os.makedirs('scripts', exist_ok=True)
+    with open(output_path, 'w') as outfile:
         json.dump(image_matrices, outfile, indent=4)
-    print("Generated output.json with image matrix")
+    print(f"Generated {output_path} with image matrix")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
