@@ -113,7 +113,7 @@ jobs:
     needs: build-image-list
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
+      matrix: ${{ fromJson('[{"name":"test","base_os":"el7","osg_series":"3.6","base_repo":"development"}]') }}
     steps:
       - name: Print matrix output
         run: |
