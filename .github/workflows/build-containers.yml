@@ -68,7 +68,8 @@ jobs:
 
       - id: set-matrix
         run: |
-          MATRIX=$(jq 'map(select(.name != "" and .osg_series != "" and .base_repo != "" and .base_os != ""))' scripts/output.json)
+          cat scripts/output.json | jq 'map(select(.name != "" and .osg_series != "" and .base_repo != "" and .base_os != ""))' > filtered_output.json
+          MATRIX=$(cat filtered_output.json | jq -c .)
           echo "matrix=$MATRIX" >> $GITHUB_ENV
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT  # Debug line to print the matrix
         shell: bash
