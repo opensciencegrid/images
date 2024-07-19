@@ -59,7 +59,7 @@ def main(image_dirs):
     # Output all JSON objects to a single JSON file in the scripts directory
     output_path = os.path.join('scripts', 'output.json')
     os.makedirs('scripts', exist_ok=True)
-    with open(output_path, 'w') as outfile:
+    with open(output_path, 'w+') as outfile:
         outfile.write('[')
         for i, matrix in enumerate(image_matrices):
             json_str = json.dumps(matrix, separators=(',', ':'))
