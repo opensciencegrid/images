@@ -99,7 +99,10 @@ jobs:
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT  # Debug line to print the matrix
         shell: bash
 
-    
+      - name: Print matrix output
+        run: |
+          echo "Matrix output: ${{ steps.set-matrix.outputs.matrix }}"
+  
 
   build:
     runs-on: ubuntu-latest
