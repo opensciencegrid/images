@@ -84,18 +84,16 @@ jobs:
         id: run-python-script
         run: |
           python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
-          echo "Generated scripts/output.json:"
-          cat scripts/output.json
           matrix=$(cat scripts/output.json)
-          echo "matrix=$matrix" >> $GITHUB_ENV
-          
+          echo "matrix=$matrix" >> $GITHUB_ENV  # ensure no newline characters are causing issues
+  
+      - name: Set matrix output
+        run: echo "::set-output name=matrix::$(echo $matrix | jq -c .)"
+
       - name: Verify scripts/output.json
         run: |
           echo "Content of scripts/output.json:"
           cat scripts/output.json
-    
-      - name: Set matrix output
-        run: echo "::set-output name=matrix::$(<scripts/output.json)"
   
       
 
