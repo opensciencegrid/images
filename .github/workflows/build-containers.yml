@@ -81,7 +81,7 @@ jobs:
 
       - id: set-matrix
         run: |
-          cat formatted_output.json | jq -c . > matrix.json
+          cat output.json | jq -c . > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_ENV
         shell: bash
 
