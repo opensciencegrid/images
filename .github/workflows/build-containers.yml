@@ -104,23 +104,19 @@ jobs:
           echo "Matrix output: ${{ steps.set-matrix.outputs.matrix }}"
   
 
+  
   build:
     runs-on: ubuntu-latest
-    needs: build-image-list
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
+      matrix: ${{fromJson(needs.setup-matrix.outputs.matrix)}}
     steps:
-      - name: Print matrix output
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build and push container images
         run: |
-          echo "Matrix output: ${{ toJson(matrix) }}"
-      - name: Build ${{ matrix.name }}:${{ matrix.osg_series }}-${{ matrix.base_repo }}
-        uses: opensciencegrid/build-container-action@v0.6.0
-        with:
-          osg_series: ${{ matrix.osg_series }}
-          osg_repo: ${{ matrix.base_repo }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
+          docker build -t my-image:${{ matrix.base_os }}-${{ matrix.osg_series }} ${{ github.workspace }}
+          docker push my-image:${{ matrix.base_os }}-${{ matrix.osg_series }}
       
 
   push:
