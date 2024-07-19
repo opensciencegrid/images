@@ -86,12 +86,17 @@ jobs:
           python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
           echo "Generated scripts/output.json:"
           cat scripts/output.json
-
+          matrix=$(cat scripts/output.json)
+          echo "matrix=$matrix" >> $GITHUB_ENV
+          
       - name: Verify scripts/output.json
         run: |
           echo "Content of scripts/output.json:"
           cat scripts/output.json
-
+    
+      - name: Set matrix output
+        run: echo "::set-output name=matrix::$(<scripts/output.json)"
+  
       
 
       - name: Print matrix output
