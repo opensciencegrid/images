@@ -78,11 +78,6 @@ jobs:
         run: |
             echo "Content of output.json:"
             cat output.json
-        
-      - name: Verify JSON formatting
-        run: |
-            cat output.json | jq . > formatted_output.json
-            cat formatted_output.json
 
       - id: set-matrix
         run: |
