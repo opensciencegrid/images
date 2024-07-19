@@ -64,13 +64,10 @@ jobs:
                                       -type d \
                                       -printf "$ORG_DIR/%P\n")
           fi
-
           image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
-
           # Save the JSON to a file and pass it to a python script
           echo "$image_json" > image_list.json
           echo "images=$(echo $images | tr '\n' ' ')" >> $GITHUB_OUTPUT
-
       - name: Display image list
         run: cat image_list.json
 
@@ -84,7 +81,6 @@ jobs:
         run: |
           python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }} > output.json
           cat output.json
-
   build:
     runs-on: ubuntu-latest
     needs: build-image-list

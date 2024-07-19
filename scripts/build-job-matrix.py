@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from itertools import product
 
 def load_config(config_path):
     """Load JSON configuration from the given path."""
@@ -14,9 +15,13 @@ def main(image_dirs):
     default_config_path = 'opensciencegrid/default-build-config.json'
     default_config = load_config(default_config_path)
 
-    image_matrix = {}
+    image_matrices = []
 
     for image_dir in image_dirs:
+        # Check if the image directory exists
+        if not os.path.isdir(image_dir):
+            sys.exit(f"Error: Image directory '{image_dir}' does not exist.")
+
         # Construct the path to the build-config.json for the current image
         build_config_path = os.path.join(image_dir, 'build-config.json')
 
@@ -29,12 +34,40 @@ def main(image_dirs):
         # Get the image name from the directory
         image_name = os.path.basename(image_dir)
 
-        # Add the configuration to the matrix
-        image_matrix[image_name] = config
+        # Create all combinations of the parameters
+        base_os_list = config['base_os'][0].split(', ')
+        osg_series_list = config['osg_series'][0].split(', ')
+        base_repo_list = config['base_repo']
 
-    # Output the resulting JSON matrix
-    output_json = json.dumps(image_matrix, indent=4)
-    print(output_json)
+        combinations = product(
+            base_os_list,
+            osg_series_list,
+            base_repo_list
+        )
+
+        for base_os, osg_series, base_repo in combinations:
+            image_matrix = {
+                "name": image_name,
+                "base_os": base_os,
+                "osg_series": osg_series,
+                "base_repo": base_repo,
+                "standard_build": config['standard_build'],
+                "repo_build": config['repo_build']
+            }
+            image_matrices.append(image_matrix)
+
+    # Output all JSON objects to a single JSON file in the scripts directory
+    output_path = os.path.join('scripts', 'output.json')
+    os.makedirs('scripts', exist_ok=True)
+    with open(output_path, 'w') as outfile:
+        outfile.write('[')
+        for i, matrix in enumerate(image_matrices):
+            json_str = json.dumps(matrix, separators=(',', ':'))
+            if i != 0:
+                outfile.write(',')
+            outfile.write('\n ' + json_str)
+        outfile.write('\n]')
+    print(f"Generated {output_path} with image matrix")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
