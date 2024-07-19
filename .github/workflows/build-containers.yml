@@ -20,7 +20,7 @@ jobs:
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      images: ${{ steps.set-images.outputs.images }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -66,106 +66,69 @@ jobs:
           echo "Content of output.json:"
           cat output.json
 
-      - id: set-matrix
+      - id: set-images
         run: |
-          MATRIX=$(cat output.json | jq -c .)
-          echo "matrix=$MATRIX" >> $GITHUB_ENV
+          IMAGES=$(cat output.json | jq -c .)
+          echo "images=$IMAGES" >> $GITHUB_ENV
         shell: bash
 
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
-      - name: Build ${{ matrix.name }}:${{ matrix.osg_series }}-${{ matrix.base_repo }}
-        uses: opensciencegrid/build-container-action@v0.6.0
+      - uses: actions/checkout@v3
         with:
-          osg_series: ${{ matrix.osg_series }}
-          osg_repo: ${{ matrix.base_repo }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
+          fetch-depth: 0
+
+      - name: Read and Build Images
+        run: |
+          IMAGES=$(echo ${{ env.images }} | jq -c .)
+          echo "Images to process: $IMAGES"
+          for row in $(echo "${IMAGES}" | jq -r '.[] | @base64'); do
+              _jq() {
+                  echo ${row} | base64 --decode | jq -r ${1}
+              }
+              NAME=$(_jq '.name')
+              BASE_OS=$(_jq '.base_os')
+              OSG_SERIES=$(_jq '.osg_series')
+              BASE_REPO=$(_jq '.base_repo')
+              STANDARD_BUILD=$(_jq '.standard_build')
+              REPO_BUILD=$(_jq '.repo_build')
+
+              echo "Processing image: $NAME with base_os: $BASE_OS, osg_series: $OSG_SERIES, base_repo: $BASE_REPO"
+              # Trigger the build here
+              gh run workflow build-and-push-container-images.yml --context $NAME --base_os $BASE_OS --osg_series $OSG_SERIES --base_repo $BASE_REPO --standard_build $STANDARD_BUILD --repo_build $REPO_BUILD
+          done
 
   push:
     runs-on: ubuntu-latest
+    needs: [make-date-tag, build-image-list, build]
     if: >-
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       github.repository_owner == 'opensciencegrid'
-    needs: [make-date-tag, build-image-list, build]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
-      - name: Push to Harbor (${{ matrix.osg_series }}-development)
-        if: matrix.osg_series != '23'
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: development
-          osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
 
-      - name: Push to Harbor (${{ matrix.osg_series }}-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
         with:
-          repo: testing
-          osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Harbor (${{ matrix.osg_series }}-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: release
-          osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
+      - name: Push images to Docker Hub
+        run: |
+          IMAGES=$(echo ${{ env.images }} | jq -c .)
+          for row in $(echo "${IMAGES}" | jq -r '.[] | @base64'); do
+              _jq() {
+                  echo ${row} | base64 --decode | jq -r ${1}
+              }
+              NAME=$(_jq '.name')
+              BASE_OS=$(_jq '.base_os')
+              OSG_SERIES=$(_jq '.osg_series')
+              BASE_REPO=$(_jq '.base_repo')
 
-      - name: Push to Docker Hub (${{ matrix.osg_series }}-development)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: development
-          osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push to Docker Hub (${{ matrix.osg_series }}-testing)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: testing
-          osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push to Docker Hub (${{ matrix.osg_series }}-release)
-        if: always()
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: release
-          osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+              echo "Pushing image: $NAME with base_os: $BASE_OS, osg_series: $OSG_SERIES, base_repo: $BASE_REPO"
+              docker push docker.io/opensciencegrid/$NAME:$OSG_SERIES-$BASE_REPO
+          done
