@@ -70,18 +70,19 @@ jobs:
       - name: Run build-job-matrix script
         id: run-python-script
         run: |
-          python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }} > output.json
-          cat output.json
-
+            python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }} > output.json
+            echo "Generated output.json:"
+            cat output.json
+        
       - name: Verify output.json
         run: |
-          echo "Content of output.json:"
-          cat output.json
-
+            echo "Content of output.json:"
+            cat output.json
+        
       - name: Verify JSON formatting
         run: |
-          cat output.json | jq . > formatted_output.json
-          cat formatted_output.json
+            cat output.json | jq . > formatted_output.json
+            cat formatted_output.json
 
       - id: set-matrix
         run: |
