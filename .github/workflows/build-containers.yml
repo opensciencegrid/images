@@ -68,9 +68,9 @@ jobs:
 
       - id: set-matrix
         run: |
-          MATRIX=$(cat scripts/output.json | jq -c .)
+          MATRIX=$(cat scripts/output.json | jq 'map(select(.name != "")) | map(select(.osg_series != "")) | map(select(.base_repo != "")) | map(select(.base_os != "")) | jq -c .')
           echo "matrix=$MATRIX" >> $GITHUB_ENV
-          echo "MATRIX=$MATRIX"  # Debug line to print the matrix
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT  # Debug line to print the matrix
         shell: bash
 
   build:
