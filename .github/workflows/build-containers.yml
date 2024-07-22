@@ -101,22 +101,11 @@ jobs:
         run: |
           echo "Building ${{ matrix.name }} with configuration ${{ matrix.config }}"
           IFS='-' read -r BASE_OS OSG_SERIES BASE_REPO STANDARD_BUILD REPO_BUILD <<< "${{ matrix.config }}"
-          echo "BASE_OS: $BASE_OS"
-          echo "OSG_SERIES: $OSG_SERIES"
-          echo "BASE_REPO: $BASE_REPO"
-          echo "STANDARD_BUILD: $STANDARD_BUILD"
-          echo "REPO_BUILD: $REPO_BUILD"
-
-      - name: Validate environment variables
-        run: |
-          echo "Validating environment variables:"
-          echo "BASE_OS: $BASE_OS"
-          echo "OSG_SERIES: $OSG_SERIES"
-          echo "BASE_REPO: $BASE_REPO"
-          if [ -z "$BASE_OS" ] || [ -z "$OSG_SERIES" ] || [ -z "$BASE_REPO" ]; then
-            echo "Error: One or more environment variables are not set."
-            exit 1
-          fi
+          echo "base_os: $BASE_OS"
+          echo "osg_series: $OSG_SERIES"
+          echo "base_repo: $BASE_REPO"
+          echo "standard_build: $STANDARD_BUILD"
+          echo "repo_build: $REPO_BUILD"
 
       - name: Build Image
         run: |
