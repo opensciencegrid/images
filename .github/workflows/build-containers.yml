@@ -111,17 +111,18 @@ jobs:
         run: |
           MATRIX_JSON='${{ needs.build-image-list.outputs.matrix }}'
           echo "MATRIX_JSON: $MATRIX_JSON"
-          echo "$MATRIX_JSON" | jq -c '.[]' | while read -r CONFIGS; do
-            echo "$CONFIGS" | jq -r 'to_entries[] | [.key, .value[]] | @tsv' | while IFS=$'\t' read -r NAME CONFIG; do
+          echo "$MATRIX_JSON" | jq -c 'to_entries[]' | while read -r entry; do
+            NAME=$(echo "$entry" | jq -r '.key')
+            CONFIGS=$(echo "$entry" | jq -r '.value[]')
+            for CONFIG in $CONFIGS; do
               IFS='-' read -r BASE_OS OSG_SERIES BASE_REPO STANDARD_BUILD REPO_BUILD <<< "$CONFIG"
               echo "Building $NAME with OS $BASE_OS, Series $OSG_SERIES, Repo $BASE_REPO"
-              # Example build action (uncomment and adjust this with your actual build command)
-              # opensciencegrid/build-container-action@v0.6.0
-              # with:
-              #   osg_series: $OSG_SERIES
-              #   osg_repo: $BASE_REPO
-              #   context: $NAME
-              #   base_os: $BASE_OS
+              # Insert your actual build command here
+              echo "Build command: opensciencegrid/build-container-action@v0.6.0"
+              echo "osg_series: $OSG_SERIES"
+              echo "osg_repo: $BASE_REPO"
+              echo "context: $NAME"
+              echo "base_os: $BASE_OS"
             done
           done
 
