@@ -143,9 +143,30 @@ jobs:
                        --file opensciencegrid/${{ matrix.name }}/Dockerfile \
                        opensciencegrid/${{ matrix.name }}
 
-  push:
+  debug-push:
     runs-on: ubuntu-latest
     needs: [build]
+    steps:
+      - name: Print event name
+        run: 
+          |
+          echo "Event name: ${{ github.event_name }}"
+      - name: Print ref
+        run: 
+          |
+          echo "Ref: ${{ github.ref }}"
+      - name: Print repository owner
+        run: 
+          |
+          echo "Repository owner: ${{ github.repository_owner }}"
+      - name: Print build matrix
+        run: 
+          |
+          echo "Build matrix: ${{ needs.build.outputs.matrix }}"
+
+  push:
+    runs-on: ubuntu-latest
+    needs: [build, debug-push]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     strategy:
       fail-fast: false
