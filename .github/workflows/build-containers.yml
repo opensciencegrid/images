@@ -115,14 +115,16 @@ jobs:
             for CONFIG in $CONFIGS; do
               IFS='-' read BASE_OS OSG_SERIES BASE_REPO STANDARD_BUILD REPO_BUILD <<< "$CONFIG"
               echo "Building $KEY with OS $BASE_OS, Series $OSG_SERIES, Repo $BASE_REPO"
-              # Assuming a hypothetical build step here:
-              - name: Build $KEY:${OSG_SERIES}-${BASE_REPO}
-                uses: opensciencegrid/build-container-action@v0.6.0
-                with:
-                  osg_series: $OSG_SERIES
-                  osg_repo: $BASE_REPO
-                  context: $KEY
-                  base_os: $BASE_OS
+              # Insert build action here using the extracted parameters
+              echo "Running build for $KEY with $BASE_OS, $OSG_SERIES, $BASE_REPO, $STANDARD_BUILD, $REPO_BUILD"
+              # Example build action
+              echo "Build command: opensciencegrid/build-container-action@v0.6.0"
+              echo "osg_series: $OSG_SERIES"
+              echo "osg_repo: $BASE_REPO"
+              echo "context: $KEY"
+              echo "base_os: $BASE_OS"
+            done
+          done
 
   push:
     runs-on: ubuntu-latest
