@@ -105,11 +105,11 @@ jobs:
         run: |
           echo "Building ${{ matrix.name }} with configuration ${{ matrix.config }}"
           CONFIG="${{ matrix.config }}"
-          BASE_OS=$(echo $CONFIG | cut -d'-' -f1)
-          OSG_SERIES=$(echo $CONFIG | cut -d'-' -f2)
-          BASE_REPO=$(echo $CONFIG | cut -d'-' -f3)
-          STANDARD_BUILD=$(echo $CONFIG | cut -d'-' -f4)
-          REPO_BUILD=$(echo $CONFIG | cut -d'-' -f5)
+          BASE_OS=$(echo $CONFIG | awk -F'-' '{print $1}')
+          OSG_SERIES=$(echo $CONFIG | awk -F'-' '{print $2}')
+          BASE_REPO=$(echo $CONFIG | awk -F'-' '{print $3}')
+          STANDARD_BUILD=$(echo $CONFIG | awk -F'-' '{print $4}')
+          REPO_BUILD=$(echo $CONFIG | awk -F'-' '{print $5}')
           echo "BASE_OS: $BASE_OS"
           echo "OSG_SERIES: $OSG_SERIES"
           echo "BASE_REPO: $BASE_REPO"
