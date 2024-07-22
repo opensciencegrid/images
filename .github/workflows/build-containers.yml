@@ -115,22 +115,20 @@ jobs:
           echo "BASE_REPO: $BASE_REPO"
           echo "STANDARD_BUILD: $STANDARD_BUILD"
           echo "REPO_BUILD: $REPO_BUILD"
-          echo "export BASE_OS=$BASE_OS" >> $GITHUB_ENV
-          echo "export OSG_SERIES=$OSG_SERIES" >> $GITHUB_ENV
-          echo "export BASE_REPO=$BASE_REPO" >> $GITHUB_ENV
-          echo "export STANDARD_BUILD=$STANDARD_BUILD" >> $GITHUB_ENV
-          echo "export REPO_BUILD=$REPO_BUILD" >> $GITHUB_ENV
+          echo "BASE_OS=$BASE_OS" >> $GITHUB_ENV
+          echo "OSG_SERIES=$OSG_SERIES" >> $GITHUB_ENV
+          echo "BASE_REPO=$BASE_REPO" >> $GITHUB_ENV
+          echo "STANDARD_BUILD=$STANDARD_BUILD" >> $GITHUB_ENV
+          echo "REPO_BUILD=$REPO_BUILD" >> $GITHUB_ENV
 
       - name: Validate environment variables
         run: |
           echo "Validating environment variables:"
-          echo "BASE_OS: $BASE_OS"
-          echo "OSG_SERIES: $OSG_SERIES"
-          echo "BASE_REPO: $BASE_REPO"
           if [ -z "$BASE_OS" ] || [ -z "$OSG_SERIES" ] || [ -z "$BASE_REPO" ]; then
             echo "Error: One or more environment variables are not set."
             exit 1
-          fi
+          else
+            echo "All required environment variables are set."
 
       - name: Build Image
         run: |
