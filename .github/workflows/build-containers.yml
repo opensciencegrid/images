@@ -90,6 +90,8 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
+      - uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -110,7 +112,7 @@ jobs:
         with:
           osg_series: $OSG_SERIES
           osg_repo: $BASE_REPO
-          context: ${{ matrix.name }}
+          context: opensciencegrid/${{ matrix.name }}
           base_os: $BASE_OS
 
   push:
@@ -131,7 +133,7 @@ jobs:
         with:
           repo: development
           osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
+          context: opensciencegrid/${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
@@ -143,7 +145,7 @@ jobs:
         with:
           repo: testing
           osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
+          context: opensciencegrid/${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
@@ -155,7 +157,7 @@ jobs:
         with:
           repo: release
           osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
+          context: opensciencegrid/${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
@@ -167,7 +169,7 @@ jobs:
         with:
           repo: development
           osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
+          context: opensciencegrid/${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
@@ -179,7 +181,7 @@ jobs:
         with:
           repo: testing
           osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
+          context: opensciencegrid/${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
@@ -191,7 +193,7 @@ jobs:
         with:
           repo: release
           osg_series: ${{ matrix.osg_series }}
-          context: ${{ matrix.name }}
+          context: opensciencegrid/${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
