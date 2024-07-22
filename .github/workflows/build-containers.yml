@@ -107,6 +107,17 @@ jobs:
           echo "STANDARD_BUILD: $STANDARD_BUILD"
           echo "REPO_BUILD: $REPO_BUILD"
 
+      - name: Validate environment variables
+        run: |
+          echo "Validating environment variables:"
+          echo "BASE_OS: $BASE_OS"
+          echo "OSG_SERIES: $OSG_SERIES"
+          echo "BASE_REPO: $BASE_REPO"
+          if [ -z "$BASE_OS" ] || [ -z "$OSG_SERIES" ] || [ -z "$BASE_REPO" ]; then
+            echo "Error: One or more environment variables are not set."
+            exit 1
+          fi
+
       - name: Build Image
         run: |
           DEFAULT_TAG=$(echo s3-backup-${OSG_SERIES}-${BASE_REPO}-${GITHUB_RUN_NUMBER} | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
