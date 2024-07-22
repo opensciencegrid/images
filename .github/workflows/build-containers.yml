@@ -230,7 +230,7 @@ jobs:
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
+    
       - name: Push to Docker Hub (${{ matrix.osg_series }}-testing)
         if: always()
         uses: opensciencegrid/push-container-action@main
@@ -242,7 +242,7 @@ jobs:
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-      
+    
       - name: Push to Docker Hub (${{ matrix.osg_series }}-release)
         if: always()
         uses: opensciencegrid/push-container-action@main
