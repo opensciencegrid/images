@@ -31,9 +31,9 @@ jobs:
             ORG_DIR=opensciencegrid
             if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
                [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-                 if ([[ $GITHUB_EVENT_NAME == 'pull_request' ]]); then
+                 if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
                      BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-                 elif ([[ $GITHUB_REF == 'refs/heads/main' ]]); then
+                 elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
                      BASE=${{github.event.before}}
                  else
                      BASE=origin/main
@@ -104,12 +104,12 @@ jobs:
       - name: Print and set configuration
         run: |
           echo "Building ${{ matrix.name }} with configuration ${{ matrix.config }}"
-          CONFIG=(${{ matrix.config }})
-          BASE_OS=${CONFIG[0]}
-          OSG_SERIES=${CONFIG[1]}
-          BASE_REPO=${CONFIG[2]}
-          STANDARD_BUILD=${CONFIG[3]}
-          REPO_BUILD=${CONFIG[4]}
+          CONFIG="${{ matrix.config }}"
+          BASE_OS=$(echo $CONFIG | cut -d'-' -f1)
+          OSG_SERIES=$(echo $CONFIG | cut -d'-' -f2)
+          BASE_REPO=$(echo $CONFIG | cut -d'-' -f3)
+          STANDARD_BUILD=$(echo $CONFIG | cut -d'-' -f4)
+          REPO_BUILD=$(echo $CONFIG | cut -d'-' -f5)
           echo "BASE_OS: $BASE_OS"
           echo "OSG_SERIES: $OSG_SERIES"
           echo "BASE_REPO: $BASE_REPO"
