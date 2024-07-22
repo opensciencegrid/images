@@ -75,7 +75,7 @@ jobs:
         id: set_matrix
         run: |
           json_content=$(cat scripts/grouped_output.json)
-          echo "::set-output name=matrix::$(echo $json_content | jq -c)"
+          echo "::set-output name=matrix::$(echo $json_content | jq '.include' | jq -c)"
 
       - name: Verify scripts/output.json
         run: |
@@ -87,8 +87,7 @@ jobs:
     needs: build-image-list
     strategy:
       fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -122,8 +121,7 @@ jobs:
     needs: [make-date-tag, build]
     strategy:
       fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.build.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.build.outputs.matrix) }}
     steps:
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
         if: matrix.osg_series != '23'
