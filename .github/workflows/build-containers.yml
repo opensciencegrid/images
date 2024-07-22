@@ -20,7 +20,7 @@ jobs:
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set_matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -82,50 +82,49 @@ jobs:
 
       - name: Run build-job-matrix script
         id: run-python-script
-        run: |
-          python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
-          matrix=$(cat scripts/output.json)
-          echo "matrix=$matrix" >> $GITHUB_ENV  # ensure no newline characters are causing issues
-  
-      - name: Generate Matrix Configuration
-        run: python scripts/build-job-matrix.py opensciencegrid/s3-backup
+        run: python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
   
       - name: Read JSON and set as output
         id: set_matrix
         run: |
-          json_content=$(cat scripts/output.json)
-          echo "::set-output name=matrix::$json_content"
-  
+          json_content=$(cat scripts/grouped_output.json)
+          echo "::set-output name=matrix::$(echo $json_content | jq -c)"
+
       - name: Verify scripts/output.json
         run: |
-          echo "Content of scripts/output.json:"
-          cat scripts/output.json
-  
-      
-
-      - name: Print matrix output
-        run: |
-          echo "Matrix output: ${{ steps.set_matrix.outputs.matrix }}"
-  
+          echo "Content of scripts/grouped_output.json:"
+          cat scripts/grouped_output.json
 
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson('[{"name":"test","base_os":"el7","osg_series":"3.6","base_repo":"development"}]') }}
+      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Print matrix output
-        run: |
+        run: 
+          |
           echo "Matrix output: ${{ toJson(matrix) }}"
-      - name: Build ${{ matrix.name }}:${{ matrix.osg_series }}-${{ matrix.base_repo }}
-        uses: opensciencegrid/build-container-action@v0.6.0
-        with:
-          osg_series: ${{ matrix.osg_series }}
-          osg_repo: ${{ matrix.base_repo }}
-          context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
-      
+
+      - name: Build and Push Images
+        run: |
+          MATRIX_JSON='${{ needs.build-image-list.outputs.matrix }}'
+          echo "MATRIX_JSON: $MATRIX_JSON"
+          echo "$MATRIX_JSON" | jq -c 'to_entries[]' | while read -r entry; do
+            NAME=$(echo "$entry" | jq -r '.key')
+            CONFIGS=$(echo "$entry" | jq -r '.value[]')
+            for CONFIG in $CONFIGS; do
+              IFS='-' read -r BASE_OS OSG_SERIES BASE_REPO STANDARD_BUILD REPO_BUILD <<< "$CONFIG"
+              echo "Building $NAME with OS $BASE_OS, Series $OSG_SERIES, Repo $BASE_REPO"
+              # Insert your actual build command here
+              echo "Build command: opensciencegrid/build-container-action@v0.6.0"
+              echo "osg_series: $OSG_SERIES"
+              echo "osg_repo: $BASE_REPO"
+              echo "context: $NAME"
+              echo "base_os: $BASE_OS"
+            done
+          done
 
   push:
     runs-on: ubuntu-latest
