@@ -83,7 +83,7 @@ jobs:
       - name: Run build-job-matrix script
         id: run-python-script
         run: python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
-  
+
       - name: Read JSON and set as output
         id: set_matrix
         run: |
@@ -100,8 +100,7 @@ jobs:
     needs: build-image-list
     strategy:
       fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -121,10 +120,10 @@ jobs:
       - name: Build Image
         uses: opensciencegrid/build-container-action@v0.6.0
         with:
-          osg_series: ${{ matrix.osg_series }}
-          osg_repo: ${{ matrix.base_repo }}
+          osg_series: $OSG_SERIES
+          osg_repo: $BASE_REPO
           context: ${{ matrix.name }}
-          base_os: ${{ matrix.base_os }}
+          base_os: $BASE_OS
 
   push:
     runs-on: ubuntu-latest
