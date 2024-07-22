@@ -156,11 +156,11 @@ jobs:
           |
           echo "Ref: ${{ github.ref }}"
       - name: Print repository owner
-        run: 
+        run:
           |
           echo "Repository owner: ${{ github.repository_owner }}"
       - name: Print build matrix
-        run:
+        run: 
           |
           echo "Build matrix: ${{ needs.build.outputs.matrix }}"
 
@@ -170,7 +170,7 @@ jobs:
     if: github.event_name != 'pull_request'
     strategy:
       fail-fast: false
-      matrix:
+      matrix: 
         include: ${{ fromJson(needs.build.outputs.matrix) }}
     steps:
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
@@ -214,6 +214,30 @@ jobs:
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
+          osg_series: ${{ matrix.osg_series }}
+          context: opensciencegrid/${{ matrix.name }}
+          base_os: ${{ matrix.base_os }}
+          registry_url: docker.io
+          registry_user: ${{ secrets.DOCKER_USERNAME }}
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to Docker Hub (${{ matrix.osg_series }}-testing)
+        if: always()
+        uses: opensciencegrid/push-container-action@main
+        with:
+          repo: testing
+          osg_series: ${{ matrix.osg_series }}
+          context: opensciencegrid/${{ matrix.name }}
+          base_os: ${{ matrix.base_os }}
+          registry_url: docker.io
+          registry_user: ${{ secrets.DOCKER_USERNAME }}
+          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to Docker Hub (${{ matrix.osg_series }}-release)
+        if: always()
+        uses: opensciencegrid/push-container-action@main
+        with:
+          repo: release
           osg_series: ${{ matrix.osg_series }}
           context: opensciencegrid/${{ matrix.name }}
           base_os: ${{ matrix.base_os }}
