@@ -151,7 +151,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.build.outputs.matrix) }}
+        include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
         if: matrix.osg_series != '23'
