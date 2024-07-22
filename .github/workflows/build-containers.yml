@@ -29,14 +29,6 @@ jobs:
       - id: image-list
         run: |
             ORG_DIR=opensciencegrid
-            # Get the list of files changed based on the type of event
-            # kicking off the GHA:
-            # 1. For the main branch, diff the previous state of main vs
-            #    the current commit
-            # 2. For other branches (i.e., on someone's fork), diff main
-            #    vs the current commit
-            # 3. For PRs, diff the base ref vs the current commit
-            # 4. For everything else (e.g., dispatches), build all images
             if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
                [[ $GITHUB_EVENT_NAME == 'push' ]]; then
                  if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
@@ -46,9 +38,6 @@ jobs:
                  else
                      BASE=origin/main
                  fi
-                 # List image root dirs where files have changed and the
-                 # root dir exists. Example value:
-                 # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
                  images=$(git diff --name-only \
                                    "$BASE" \
                                    "$GITHUB_SHA" |
@@ -60,8 +49,6 @@ jobs:
                                              -wholename ./{} \
                                              -printf "%P\n")
             else
-                 # List all image root dirs. Example value:
-                 # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
                  images=$(find $ORG_DIR -mindepth 1 \
                                         -maxdepth 1 \
                                         -type d \
@@ -135,7 +122,8 @@ jobs:
     needs: [make-date-tag, build]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.build.outputs.matrix) }}
+      matrix:
+        include: ${{ fromJson(needs.build.outputs.matrix) }}
     steps:
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
         if: matrix.osg_series != '23'
