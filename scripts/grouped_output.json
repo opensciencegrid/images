@@ -2,27 +2,27 @@
     "include": [
         {
             "name": "sssd",
-            "config": "el7-3.6-development-True-False"
+            "config": "el8-3.6-development-True-False"
         },
         {
             "name": "sssd",
-            "config": "el7-3.6-testing-True-False"
+            "config": "el8-3.6-testing-True-False"
         },
         {
             "name": "sssd",
-            "config": "el7-3.6-release-True-False"
+            "config": "el8-3.6-release-True-False"
         },
         {
             "name": "sssd",
-            "config": "el7-23-development-True-False"
+            "config": "el8-23-development-True-False"
         },
         {
             "name": "sssd",
-            "config": "el7-23-testing-True-False"
+            "config": "el8-23-testing-True-False"
         },
         {
             "name": "sssd",
-            "config": "el7-23-release-True-False"
+            "config": "el8-23-release-True-False"
         },
         {
             "name": "sssd",
