@@ -108,14 +108,14 @@ jobs:
           echo "REPO_BUILD: $REPO_BUILD"
 
       - name: Build Image
-        uses: opensciencegrid/build-container-action@v0.6.0
-        with:
-          osg_series: $OSG_SERIES
-          osg_repo: $BASE_REPO
-          context: opensciencegrid/${{ matrix.name }}
-          base_os: $BASE_OS
-        env:
-          DEFAULT_TAG: $(echo s3-backup-${OSG_SERIES}-${BASE_REPO}-${GITHUB_RUN_NUMBER} | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-_')
+        run: |
+          DEFAULT_TAG=$(echo s3-backup-${OSG_SERIES}-${BASE_REPO}-${GITHUB_RUN_NUMBER} | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
+          docker build --build-arg BASE_OS=$BASE_OS \
+                       --build-arg BASE_OSG_SERIES=$OSG_SERIES \
+                       --build-arg BASE_REPO=$BASE_REPO \
+                       --tag $DEFAULT_TAG \
+                       --file opensciencegrid/${{ matrix.name }}/Dockerfile \
+                       opensciencegrid/${{ matrix.name }}
 
   push:
     runs-on: ubuntu-latest
