@@ -92,14 +92,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Print raw matrix configuration
+        run: |
+          echo "Raw matrix configuration: ${{ matrix }}"
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-
-      - name: Print matrix configuration
-        run: |
-          echo "Matrix configuration: ${{ matrix.config }}"
 
       - name: Print configuration
         run: |
