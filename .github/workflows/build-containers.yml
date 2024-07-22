@@ -143,36 +143,46 @@ jobs:
                        --file opensciencegrid/${{ matrix.name }}/Dockerfile \
                        opensciencegrid/${{ matrix.name }}
 
-  debug-push:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Print event name
-        run: 
-          |
-          echo "Event name: ${{ github.event_name }}"
-      - name: Print ref
-        run: 
-          |
-          echo "Ref: ${{ github.ref }}"
-      - name: Print repository owner
-        run:
-          |
-          echo "Repository owner: ${{ github.repository_owner }}"
-      - name: Print build matrix
-        run: 
-          |
-          echo "Build matrix: ${{ needs.build.outputs.matrix }}"
-
   push:
     runs-on: ubuntu-latest
-    needs: [build, debug-push]
+    needs: build
     if: github.event_name != 'pull_request'
     strategy:
       fail-fast: false
-      matrix: 
+      matrix:
         include: ${{ fromJson(needs.build.outputs.matrix) }}
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Print raw matrix configuration
+        run: |
+          echo "Raw matrix configuration: ${{ matrix }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Print and set configuration
+        run: |
+          echo "Pushing ${{ matrix.name }} with configuration ${{ matrix.config }}"
+          CONFIG="${{ matrix.config }}"
+          BASE_OS=$(echo $CONFIG | awk -F'-' '{print $1}')
+          OSG_SERIES=$(echo $CONFIG | awk -F'-' '{print $2}')
+          BASE_REPO=$(echo $CONFIG | awk -F'-' '{print $3}')
+          STANDARD_BUILD=$(echo $CONFIG | awk -F'-' '{print $4}')
+          REPO_BUILD=$(echo $CONFIG | awk -F'-' '{print $5}')
+          echo "BASE_OS: $BASE_OS"
+          echo "OSG_SERIES: $OSG_SERIES"
+          echo "BASE_REPO: $BASE_REPO"
+          echo "STANDARD_BUILD: $STANDARD_BUILD"
+          echo "REPO_BUILD: $REPO_BUILD"
+          echo "BASE_OS=$BASE_OS" >> $GITHUB_ENV
+          echo "OSG_SERIES=$OSG_SERIES" >> $GITHUB_ENV
+          echo "BASE_REPO=$BASE_REPO" >> $GITHUB_ENV
+          echo "STANDARD_BUILD=$STANDARD_BUILD" >> $GITHUB_ENV
+          echo "REPO_BUILD=$REPO_BUILD" >> $GITHUB_ENV
+
       - name: Push to Harbor (${{ matrix.osg_series }}-development)
         if: matrix.osg_series != '23'
         uses: opensciencegrid/push-container-action@main
@@ -232,7 +242,7 @@ jobs:
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-
+      
       - name: Push to Docker Hub (${{ matrix.osg_series }}-release)
         if: always()
         uses: opensciencegrid/push-container-action@main
