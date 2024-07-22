@@ -149,7 +149,7 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       github.repository_owner == 'opensciencegrid'
-    needs: [make-date-tag, build]
+    needs: [build]
     strategy:
       fail-fast: false
       matrix:
