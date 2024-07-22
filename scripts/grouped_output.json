@@ -1,1 +1,19 @@
-[{"name":"sssd","config":"el7-3.6-development-True-False"},{"name":"sssd","config":"el7-3.6-testing-True-False"},{"name":"sssd","config":"el7-3.6-release-True-False"},{"name":"sssd","config":"el7-23-development-True-False"},{"name":"sssd","config":"el7-23-testing-True-False"},{"name":"sssd","config":"el7-23-release-True-False"},{"name":"sssd","config":"el9-3.6-development-True-False"},{"name":"sssd","config":"el9-3.6-testing-True-False"},{"name":"sssd","config":"el9-3.6-release-True-False"},{"name":"sssd","config":"el9-23-development-True-False"},{"name":"sssd","config":"el9-23-testing-True-False"},{"name":"sssd","config":"el9-23-release-True-False"},{"name":"s3-backup","config":"el7-3.6-development-True-False"}]
+{
+    "sssd": [
+        "el7-3.6-development-True-False",
+        "el7-3.6-testing-True-False",
+        "el7-3.6-release-True-False",
+        "el7-23-development-True-False",
+        "el7-23-testing-True-False",
+        "el7-23-release-True-False",
+        "el9-3.6-development-True-False",
+        "el9-3.6-testing-True-False",
+        "el9-3.6-release-True-False",
+        "el9-23-development-True-False",
+        "el9-23-testing-True-False",
+        "el9-23-release-True-False"
+    ],
+    "s3-backup": [
+        "el7-3.6-development-True-False"
+    ]
+}

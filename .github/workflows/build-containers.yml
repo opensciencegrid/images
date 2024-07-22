@@ -100,7 +100,8 @@ jobs:
     needs: build-image-list
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
+      matrix:
+        include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - name: Set up Python
         uses: actions/setup-python@v2
