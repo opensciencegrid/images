@@ -20,7 +20,7 @@ jobs:
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set_matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -82,15 +82,14 @@ jobs:
 
       - name: Run build-job-matrix script
         id: run-python-script
-        run: |
-          python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
+        run: python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
   
       - name: Read JSON and set as output
         id: set_matrix
         run: |
           json_content=$(cat scripts/grouped_output.json)
-          echo "::set-output name=matrix::$json_content"
-  
+          echo "::set-output name=matrix::$(echo $json_content | jq -c)"
+
       - name: Verify scripts/output.json
         run: |
           echo "Content of scripts/grouped_output.json:"
@@ -103,7 +102,12 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
-      - name: Process and Build Images
+      - name: Print matrix output
+        run: 
+          |
+          echo "Matrix output: ${{ toJson(matrix) }}"
+
+      - name: Build and Push Images
         run: |
           MATRIX_JSON='${{ needs.build-image-list.outputs.matrix }}'
           for KEY in $(echo $MATRIX_JSON | jq -r 'keys[]'); do
@@ -119,8 +123,6 @@ jobs:
                   osg_repo: $BASE_REPO
                   context: $KEY
                   base_os: $BASE_OS
-            done
-          done
 
   push:
     runs-on: ubuntu-latest
