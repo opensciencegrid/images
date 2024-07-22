@@ -15,7 +15,7 @@ def main(image_dirs):
     default_config_path = 'opensciencegrid/default-build-config.json'
     default_config = load_config(default_config_path)
 
-    image_matrices = []
+    grouped_configurations = {}
 
     for image_dir in image_dirs:
         # Check if the image directory exists
@@ -34,6 +34,10 @@ def main(image_dirs):
         # Get the image name from the directory
         image_name = os.path.basename(image_dir)
 
+        # Initialize the dictionary for this image if not already initialized
+        if image_name not in grouped_configurations:
+            grouped_configurations[image_name] = []
+
         # Create all combinations of the parameters
         base_os_list = config['base_os'][0].split(', ')
         osg_series_list = config['osg_series'][0].split(', ')
@@ -46,18 +50,15 @@ def main(image_dirs):
         )
 
         for base_os, osg_series, base_repo in combinations:
-            image_matrix = {
-                "name": image_name,
-                "config": f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"
-            }
-            image_matrices.append(image_matrix)
+            configuration_string = f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"
+            grouped_configurations[image_name].append(configuration_string)
 
-    # Output all JSON objects to a single JSON file in the scripts directory
+    # Output all configurations to a single JSON file in the scripts directory
     output_path = os.path.join('scripts', 'grouped_output.json')
     os.makedirs('scripts', exist_ok=True)
-    with open(output_path, 'w+') as outfile:
-        json.dump(image_matrices, outfile, separators=(',', ':'))
-    print(f"Generated {output_path} with image matrix")
+    with open(output_path, 'w') as outfile:
+        json.dump(grouped_configurations, outfile, indent=4)
+    print(f"Generated {output_path} with grouped image configurations")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
