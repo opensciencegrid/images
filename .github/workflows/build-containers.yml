@@ -21,7 +21,7 @@ jobs:
   build-image-list:
     runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.image-list.outputs.json }}
+      matrix: ${{ steps.set_matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -69,12 +69,31 @@ jobs:
                                       -printf "$ORG_DIR/%P\n")
           fi
 
-          # Ensure that the generated JSON array has a member,
-          # otherwise GHA will throw an error about an empty matrix
-          # vector in subsequent steps
-          image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n")')
-          echo "json=$image_json" >> $GITHUB_OUTPUT
+            image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
+            echo "$image_json" > image_list.json
+            echo "images=$(echo $images | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
+      - name: Display image list
+        run: cat image_list.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Run build-job-matrix script
+        id: run-python-script
+        run: python scripts/build-job-matrix.py ${{ steps.image-list.outputs.images }}
+
+      - name: Read JSON and set as output
+        id: set_matrix
+        run: |
+          json_content=$(cat scripts/grouped_output.json)
+          echo "::set-output name=matrix::$(echo $json_content | jq -c '.include')"
+      - name: Verify scripts/output.json
+        run: |
+          echo "Content of scripts/grouped_output.json:"
+          cat scripts/grouped_output.json
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
@@ -85,20 +104,42 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
-        yum_repo: ['development', 'testing', 'release']
-        series:
-          - name: '23'
-            os: 'el9'
+        include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
-      - name: Build ${{ matrix.image }}:${{ matrix.series }}-${{ matrix.yum_repo }}
+      - uses: actions/checkout@v3
+
+      - name: Print raw matrix configuration
+        run: |
+          echo "Raw matrix configuration: ${{ matrix }}"
+      - name: Set environment variables
+        id: set-env-vars
+        run: |
+          CONFIG="${{ matrix.config }}"
+          BASE_OS=$(echo $CONFIG | awk -F'-' '{print $1}')
+          OSG_SERIES=$(echo $CONFIG | awk -F'-' '{print $2}')
+          BASE_REPO=$(echo $CONFIG | awk -F'-' '{print $3}')
+          CONTEXT="opensciencegrid/${{ matrix.name }}"
+          echo "BASE_OS=${BASE_OS}" >> $GITHUB_ENV
+          echo "OSG_SERIES=${OSG_SERIES}" >> $GITHUB_ENV
+          echo "BASE_REPO=${BASE_REPO}" >> $GITHUB_ENV
+          echo "CONTEXT=${CONTEXT}" >> $GITHUB_ENV
+      - name: Validate Environment Variables
+        run: |
+          echo "Validating environment variables:"
+          if [ -z "$BASE_OS" ] || [ -z "$OSG_SERIES" ] || [ -z "$BASE_REPO" ] || [ -z "$CONTEXT" ]; then
+            echo "Error: One or more environment variables are not set."
+            exit 1
+          else
+            echo "All required environment variables are set."
+          fi
+      - name: Build Image
         continue-on-error: ${{ matrix.yum_repo == 'development' }}
         uses: opensciencegrid/build-container-action@v0.6.0
         with:
-          osg_series: ${{ matrix.series.name }}
-          osg_repo: ${{ matrix.yum_repo }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ env.OSG_SERIES }}
+          osg_repo: ${{ env.BASE_REPO }}
+          context: ${{ env.CONTEXT }}
+          base_os: ${{ env.BASE_OS }}
 
   push:
     runs-on: ubuntu-latest
@@ -111,80 +152,102 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.build-image-list.outputs.images) }}
-        series:
-          - name: '23'
-            os: 'el9'
+        include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
-      - name: Push to Harbor (${{ matrix.series }}-development)
-        # FIXME: reenable for OSG 23 development when available
-        if: matrix.series.name != '23'
+      - uses: actions/checkout@v3
+
+      - name: Print raw matrix configuration
+        run: |
+          echo "Raw matrix configuration: ${{ matrix }}"
+      - name: Set environment variables
+        id: set-env-vars
+        run: |
+          CONFIG="${{ matrix.config }}"
+          BASE_OS=$(echo $CONFIG | awk -F'-' '{print $1}')
+          OSG_SERIES=$(echo $CONFIG | awk -F'-' '{print $2}')
+          BASE_REPO=$(echo $CONFIG | awk -F'-' '{print $3}')
+          CONTEXT="opensciencegrid/${{ matrix.name }}"
+          echo "BASE_OS=${BASE_OS}" >> $GITHUB_ENV
+          echo "OSG_SERIES=${OSG_SERIES}" >> $GITHUB_ENV
+          echo "BASE_REPO=${BASE_REPO}" >> $GITHUB_ENV
+          echo "CONTEXT=${CONTEXT}" >> $GITHUB_ENV
+      - name: Validate Environment Variables
+        run: |
+          echo "Validating environment variables:"
+          if [ -z "$BASE_OS" ] || [ -z "$OSG_SERIES" ] || [ -z "$BASE_REPO" ] || [ -z "$CONTEXT" ]; then
+            echo "Error: One or more environment variables are not set."
+            exit 1
+          else
+            echo "All required environment variables are set."
+          fi
+      - name: Push to Harbor (${{ env.OSG_SERIES }}-development)
+        if: env.OSG_SERIES != '23'
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ env.OSG_SERIES }}
+          context: ${{ env.CONTEXT }}
+          base_os: ${{ env.BASE_OS }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Harbor (${{ matrix.series.name }}-testing)
+      - name: Push to Harbor (${{ env.OSG_SERIES }}-testing)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ env.OSG_SERIES }}
+          context: ${{ env.CONTEXT }}
+          base_os: ${{ env.BASE_OS }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Harbor (${{ matrix.series.name }}-release)
+      - name: Push to Harbor (${{ env.OSG_SERIES }}-release)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ env.OSG_SERIES }}
+          context: ${{ env.CONTEXT }}
+          base_os: ${{ env.BASE_OS }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
 
-      - name: Push to Docker Hub (${{ matrix.series.name }}-development)
+      - name: Push to Docker Hub (${{ env.OSG_SERIES }}-development)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: development
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ env.OSG_SERIES }}
+          context: ${{ env.CONTEXT }}
+          base_os: ${{ env.BASE_OS }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub (${{ matrix.series.name }}-testing)
+      - name: Push to Docker Hub (${{ env.OSG_SERIES }}-testing)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: testing
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ env.OSG_SERIES }}
+          context: ${{ env.CONTEXT }}
+          base_os: ${{ env.BASE_OS }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub (${{ matrix.series.name }}-release)
+      - name: Push to Docker Hub (${{env.OSG_SERIES }}-release)
         if: always()
         uses: opensciencegrid/push-container-action@main
         with:
           repo: release
-          osg_series: ${{ matrix.series.name }}
-          context: ${{ matrix.image }}
-          base_os: ${{ matrix.series.os }}
+          osg_series: ${{ env.OSG_SERIES }}
+          context: ${{ env.CONTEXT }}
+          base_os: ${{ env.BASE_OS }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
