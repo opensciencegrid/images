@@ -39,31 +39,31 @@ jobs:
           # 3. For PRs, diff the base ref vs the current commit
           # 4. For everything else (e.g., dispatches), build all images
           if [[ $GITHUB_EVENT_NAME == 'pull_request' ]] ||
-              [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-                if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-                    BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
-                elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-                    BASE=${{github.event.before}}
-                else
-                    BASE=origin/main
-                fi
-                # List image root dirs where files have changed and the
-                # root dir exists. Example value:
-                # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
-                images=$(git diff --name-only \
-                                  "$BASE" \
-                                  "$GITHUB_SHA" |
+             [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+                   BASE=$(git merge-base origin/$GITHUB_BASE_REF HEAD)
+               elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+                   BASE=${{github.event.before}}
+               else
+                   BASE=origin/main
+               fi
+               # List image root dirs where files have changed and the
+               # root dir exists. Example value:
+               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
+               images=$(git diff --name-only \
+                                 "$BASE" \
+                                 "$GITHUB_SHA" |
                         egrep "^$ORG_DIR/" |
                         cut -d/ -f -2 |
                         sort |
                         uniq |
                         xargs -I {} find . -type d \
-                                            -wholename ./{} \
-                                            -printf "%P\n")
+                                           -wholename ./{} \
+                                           -printf "%P\n")
           else
-                # List all image root dirs. Example value:
-                # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
-                images=$(find $ORG_DIR -mindepth 1 \
+               # List all image root dirs. Example value:
+               # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
+               images=$(find $ORG_DIR -mindepth 1 \
                                       -maxdepth 1 \
                                       -type d \
                                       -printf "$ORG_DIR/%P\n")
