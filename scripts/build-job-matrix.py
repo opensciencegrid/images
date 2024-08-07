@@ -49,11 +49,9 @@ def main(image_dirs):
             configuration_string = f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"
             include_list.append({"name": image_name, "config": configuration_string})
 
-    output_path = os.path.join('scripts', 'grouped_output.json')
-    os.makedirs('scripts', exist_ok=True)
-    with open(output_path, 'w') as outfile:
-        json.dump({"include": include_list}, outfile, indent=4)
-    print(f"Generated {output_path} with grouped image configurations")
+    sys.stdout.flush()  
+    json_output = json.dumps({"include": include_list}, indent=4)
+    print(json_output)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
