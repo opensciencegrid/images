@@ -108,10 +108,12 @@ jobs:
         include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
-
+        # Example of a matrix configuration string:
+        # {el9-23-development-True-False}
       - name: Print raw matrix configuration
         run: |
-          echo "Raw matrix configuration: ${{ matrix }}"
+          echo "Raw matrix configuration: ${{ matrix.config }}"
+
       - name: Set environment variables
         id: set-env-vars
         run: |
@@ -124,6 +126,7 @@ jobs:
           echo "OSG_SERIES=${OSG_SERIES}" >> $GITHUB_ENV
           echo "BASE_REPO=${BASE_REPO}" >> $GITHUB_ENV
           echo "CONTEXT=${CONTEXT}" >> $GITHUB_ENV
+
       - name: Validate Environment Variables
         run: |
           echo "Validating environment variables:"
@@ -133,6 +136,7 @@ jobs:
           else
             echo "All required environment variables are set."
           fi
+
       - name: Build Image
         continue-on-error: ${{ matrix.yum_repo == 'development' }}
         uses: opensciencegrid/build-container-action@v0.6.0
@@ -156,10 +160,12 @@ jobs:
         include: ${{ fromJson(needs.build-image-list.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
-
+        # Example of a matrix configuration string:
+        # {el9-23-development-True-False}
       - name: Print raw matrix configuration
         run: |
-          echo "Raw matrix configuration: ${{ matrix }}"
+          echo "Raw matrix configuration: ${{ matrix.config }}"
+
       - name: Set environment variables
         id: set-env-vars
         run: |
@@ -172,6 +178,7 @@ jobs:
           echo "OSG_SERIES=${OSG_SERIES}" >> $GITHUB_ENV
           echo "BASE_REPO=${BASE_REPO}" >> $GITHUB_ENV
           echo "CONTEXT=${CONTEXT}" >> $GITHUB_ENV
+
       - name: Validate Environment Variables
         run: |
           echo "Validating environment variables:"
@@ -181,6 +188,7 @@ jobs:
           else
             echo "All required environment variables are set."
           fi
+          
       - name: Push to Harbor (${{ env.OSG_SERIES }}-development)
         if: env.OSG_SERIES != '23'
         uses: opensciencegrid/push-container-action@main
