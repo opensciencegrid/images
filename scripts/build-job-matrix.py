@@ -35,8 +35,8 @@ def main(image_dirs):
 
         image_name = os.path.basename(image_dir)
 
-        base_os_list = config['base_os'][0].split(', ')
-        osg_series_list = config['osg_series'][0].split(', ')
+        base_os_list = config['base_os']
+        osg_series_list = config['osg_series']
         base_repo_list = config['base_repo']
 
         combinations = product(
