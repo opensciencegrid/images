@@ -1,7 +1,7 @@
 ARG BASE_OSG_SERIES=24
 ARG BASE_YUM_REPO=development
 
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-<DISTRO VERSION>-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 
 # Previous instance has gone out of scope
 ARG BASE_OSG_SERIES=24
