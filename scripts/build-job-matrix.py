@@ -5,6 +5,7 @@ from itertools import product
 
 DEFAULT_CONFIG_PATH = 'opensciencegrid/default-build-config.json'
 
+
 def load_config(config_path, default_config=None):
     """Load JSON configuration from the given path."""
     try:
@@ -19,8 +20,9 @@ def load_config(config_path, default_config=None):
         else:
             raise
 
+
 def main(image_dirs):
-    print("Image directories:", image_dirs)  
+    print("Image directories:", image_dirs)
 
     default_config = load_config(DEFAULT_CONFIG_PATH)
 
@@ -55,9 +57,10 @@ def main(image_dirs):
             configuration_string = f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"
             include_list.append({"name": image_name, "config": configuration_string})
 
-    sys.stdout.flush()  
+    sys.stdout.flush()
     json_output = json.dumps({"include": include_list}, indent=4)
     print(json_output)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
