@@ -192,7 +192,7 @@ jobs:
       - name: Push to Harbor (${OSG_SERIES}-${BASE_REPO})
         uses: opensciencegrid/push-container-action@main
         with:
-          repo: ${{ env.BASE_REPO }
+          repo: ${{ env.BASE_REPO }}
           osg_series: ${{ env.OSG_SERIES }}
           context: ${{ env.CONTEXT }}
           base_os: ${{ env.BASE_OS }}
