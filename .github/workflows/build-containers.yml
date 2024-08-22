@@ -189,11 +189,10 @@ jobs:
             echo "All required environment variables are set."
           fi
           
-      - name: Push to Harbor (${OSG_SERIES}-development)
-        if: ${{ env.BASE_REPO == 'development' }}
+      - name: Push to Harbor (${OSG_SERIES}-${BASE_REPO})
         uses: opensciencegrid/push-container-action@main
         with:
-          repo: development
+          repo: ${{ env.BASE_REPO }
           osg_series: ${{ env.OSG_SERIES }}
           context: ${{ env.CONTEXT }}
           base_os: ${{ env.BASE_OS }}
@@ -201,59 +200,10 @@ jobs:
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
         
-      - name: Push to Harbor (${OSG_SERIES}-testing)
-        if: ${{ env.BASE_REPO == 'testing' }}
+      - name: Push to Docker Hub (${OSG_SERIES}-${BASE_REPO})
         uses: opensciencegrid/push-container-action@main
         with:
-          repo: testing
-          osg_series: ${{ env.OSG_SERIES }}
-          context: ${{ env.CONTEXT }}
-          base_os: ${{ env.BASE_OS }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
-      
-      - name: Push to Harbor (${OSG_SERIES}-release)
-        if: ${{ env.BASE_REPO == 'release' }}
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: release
-          osg_series: ${{ env.OSG_SERIES }}
-          context: ${{ env.CONTEXT }}
-          base_os: ${{ env.BASE_OS }}
-          registry_url: hub.opensciencegrid.org
-          registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
-          registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
-      
-      - name: Push to Docker Hub (${OSG_SERIES}-development)
-        if: ${{ env.BASE_REPO == 'development' }}
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: development
-          osg_series: ${{ env.OSG_SERIES }}
-          context: ${{ env.CONTEXT }}
-          base_os: ${{ env.BASE_OS }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Push to Docker Hub (${OSG_SERIES}-testing)
-        if: ${{ env.BASE_REPO == 'testing' }}
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: testing
-          osg_series: ${{ env.OSG_SERIES }}
-          context: ${{ env.CONTEXT }}
-          base_os: ${{ env.BASE_OS }}
-          registry_url: docker.io
-          registry_user: ${{ secrets.DOCKER_USERNAME }}
-          registry_pass: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Push to Docker Hub (${OSG_SERIES}-release)
-        if: ${{ env.BASE_REPO == 'release' }}
-        uses: opensciencegrid/push-container-action@main
-        with:
-          repo: release
+          repo: ${{ env.BASE_REPO }}
           osg_series: ${{ env.OSG_SERIES }}
           context: ${{ env.CONTEXT }}
           base_os: ${{ env.BASE_OS }}
