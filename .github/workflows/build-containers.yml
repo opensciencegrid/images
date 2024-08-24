@@ -91,7 +91,7 @@ jobs:
           # Use jq to extract the 'include' part of the JSON
           matrix=$(echo "$matrix_json" | jq -c '.include')
           echo "::set-output name=matrix::$matrix"
-          echo "::set-output name=image_list::$image_json"
+          
         
       - name: Verify matrix content
         run: |
