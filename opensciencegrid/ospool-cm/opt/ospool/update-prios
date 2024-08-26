@@ -46,7 +46,7 @@ def main():
 
     # get the current prio ads so we can determine if we need
     # an update or note
-    current_prios = neg.getPriorities
+    current_prios = neg.getPriorities()
 
     for ad in col.query(AdTypes.Submitter):
 
