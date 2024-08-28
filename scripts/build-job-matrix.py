@@ -51,7 +51,8 @@ def main(image_dirs):
         # Constructs a unique configuration string to represent each build setting.
         # This combines the base OS, OSG series, base repository, and two standard
         # build parameters, making it easy to identify and manage each configuration.
-        # This approach is preferred because it offers:
+        # This approach is preferred because GHA's inability to deal with nested JSON 
+        # structures in the matrix construction and it offers:
         # 1. Simplicity: Using a single string to represent configurations is straightforward and easy to understand.
         # 2. Integration: A single string is easily passed to external tools and systems that manage builds.
             configuration_string = f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"

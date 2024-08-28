@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      image_list: ${{ steps.image-list.outputs.image_list }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -72,6 +73,7 @@ jobs:
             image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
             echo "$image_json" > image_list.json
             echo "images=$(echo $images | tr '\n' ' ')" >> $GITHUB_OUTPUT
+            echo "image_list=$image_json" >> $GITHUB_OUTPUT
 
       - name: Display image list
         run: cat image_list.json
@@ -89,6 +91,7 @@ jobs:
           # Use jq to extract the 'include' part of the JSON
           matrix=$(echo "$matrix_json" | jq -c '.include')
           echo "::set-output name=matrix::$matrix"
+          
         
       - name: Verify matrix content
         run: |
@@ -98,7 +101,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: build-image-list
-    if: needs.build-image-list.outputs.images != '["dummy"]'
+    if: ${{ needs.build-image-list.outputs.image_list != '["dummy"]' }}
     # Prevent a single build failure from killing the workflow.
     # This is safe since subsequent pushes should fail on cache load
     continue-on-error: true
@@ -152,7 +155,7 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.event_name != 'pull_request' &&
       github.repository_owner == 'opensciencegrid' &&
-      needs.build-image-list.outputs.images != '["dummy"]'
+      needs.build-image-list.outputs.image_list != '["dummy"]'
     needs: [make-date-tag, build-image-list, build]
     strategy:
       fail-fast: false
