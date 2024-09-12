@@ -15,7 +15,7 @@ for line in sys.stdin:
         string_ = "{} {}".format(*split_line[0:2])
         format_ = "%m/%d/%y %H:%M:%S"
         linetime = time.strptime(string_, format_)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, IndexError):
         # could not parse it; skip this line
         continue
     if linetime < starttime:
