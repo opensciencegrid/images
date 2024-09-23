@@ -1,0 +1,5 @@
+<Context privileged="true" antiResourceLocking="false"
+         docBase="${catalina.home}/webapps/manager">
+    <Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1|TOMCAT_ADMIN_IP" />
+</Context>
+
