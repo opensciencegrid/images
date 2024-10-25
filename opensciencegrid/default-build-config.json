@@ -2,6 +2,6 @@
     "standard_build": true,
     "repo_build": false,
     "base_os": ["el9"],
-    "osg_series": ["23"],
+    "osg_series": ["23", "24"],
     "base_repo": ["development", "testing", "release"]
   }
