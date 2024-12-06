@@ -62,6 +62,12 @@ def main():
         held = ad_int(ad, "HeldJobs", 0)
         factor += held
 
+        # Adjust xenon's priority - they bring allocated resources,
+        # and this adjustment will give them improved fair share to
+        # the general OSPool.
+        if "xenon" in ad['Name']:
+            factor -= 300
+
         # upper/lower limits on the adjustments
         factor = min(factor, 10000)
         factor = max(factor, 500)
