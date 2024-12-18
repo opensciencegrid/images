@@ -23,7 +23,8 @@ Subcommands:
   backup                 Encrypts and backs up data to S3
   ls [path]              Show contents of S3_DEST_DIR or 'path'
                          ('/' shows the contents of the S3_BUCKET root)
-  mirror                 Sync S3 source to S3 destination, replacing contents
+  mirror [--remove]      Sync S3 source to S3 destination, replacing contents
+                             --remove: Remove extraneous objects from target
   restore [datetime]     Restore latest backup from S3 or backup corresponding to
                          'datetime' (format YYYYMMDD-hhmm)
 
@@ -125,11 +126,27 @@ mc_restore () {
 mc_mirror() {
     [[ -n $S3_DEST_DIR ]] || fail "ERROR: \$S3_DEST_DIR is required"
 
-    mc mirror \
-       --quiet \
-       --overwrite \
-       "$S3_SRC_ALIAS/$S3_SRC_BUCKET" \
-       "$S3_ALIAS/$S3_BUCKET/$S3_DEST_DIR/"
+    # mc mirror arguments
+    local args=(
+       "--quiet"
+       "--overwrite"
+    )
+
+    # Parse optional args
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --remove)
+                shift; args+=("--remove") ;;
+            *)
+                usage ;;
+        esac
+    done
+
+    # Add source and target
+    args+=("$S3_SRC_ALIAS/$S3_SRC_BUCKET")
+    args+=("$S3_ALIAS/$S3_BUCKET/$S3_DEST_DIR/")
+
+    mc mirror "${args[@]}"
 }
 
 mc_create_alias () {
@@ -178,7 +195,7 @@ case "$subcommand" in
         shift; mc_ls "$@" ;;
     mirror)
         if [ "$mirror_cfg" = true ]; then
-            mc_mirror
+            shift; mc_mirror "$@"
         else
            usage
         fi
