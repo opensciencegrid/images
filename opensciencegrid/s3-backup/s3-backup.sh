@@ -23,8 +23,9 @@ Subcommands:
   backup                 Encrypts and backs up data to S3
   ls [path]              Show contents of S3_DEST_DIR or 'path'
                          ('/' shows the contents of the S3_BUCKET root)
-  mirror [--remove]      Sync S3 source to S3 destination, replacing contents
-                             --remove: Remove extraneous objects from target
+  mirror                 Sync S3 source to S3 destination, replacing contents
+         [--remove]          Remove objects on dest that do not exist on source
+         [--dry-run]         Perform a mock mirror operation
   restore [datetime]     Restore latest backup from S3 or backup corresponding to
                          'datetime' (format YYYYMMDD-hhmm)
 
@@ -135,6 +136,8 @@ mc_mirror() {
     # Parse optional args
     while [[ $# -gt 0 ]]; do
         case $1 in
+            --dry-run)
+                shift; args+=("--dry-run") ;;
             --remove)
                 shift; args+=("--remove") ;;
             *)
@@ -169,8 +172,8 @@ mc_create_alias () {
 # Capture the subcommand
 case $# in
     0) subcommand=backup ;;
-    # allow 2 args, ls/restore can take an additional arg
-    [12]) subcommand=$1 ;;
+    # allow 2-3 args, ls/restore can take 2, mirror 3
+    [123]) subcommand=$1 ;;
     *) usage ;;
 esac
 
