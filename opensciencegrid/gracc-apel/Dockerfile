@@ -28,6 +28,13 @@ RUN    pip3 install --no-cache-dir \
          opensearch-py \
          requests
 
+# EPEL for EL9 ships python3-daemon-2.3.2-1.el9.noarch
+# It uses excessive memory when nofile ulimit is high, fixed in >= v3.0.0
+# https://pagure.io/python-daemon/issue/72
+# TODO: Revert after EPEL package is updated
+RUN    pip3 install --no-cache-dir --upgrade \
+         python-daemon
+
 RUN    mkdir /etc/grid-security/apel \
     && mkdir -p /var/spool/apel/outgoing/12345678
 
