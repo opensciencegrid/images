@@ -46,18 +46,6 @@ ospool_submitter_running_jobs_count = Gauge("ospool_submitter_running_jobs_count
 ospool_submitter_held_jobs_count = Gauge("ospool_submitter_held_jobs_count", "Submitter held jobs", ["submitter", "schedd"])
 
 
-def to_bool(s):
-    if not s:
-        return False
-    if isinstance(s, bool):
-        return s
-    if isinstance(s, classad2.ExprTree):
-        return s.eval()
-    if isinstance(s, str) and (s.to_lower() == "true" or s == "1"):
-        return True
-    return False
-
-
 def entry_factory():
     '''
     Make sure we have a base entry for given resource
