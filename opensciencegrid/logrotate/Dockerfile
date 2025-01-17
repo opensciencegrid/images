@@ -14,4 +14,5 @@ RUN yum install -y crontabs \
                    logrotate \
     && yum clean all
 
-CMD [ "sh", "-c", "echo \"$CRON_EXPR /usr/sbin/logrotate $LOGROTATE_OPTIONS $LOGROTATE_CONF\" '> /proc/$(cat /var/run/crond.pid)/fd/1 2>&1' | crontab - && crond -n"]
+COPY startup.sh /bin/
+CMD [ "/bin/startup.sh" ]
