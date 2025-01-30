@@ -1,7 +1,13 @@
 #!/bin/bash
 # Wrapper script for starting & stopping frontier squid from supervisord
 
-STARTSTOPSCRIPT=/etc/init.d/frontier-squid
+STARTSTOPSCRIPT=/usr/libexec/squid/frontier-squid
+if [ ! -x "$STARTSTOPSCRIPT" ]; then
+    # Try the < frontier-squid-5.9-3.2 path
+    # FIXME: Remove when 5.9-2.1 is deprecated
+    STARTSTOPSCRIPT=/etc/init.d/frontier-squid
+fi
+
 if [ "$(id -u)" != 0 ]; then
     STARTSTOPSCRIPT=/usr/sbin/fn-local-squid.sh
     if [ -f /etc/sysconfig/frontier-squid ]; then
