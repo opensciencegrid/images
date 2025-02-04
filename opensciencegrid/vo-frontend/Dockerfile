@@ -27,6 +27,12 @@ RUN yum -y install \
 # clean log dirs
 RUN rm -rf /var/log/gwms-frontend/*
 
+# GWMS brings in mod_ssl, which now drops a default ssl config in
+# /etc/httpd/conf.d/ssl.conf which prevents the frontend httpd from
+# starting up. We do not need this file, as ssl is handled by k8s
+# ingress.
+RUN rm -f /etc/httpd/conf.d/ssl.conf
+
 # patch gwms (but only for certain versions)
 ADD patches /opt/gwms-patches
 RUN VERSION=$(rpm -qa | grep glideinwms-libs | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+') && \
