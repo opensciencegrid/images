@@ -27,4 +27,10 @@ RUN if [[ ${BASE_OS} < 'el9' ]] ; then \
       pip3 install --upgrade --no-cache-dir PyYAML \
     ; fi
 
+# GWMS brings in mod_ssl, which now drops a default ssl config in
+# /etc/httpd/conf.d/ssl.conf which prevents the frontend httpd from
+# starting up. We do not need this file, as ssl is handled by k8s
+# ingress.
+RUN rm -f /etc/httpd/conf.d/ssl.conf
+
 ADD etc /etc
