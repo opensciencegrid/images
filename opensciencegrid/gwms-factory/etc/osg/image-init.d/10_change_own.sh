@@ -15,4 +15,5 @@ chown gfactory: /var/lib/gwms-factory/{client-proxies,creation,server-credential
 mkdir -p /var/lib/gwms-factory/condor
 
 mkdir -p /var/log/gwms-factory/client
+chown gfactory:gfactory /var/log/gwms-factory
 chown gfactory:gfactory /var/log/gwms-factory/client
