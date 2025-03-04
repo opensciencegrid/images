@@ -16,6 +16,24 @@
 ]
 [
   Aggregate = "SUM";
+  Name   = "BcusInUse";
+  Desc   = "Number of 1core-4GB-4GB Basic Computing Units provisioned";
+  Value  = floor(min({totalslotcpus,totalslotmemory/1024/4,totalslotdisk/1024/1024/4}))-floor(min({cpus,Memory/1024/4,Disk/1024/1024/4}));
+  Units  = "Basic Computing Units";
+  Requirements = PartitionableSlot=?=True;
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
+  Name   = "BcusNotInUse";
+  Desc   = "Number of 1core-4GB-4GB Basic Computing Units not provisioned";
+  Value  = floor(min({cpus,Memory/1024/4,Disk/1024/1024/4}));
+  Units  = "Basic Computing Units";
+  Requirements = PartitionableSlot=?=True;
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
   Name   = "CpusInUse";
   Desc   = "Number of CPU cores provisioned for running jobs";
   Value  = Cpus;
@@ -25,7 +43,7 @@
 ]
 [
   Aggregate = "SUM";
-  Name   = strcat("Cpus_Project ",replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown");
+  Name   = strcat("Cpus_Project ",ifThenElse(ProjectName=!=UNDEFINED,ProjectName,replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown"));
   Desc   = "Number of CPU cores provisioned per project";
   Value  = Cpus;
   Units  = "cores";
@@ -52,7 +70,7 @@
 ]
 [
   Aggregate = "SUM";
-  Name   = strcat("Memory_Project ",replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown");
+  Name   = strcat("Memory_Project ",ifThenElse(ProjectName=!=UNDEFINED,ProjectName,replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown"));
   Desc   = "Amount of memory provisioned per project";
   Value  = Memory;
   Units  = "megabytes";
@@ -70,6 +88,33 @@
 ]
 [
   Aggregate = "SUM";
+  Name   = "DiskInUse";
+  Desc   = "Amount of disk provisioned";
+  Value  = Disk/1024.0/1024;
+  Units  = "gigabytes";
+  Requirements = ( State == "Claimed" || State=="Preempting" ) && Activity != "Idle" && Activity != "Suspended";
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
+  Name   = strcat("Disk_Project ",ifThenElse(ProjectName=!=UNDEFINED,ProjectName,replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown"));
+  Desc   = "Amount of disk provisioned per project";
+  Value  = Disk/1024.0/1024;
+  Units  = "gigabytes";
+  Requirements = ( State == "Claimed" || State=="Preempting" );
+  TargetType = "Machine";
+]
+[
+  Aggregate = "SUM";
+  Name   = "DiskNotInUse";
+  Desc   = "Amount of disk not provisioned";
+  Value  = Disk/1024.0/1024;
+  Units  = "gigabytes";
+  Requirements = ( ( State == "Claimed" || State == "Preempting" ) && Activity != "Idle" && Activity != "Suspended" ) == false;
+  TargetType =  "Machine";
+]
+[
+  Aggregate = "SUM";
   Name   = "GpusInUse";
   Desc   = "Number of GPU devices provisioned";
   Value  = Gpus?:0;
@@ -79,7 +124,7 @@
 ]
 [
   Aggregate = "SUM";
-  Name   = strcat("Gpus_Project ",replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown");
+  Name   = strcat("Gpus_Project ",ifThenElse(ProjectName=!=UNDEFINED,ProjectName,replaceall("^[^.]*\\.|\\..+@.+$", AccountingGroup,"")?:"Unknown"));
   Desc   = "Number of GPUs provisioned per project";
   Value  = Gpus;
   Units  = "devices";
