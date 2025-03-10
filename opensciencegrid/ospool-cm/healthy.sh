@@ -17,7 +17,7 @@ if [ -r /var/log/condor/NegotiatorLog ]; then
 fi
 
 procs_z=$(ps axo pid,stat | awk '$2 ~ /^Z/ { print $1 }' | wc -l)
-if [ "$procs_z" -gt 0 ]; then
+if [ "$procs_z" -gt 3 ]; then
     echo "Found $procs_z zombie (Z) processes" >&2
     exit 4
 fi
