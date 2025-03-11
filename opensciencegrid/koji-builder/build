@@ -1,5 +1,5 @@
 #!/bin/bash
-: "${BASE_OSG_SERIES:=3.6}"
+: "${BASE_OSG_SERIES:=24}"
 : "${BASE_YUM_REPO:=release}"
 docker build --build-arg BASE_OSG_SERIES="$BASE_OSG_SERIES" --build-arg BASE_YUM_REPO="$BASE_YUM_REPO" \
     -t "opensciencegrid/koji-builder:$BASE_YUM_REPO" .
