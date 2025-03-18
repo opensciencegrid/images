@@ -8,8 +8,8 @@ from email.message import EmailMessage
 if len(sys.argv) != 4:
     print("Usage: send_mail.py <subject> <from> <to> /path/to/content")
 
-server = os.environ["SMTP_SERVER"]
-port = os.environ["SMTP_PORT"]
+server = os.getenv("SMTP_SERVER", "postfix-mail")
+port = int(os.getenv("SMTP_PORT", "587"))
 
 # Set email contents
 msg = EmailMessage()
@@ -21,6 +21,6 @@ msg["Subject"] = sys.argv[1]
 msg["From"] = sys.argv[2]
 msg["To"] = sys.argv[3]
 
-s = smtplib.SMTP("postfix-mail", 587)
+s = smtplib.SMTP(server, port)
 s.send_message(msg)
 s.quit()
