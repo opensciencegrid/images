@@ -132,8 +132,6 @@ fi
 echo ---
 } 2>&1 | tee $tmpd/backups.log
 
-cat $tmpd/backups.log >> $logdir/backups.log
-
 if [[ -e $tmpd/failures-detected ]]; then
     if [[ -t 1 ]]; then
         echo errors detected...
