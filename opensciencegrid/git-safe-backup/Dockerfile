@@ -1,3 +1,7 @@
+# Multiplex a single docker image for the two github backup scripts
+# - safe-backup.sh backs up raw git repository content
+# - github-metadata-backup.sh backs up github-specific metadata such as issues
+
 FROM almalinux:9
 
 LABEL maintainer="OSG Software <help@osg-htc.org>"
@@ -14,7 +18,8 @@ ENV EMAIL_FROM="example@example.com"
 ENV EMAIL_TO="example@example.com"
 
 # Install dependencies
-RUN yum install -y git logrotate
+RUN yum install -y git logrotate python3-pip && \
+    pip3 install PyGithub
 
-COPY safe-backup.sh send_mail.py /bin/
+COPY safe-backup.sh send_mail.py github-metadata-backup.sh safe-backup.sh ghb.py /bin/
 CMD [ "/bin/safe-backup.sh" ]
