@@ -9,13 +9,9 @@ mkdir -p $ghmdir
 mkdir -p $local_ghmdir
 
 # due to the enormous number of files involved:
-#   - origin bare repo on AFS is $ghmdir/repos.git
-#   - working copy is on local disk under $local_ghmdir
+#   - origin bare repo should be placed on a volume-mounted storage device
+#   - working copy can be kept in container ephemeral storage
 
-# Note:
-#   - pyjwt and PyGithub libs installed locally on moria under ~/.local/lib
-#   - See ~/git/ for the versions installed, with: ./setup.py build;
-#                                                  ./setup.py install --user
 
 cd "$local_ghmdir"
 
