@@ -3,24 +3,20 @@ set -e
 
 topdir=$TOP_DIR
 ghmdir=$topdir/github_meta
-local_ghmdir=/tmp/github_meta
 
 mkdir -p $ghmdir
-mkdir -p $local_ghmdir
 
-# due to the enormous number of files involved:
-#   - origin bare repo should be placed on a volume-mounted storage device
-#   - working copy can be kept in container ephemeral storage
-
-
-cd "$local_ghmdir"
+cd "$ghmdir"
 
 /bin/ghb.py opensciencegrid
+
+# git is not configured by default in the container, set sensible defaults
+git config --global user.name "OSG Bot"
+git config --global user.email "osg-bot@cs.wisc.edu"
 
 cd repos/
 [[ -d .git ]] || git init
 git add .
 if [[ $(git status --porcelain) ]]; then
   git commit -qm auto-bak
-  git push
 fi
