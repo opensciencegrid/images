@@ -1,0 +1,67 @@
+/*
+ * This script changes the provided scopes based on request.
+ *
+ * TODO:
+ * - prefix matching, allowing more refined scopes.
+ * - have token prefix path specified by an INI file instead of hardcode.
+ */
+
+if [0 == size(proxy_claims.)] then
+[
+     return();
+];
+
+if [!is_defined(proxy_claims.'OSGID')] then
+[
+     sys_err.ok := false;
+     sys_err.message := 'Failed to locate OSG ID.';
+     return();
+];
+
+record. := script_load('scitokens/comanage.qdl', proxy_claims.'OSGID');
+
+if [0 == size(record.)] then
+[
+     sys_err.ok := false;
+     sys_err.message := 'Failed to locate the user record.';
+     return();
+];
+
+group_scopes_read.  := [];
+group_scopes_write. := [];
+if [is_defined(record.'isMemberOf'.)] then
+[
+    if [!reduce(@&&, in_group2('ap7-login', record.'isMemberOf'.))] then
+    [
+        sys_err.ok := false;
+        sys_err.message := 'User must be in the ap7-login group';
+        return();
+    ];
+
+    group_scopes_read.  := 'storage.read:/projects/' + ~values(record.'isMemberOf'.);
+    group_scopes_read.  :=  ~mask(group_scopes_read.,  -1 >= starts_with(group_scopes_read., 'storage.read:/projects/CO:'));
+    group_scopes_write. := 'storage.write:/projects/' + ~values(record.'isMemberOf'.);
+    group_scopes_write. :=  ~mask(group_scopes_write., -1 >= starts_with(group_scopes_write., 'storage.write:/projects/CO:'));
+] else [
+    sys_err.ok := false;
+    sys_err.message := 'User must be in the OSG groups';
+    return();
+];
+
+group_scopes_read.  := ~mask(scopes., -1 < list_starts_with(scopes., group_scopes_read.));
+group_scopes_write. := ~mask(scopes., -1 < list_starts_with(scopes., group_scopes_write.));
+
+user_scopes. := [];
+if [0 < size(record.voPersonApplicationUID.)] then
+[
+     user_scopes. := ~mask(scopes., -1 < list_starts_with(scopes., ['storage.read:/' + record.voPersonApplicationUID, 'storage.write:/' + record.voPersonApplicationUID]));
+];
+
+remove(access_token.ver.);
+access_token.'wlcg.ver'. := '1.0';
+access_token.'aud'       := 'https://wlcg.cern.ch/jwt/v1/any';
+access_token.sub         := record.voPersonApplicationUID;
+access_token.iss         := 'https://osg-htc.org/ospool';
+
+all_scopes. := unique(group_scopes_read. ~ group_scopes_write. ~ user_scopes.);
+access_token.scope := detokenize(all_scopes., ' ', 2);
