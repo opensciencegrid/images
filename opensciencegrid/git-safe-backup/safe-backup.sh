@@ -2,15 +2,11 @@
 
 topdir=$TOP_DIR
 bakdir=$topdir/repo
-logdir=$topdir/log
-srcdir=$topdir/script
 lockfile=/tmp/$(id -un)/.gitbackups.lk
 tsdir=/var/tmp/git-safe-backup
 
 # create directories if they don't exist
 mkdir -p $bakdir
-mkdir -p $logdir
-mkdir -p $srcdir
 
 # list file of git clone urls, path can be absolute or relative to bakdir
 git_remotes_listfile=$REMOTES_LIST
