@@ -1,0 +1,109 @@
+<config>
+    <qdl name="oa2-dev"
+            enabled="true"
+            server_mode="false"
+            numeric_digits="15"
+            compressOn="false"
+            script_path="vfs#/scripts/"
+            module_path="/opt/qdl/var/modules/">
+           <workspace verbose="true"
+                      echoModeOn="true"
+                      autosaveOn="true"
+                      editor_name="line"
+                      use_editor="true"
+                      save_dir="/opt/qdl/var/ws"
+                      showBanner = "false"
+                      autosaveInterval="300000"
+                      prettyPrint="true">
+               <home_dir>/opt/qdl</home_dir>
+               <env>etc/qdl.properties</env>
+           </workspace>
+
+           <editors>
+              <editor
+                 name="nano"
+                 exec="/bin/nano"/>
+               <editor
+                  name="vi"
+                  exec="/bin/vi"/>
+           </editors>
+            <logging
+                   logFileName="/opt/qdl/log/qdl.log"
+                   logName="qdl"
+                   disableLog4j="true"
+                   logSize="100000"
+                   logFileCount="2"
+                   debug="true"/>
+        <virtual_file_systems>
+               <vfs type="pass_through"
+                    access="rw">
+                   <root_dir>/opt/scitokens-server/var/qdl</root_dir>
+                   <scheme><![CDATA[vfs]]></scheme>
+                   <mount_point>/scripts</mount_point>
+               </vfs>
+        </virtual_file_systems>
+        <modules>
+            <module type="java"
+                    import_on_start="true">
+                <class_name>edu.uiuc.ncsa.myproxy.oa4mp.qdl.OA2QDLLoader</class_name>
+            </module>
+            <module type="java"
+                    import_on_start="true">
+                <class_name>edu.uiuc.ncsa.oa2.qdl.QDLToolsLoader</class_name>
+            </module>
+            <module type="java"
+                    import_on_start="false">
+                <class_name>edu.uiuc.ncsa.oa2.qdl.storage.StoreAccessLoader</class_name>
+            </module>
+            <module type="qdl"
+                 import_on_start="true">
+                 <path>/opt/qdl/etc/modules/math-x.mdl</path>
+            </module>
+            <module type="qdl"
+                  import_on_start="true">
+                 <path>/opt/qdl/etc/modules/ext.mdl</path>
+            </module>
+        </modules>
+
+    </qdl>
+    <qdl name="run-it"
+            enabled="true"
+            server_mode="false">
+           <workspace verbose="false"
+                      echoModeOn="false"
+                      prettyPrint="false">
+               <home_dir>/opt/qdl</home_dir>
+               <env>etc/qdl.properties</env>
+           </workspace>
+
+            <logging
+                   logFileName="/opt/qdl/log/qdl.log"
+                   logName="qdl"
+                   disableLog4j="true"
+                   logSize="100000"
+                   logFileCount="2"
+                   debug="false"/>
+           <modules>
+               <module type="java"
+                       import_on_start="true">
+                   <class_name>edu.uiuc.ncsa.myproxy.oa4mp.qdl.OA2QDLLoader</class_name>
+               </module>
+               <module type="java"
+                       import_on_start="true">
+                   <class_name>edu.uiuc.ncsa.oa2.qdl.QDLToolsLoader</class_name>
+               </module>
+               <module type="java"
+                       import_on_start="false">
+                   <class_name>edu.uiuc.ncsa.oa2.qdl.storage.StoreAccessLoader</class_name>
+               </module>
+               <module type="qdl"
+                    import_on_start="true">
+                    <path>/opt/qdl/etc/modules/math-x.mdl</path>
+               </module>
+               <module type="qdl"
+                     import_on_start="true">
+                    <path>/opt/qdl/etc/modules/ext.mdl</path>
+               </module>
+           </modules>
+    </qdl>
+</config>
