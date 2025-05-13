@@ -68,7 +68,7 @@ def main():
         factor += held
 
         if "daniel.morales" in ad["Name"]:
-            factor -= 700
+            factor -= 1500
 
         # upper/lower limits on the adjustments
         factor = min(factor, 10000)
