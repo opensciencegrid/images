@@ -5,6 +5,7 @@
 # modified according to attributes such as the number of held jobs and the
 # ratio of goodput to badput.
 
+import os
 import re
 import sys
 
@@ -31,6 +32,7 @@ def step(n):
 
 def main():
     col = htcondor.Collector()
+    ext_hostname = os.environ["OSPOOL_EXT_HOSTNAME"]
 
     # find the right negotiator
     neg_ad = None
@@ -41,6 +43,9 @@ def main():
     if not neg_ad:
         print("Unable to find the main negotiator")
         sys.exit(1)
+    if ext_hostname not in neg_ad['Name']:
+        print(f"Not updating as the negotiator is running on {neg_ad['Name']}")
+        sys.exit(2)
     neg = htcondor.Negotiator(neg_ad)
     print(f"Updating negotiator {neg_ad['Name']}")
 
