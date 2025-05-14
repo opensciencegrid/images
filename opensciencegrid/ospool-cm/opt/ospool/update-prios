@@ -32,7 +32,7 @@ def step(n):
 
 def main():
     col = htcondor.Collector()
-    ext_hostname = os.environ["OSPOOL_EXT_HOSTNAME"]
+    ext_hostname = os.environ.get("OSPOOL_EXT_HOSTNAME")
 
     # find the right negotiator
     neg_ad = None
