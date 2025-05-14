@@ -24,6 +24,11 @@ RUN yum -y install \
       vo-client && \
     yum -y clean all
 
+# for developement, grab gwms from upcoming
+RUN if [[ $BASE_YUM_REPO = development ]]; then \
+      yum -y --enablerepo=osg-upcoming-testing upgrade glideinwms-vofrontend-standalone; \
+    fi
+
 # clean log dirs
 RUN rm -rf /var/log/gwms-frontend/*
 
