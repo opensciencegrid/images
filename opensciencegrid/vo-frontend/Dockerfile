@@ -12,6 +12,7 @@ LABEL maintainer OSG Software <support@osg-htc.org>
 RUN groupadd -o -g 993 frontend
 RUN useradd -o -u 996 -g 993 -s /bin/sh frontend
 
+# for developement, grab gwms from upcoming
 RUN yum -y install \
       git \
       glideinwms-vofrontend-standalone \
@@ -22,6 +23,9 @@ RUN yum -y install \
       rsyslog-gnutls \
       vim \
       vo-client && \
+    if [[ $BASE_YUM_REPO = development ]]; then \
+      yum -y --enablerepo=osg-upcoming-testing upgrade glideinwms-vofrontend-standalone; \
+    fi && \
     yum -y clean all
 
 # clean log dirs
