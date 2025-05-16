@@ -2,8 +2,8 @@ FROM almalinux:9
 
 LABEL maintainer OSG Software <help@osg-htc.org>
 
-# Run Logrotate once per hour
-ENV CRON_EXPR="0 * * * *"
+# Run Logrotate every five minutes
+ENV CRON_EXPR="*/5 * * * *"
 # Extra options to logrotate (if any)
 ENV LOGROTATE_OPTIONS=
 # File path(s) for LogRotate config files
