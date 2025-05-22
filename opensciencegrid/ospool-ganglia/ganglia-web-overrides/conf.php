@@ -29,6 +29,7 @@ $conf['heatmaps_enabled'] = 0;
 $conf['always_display_grid_view'] = false;
 
 # use rrdcached
-$conf['rrdcached_socket'] = "unix:/tmp/rrdcached.read.sock";
+# disabled as caching did not work with the ce dashboard
+#$conf['rrdcached_socket'] = "unix:/tmp/rrdcached.read.sock";
 
 ?>
