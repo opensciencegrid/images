@@ -1,0 +1,9 @@
+{
+  "standard_build": true,
+  "repo_build": false,
+  "base_os": ["el9"],
+  "osg_series": ["24"],
+  "base_repo": ["release"],
+  "context": "kuantifier",
+  "tag": "1.0.2"
+}

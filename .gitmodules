@@ -1,0 +1,3 @@
+[submodule "opensciencegrid/kuantifier/kuantifier"]
+	path = iris-hep/kuantifier/kuantifier
+	url = git@github.com:rptaylor/kuantifier.git
