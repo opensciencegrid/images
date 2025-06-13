@@ -11,7 +11,7 @@ ARG BASE_OSG_SERIES
 LABEL maintainer OSG Software <help@osg-htc.org>
 
 RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
-   yum install -y --enablerepo=osg-internal-development 'koji-builder' osg-internal-cas
+   yum install -y --enablerepo=osg-internal-development 'koji-builder' 'osg-internal-cas >= 2'
 
 COPY kojid-supervisord.conf  /etc/supervisord.d/kojid.conf
 COPY koji_ca_cert.crt  /etc/pki/tls/certs/koji_ca_cert.crt
