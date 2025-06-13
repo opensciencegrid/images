@@ -264,7 +264,7 @@ def print_rk_recr(year, month, rk, rec, output_file=sys.stdout):
         write("LatestEndTime:",          rec.maxtime + 60*60*24 - 1)
         write("Month:",                  "%02d" % month)
         write("Year:",                   year)
-        write("Infrastructure:",         fixed_infrastructure)
+        write("InfrastructureType:",     fixed_infrastructure)
         write("GlobalUserName:",         dn)
         write("Processors:",             rk.cores)
         write("NodeCount:",              fixed_nodecount)
