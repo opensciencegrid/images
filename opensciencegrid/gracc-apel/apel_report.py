@@ -113,7 +113,7 @@ def gracc_query_apel(year, month):
 # Fixed entries:
 fixed_header = "APEL-summary-job-message: v0.4"
 fixed_separator = "%%"
-fixed_infrastructure = "Gratia-OSG"
+fixed_infrastructure = "grid"
 fixed_nodecount = 1
 fixed_normalizationfactor = 12
 
