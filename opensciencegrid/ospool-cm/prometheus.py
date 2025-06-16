@@ -20,6 +20,7 @@ ospool_claimed_cpus_count = Gauge("ospool_claimed_cpus_count", "Claimed CPUs", [
 ospool_idle_retirement_cpus_count = Gauge("ospool_idle_retirement_cpus_count", "Idle CPUs due to retirement", ["resource_name"])
 ospool_idle_memstarvation_cpus_count = Gauge("ospool_idle_memstarvation_cpus_count", "Idle CPUs due to memory starvation", ["resource_name"])
 ospool_idle_diskstarvation_cpus_count = Gauge("ospool_idle_diskstarvation_cpus_count", "Idle CPUs due to disk starvation", ["resource_name"])
+ospool_idle_blackhole_cpus_count = Gauge("ospool_idle_blackhole_cpus_count", "Idle CPUs due to black hole trigger", ["resource_name"])
 ospool_idle_other_cpus_count = Gauge("ospool_idle_other_cpus_count", "Idle CPUs due to other reasons", ["resource_name"])
 
 # gpus
@@ -56,6 +57,7 @@ def entry_factory():
         "idle_retirement_cpus": 0,
         "idle_memstarvation_cpus": 0,
         "idle_diskstarvation_cpus": 0,
+        "idle_blackhole_cpus": 0,
         "idle_other_cpus": 0,
         "total_gpus": 0,
         "claimed_gpus": 0,
@@ -96,7 +98,7 @@ def cm_resources_info(collector):
     # classify idle CPUs
     ads = collector.query(ad_type=htcondor2.AdTypes.Startd,
                           constraint="!isUndefined(GLIDEIN_ResourceName) && PartitionableSlot == true && CPUs >= 1",
-                          projection=["GLIDEIN_ResourceName", "CPUs", "Disk", "Memory", "GLIDEIN_ToRetire"])
+                          projection=["GLIDEIN_ResourceName", "CPUs", "Disk", "Memory", "GLIDEIN_ToRetire", "isBlackHole", "RecentJobDurationAvg", "RecentJobDurationCount"])
     now = time.time()
     for ad in ads:
         r = resources[ad["GLIDEIN_ResourceName"]]
@@ -106,6 +108,8 @@ def cm_resources_info(collector):
             r["idle_memstarvation_cpus"] += int(ad["CPUs"])
         elif int(ad["Disk"]) < disk_starvation:
             r["idle_diskstarvation_cpus"] += int(ad["CPUs"])
+        elif "isBlackHole" in ad and isinstance(ad["isBlackHole"], classad2.ExprTree) and ad["isBlackHole"].eval(scope=ad) == True:
+            r["idle_blackhole_cpus"] += int(ad["CPUs"])
         else:
             r["idle_other_cpus"] += int(ad["CPUs"])
 
@@ -118,12 +122,14 @@ def cm_resources_info(collector):
         ospool_idle_retirement_cpus_count.labels(resource).set(data["idle_retirement_cpus"])
         ospool_idle_memstarvation_cpus_count.labels(resource).set(data["idle_memstarvation_cpus"])
         ospool_idle_diskstarvation_cpus_count.labels(resource).set(data["idle_diskstarvation_cpus"])
+        ospool_idle_blackhole_cpus_count.labels(resource).set(data["idle_blackhole_cpus"])
 
         # jobs idle for other reasons
         idle_other_cpus = data["total_cpus"] - data["claimed_cpus"] \
                           - data["idle_retirement_cpus"] \
                           - data["idle_memstarvation_cpus"] \
-                          - data["idle_diskstarvation_cpus"]
+                          - data["idle_diskstarvation_cpus"] \
+                          - data["idle_blackhole_cpus"]
         ospool_idle_other_cpus_count.labels(resource).set(idle_other_cpus)
 
         ospool_total_gpus_count.labels(resource).set(data["total_gpus"])
