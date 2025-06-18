@@ -100,7 +100,7 @@ jobs:
           
       - name: Build Image
         continue-on-error: ${{ matrix.yum_repo == 'development' }}
-        uses: mwestphall/build-container-action@feature/checkout-optional-clean
+        uses: opensciencegrid/build-container-action@v0.7.1
         with:
           clean_before_build: false
           osg_series: ${{ matrix.osg_series }}
@@ -115,7 +115,7 @@ jobs:
           github.event_name != 'pull_request' &&
           github.repository_owner == 'opensciencegrid' &&
           needs.build-image-list.outputs.image_list != '["dummy"]'
-        uses: mwestphall/push-container-action@feature/checkout-optional-clean
+        uses: opensciencegrid/push-container-action@v0.8.1
         with:
           clean_before_build: false
           repo: ${{ matrix.base_repo }}
@@ -134,7 +134,7 @@ jobs:
           github.event_name != 'pull_request' &&
           github.repository_owner == 'opensciencegrid' &&
           needs.build-image-list.outputs.image_list != '["dummy"]' 
-        uses: mwestphall/push-container-action@feature/checkout-optional-clean
+        uses: opensciencegrid/push-container-action@v0.8.1
         with:
           clean_before_build: false
           repo: ${{ matrix.base_repo }}
