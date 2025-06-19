@@ -35,6 +35,7 @@ ospool_glidein_version = Gauge("ospool_glidein_version", "Versions in the pool",
 ospool_glidein_group = Gauge("ospool_glidein_group", "GWMS client group", ["glidein_group"])
 ospool_microarch = Gauge("ospool_microarch", "CPU Microarch", ["microarch"])
 ospool_default_os = Gauge("ospool_default_os", "Default OS", ["default_os"])
+ospool_pelican_version = Gauge("ospool_pelican_versions", "Pelican versions in the pool", ["pelican_version"])
 ospool_cvmfs = Gauge("ospool_cvmfs", "CVMFS availabilty in the pool")
 ospool_osdf = Gauge("ospool_osdf", "Resources with a working OSDF")
 ospool_apptainer = Gauge("ospool_apptainer", "Resources with a working Apptainer/Singularity")
@@ -148,6 +149,7 @@ def cm_pool_attributes(collector):
     glidein_group = defaultdict(int)
     microarch = defaultdict(int)
     default_os = defaultdict(int)
+    pelican_version = defaultdict(int)
     cvmfs = 0
     osdf = 0
     apptainer = 0
@@ -162,6 +164,7 @@ def cm_pool_attributes(collector):
                                       "Arch",
                                       "Microarch",
                                       "OSG_OS_STRING",
+                                      "PelicanPluginVersion",
                                       "HAS_CVMFS_singularity_opensciencegrid_org",
                                       "OSDF_VERIFIED",
                                       "HAS_SINGULARITY",
@@ -175,6 +178,7 @@ def cm_pool_attributes(collector):
                                       "OSG_OS_KERNEL"])
     for ad in ads:
         machine_ads += 1
+
         if "OSG_OS_KERNEL" in ad:
             # simplify version
             kversion = re.sub("\.[0-9]+-.*", "", ad["OSG_OS_KERNEL"])
@@ -189,6 +193,12 @@ def cm_pool_attributes(collector):
             microarch[ad["Arch"]] += 1
         if "OSG_OS_STRING" in ad:
             default_os[ad["OSG_OS_STRING"]] += 1
+
+        # include the glideins without Pelican
+        if "PelicanPluginVersion" not in ad:
+            ad["PelicanPluginVersion"] = "None"
+        pelican_version[ad["PelicanPluginVersion"]] += 1
+
         if "HAS_CVMFS_singularity_opensciencegrid_org" in ad and \
            ad.eval("HAS_CVMFS_singularity_opensciencegrid_org"):
             cvmfs += 1
@@ -227,6 +237,8 @@ def cm_pool_attributes(collector):
         ospool_microarch.labels(arch).set(count)
     for o, count in default_os.items():
         ospool_default_os.labels(o).set(count)
+    for version, count in pelican_version.items():
+        ospool_pelican_version.labels(version).set(count)
     ospool_cvmfs.set(cvmfs)
     ospool_osdf.set(osdf)
     ospool_apptainer.set(apptainer)
