@@ -111,7 +111,7 @@ def gracc_query_apel(year, month):
     return response
 
 # Fixed entries:
-fixed_header = "APEL-summary-job-message: v0.4"
+fixed_header = "APEL-normalised-summary-message: v0.4"
 fixed_separator = "%%"
 fixed_infrastructure = "grid"
 fixed_nodecount = 1
@@ -264,7 +264,7 @@ def print_rk_recr(year, month, rk, rec, output_file=sys.stdout):
         write("LatestEndTime:",          rec.maxtime + 60*60*24 - 1)
         write("Month:",                  "%02d" % month)
         write("Year:",                   year)
-        write("InfrastructureType:",     fixed_infrastructure)
+        write("Infrastructure:",         fixed_infrastructure)
         write("GlobalUserName:",         dn)
         write("Processors:",             rk.cores)
         write("NodeCount:",              fixed_nodecount)
