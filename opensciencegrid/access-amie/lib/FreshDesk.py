@@ -62,6 +62,7 @@ class FreshDesk():
                     json_return = url_request.json()
                     log.info('Created Ticket {}'.format(json_return['id']))
             except requests.exceptions.HTTPError as e:
+                log.warning(ticket)
                 log.warning(e.response.text)
                 raise e
             except Exception as e:
