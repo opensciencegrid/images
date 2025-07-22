@@ -195,9 +195,10 @@ def cm_pool_attributes(collector):
             default_os[ad["OSG_OS_STRING"]] += 1
 
         # include the glideins without Pelican
-        if "PelicanPluginVersion" not in ad:
-            ad["PelicanPluginVersion"] = "None"
-        pelican_version[ad["PelicanPluginVersion"]] += 1
+        if "PelicanPluginVersion" in ad:
+            pelican_version[ad["PelicanPluginVersion"]] += 1
+        else:
+            pelican_version["None"] += 1
 
         if "HAS_CVMFS_singularity_opensciencegrid_org" in ad and \
            ad.eval("HAS_CVMFS_singularity_opensciencegrid_org"):
