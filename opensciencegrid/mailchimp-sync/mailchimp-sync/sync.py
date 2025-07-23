@@ -128,8 +128,8 @@ def comanage_find_users(users):
         if n.get('PrimaryName', False) == True:
             pid = n['Person']['Id']
             if pid in co_users:
-                co_users[pid]['firstname'] = n['Given']
-                co_users[pid]['lastname'] = n['Family']
+                co_users[pid]['firstname'] = n.get('Given', "")
+                co_users[pid]['lastname'] = n.get('Family', "")
 
     # now add the users the main list, indexed by email
     for pid, u in co_users.items():
