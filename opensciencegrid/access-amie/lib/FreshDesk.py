@@ -5,7 +5,7 @@ import logging
 import pprint
 import requests
 
-log = logging.getLogger('osgaccess')
+log = logging.getLogger('accessamie')
 
 
 class FreshDesk():
@@ -43,7 +43,7 @@ class FreshDesk():
             'subject': subject,
             'description': body,
             'email': to,
-            'email_config_id': 12000002551,
+            'email_config_id': 12000004519,
             'priority': 1,
             'status': 5,
             'type': 'User Facilitation-Account or login',
