@@ -52,6 +52,8 @@ def get_updated_images():
             elif GITHUB_REF == 'refs/head/main':
                 base = args.before
             current_commit = repo.commit(GITHUB_SHA)
+
+            print(base, current_commit, GITHUB_EVENT_NAME, GITHUB_REF)
             diff_paths = {f"{_image_from_path(d.a_path)}" for d in current_commit.diff(base) if d.a_path.startswith(org_dir)}
             # Only interested in the top two path entries
             updated_images += diff_paths
