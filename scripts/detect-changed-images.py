@@ -51,7 +51,8 @@ def get_updated_images():
                 base = repo.merge_base(f'origin/{GITHUB_BASE_REF}', 'HEAD')[0].hexsha
             elif GITHUB_REF == 'refs/head/main':
                 base = args.before
-            current_commit = repo.commit(GITHUB_SHA)
+            # TODO there's probably a better way to get the current commit from the github sha
+            current_commit = [r for r in repo.iter_commits() if r.hexsha == GITHUB_SHA][0]
             diff_paths = {f"{_image_from_path(d.a_path)}" for d in current_commit.diff(base) if d.a_path.startswith(org_dir)}
             # Only interested in the top two path entries
             updated_images += diff_paths
