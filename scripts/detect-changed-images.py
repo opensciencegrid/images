@@ -12,7 +12,7 @@ import json
 ORG_DIRS = ['opensciencegrid', 'iris-hep']
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--before', nargs='?', help='SHA of the previous commit to compare against')
+parser.add_argument('--before', help='SHA of the previous commit to compare against')
 args = parser.parse_args()
 
 
