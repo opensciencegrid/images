@@ -4,7 +4,6 @@ import sys
 from itertools import product
 
 DEFAULT_CONFIG_PATH = 'opensciencegrid/default-build-config.json'
-GITHUB_OUTPUT = os.environ['GITHUB_OUTPUT']
 
 
 def load_config(config_path, default_config=None):
@@ -42,11 +41,6 @@ def main(image_dirs):
         osg_series_list = config['osg_series']
         base_repo_list = config['base_repo']
 
-        build_context = config.get('context', '')
-        tag_override = config.get('tag', '')
-        upstream_repo = config.get('upstream', '')
-        upstream_ref = config.get('upstream_ref', '')
-
         combinations = product(
             base_os_list,
             osg_series_list,
@@ -61,29 +55,17 @@ def main(image_dirs):
         # structures in the matrix construction and it offers:
         # 1. Simplicity: Using a single string to represent configurations is straightforward and easy to understand.
         # 2. Integration: A single string is easily passed to external tools and systems that manage builds.
-            include_list.append({
-                "name": image_name, 
-                "base_os": base_os,
-                "osg_series": osg_series,
-                "base_repo": base_repo,
-                "tag_override": tag_override,
-                "standard_build": config['standard_build'],
-                "repo_build": config['repo_build'],
-                "context": os.path.join(image_dir, build_context),
-                "upstream": upstream_repo,
-                "upstream_ref": upstream_ref
-            })
+            configuration_string = f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"
+            include_list.append({"name": image_name, "config": configuration_string})
 
     sys.stdout.flush()
-    # Write the include list to GITHUB_OUTPUT
-    with open(GITHUB_OUTPUT, 'a') as github_output:
-        github_output.writelines([
-            f"matrix={json.dumps(include_list)}\n"
-        ])
-    print(include_list)
+    json_output = json.dumps({"include": include_list}, indent=4)
+    print(json_output)
 
 
 if __name__ == "__main__":
-    # If run with zero arguments, output an empty list
+    if len(sys.argv) < 2:
+        sys.exit(f"Usage: {sys.argv[0]} <image_dirs>")
+
     image_dirs = sys.argv[1:]
     main(image_dirs)
