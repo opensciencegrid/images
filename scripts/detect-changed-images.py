@@ -12,7 +12,7 @@ import json
 ORG_DIRS = ['opensciencegrid', 'iris-hep']
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--before', help='SHA of the previous commit to compare against')
+parser.add_argument('--before', nargs='?', help='SHA of the previous commit to compare against')
 args = parser.parse_args()
 
 
@@ -52,6 +52,7 @@ def get_updated_images():
             elif GITHUB_REF == 'refs/head/main':
                 base = args.before
             current_commit = repo.commit(GITHUB_SHA)
+
             diff_paths = {f"{_image_from_path(d.a_path)}" for d in current_commit.diff(base) if d.a_path.startswith(org_dir)}
             # Only interested in the top two path entries
             updated_images += diff_paths
