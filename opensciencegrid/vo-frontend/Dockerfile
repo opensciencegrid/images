@@ -4,7 +4,7 @@ ARG BASE_OS=el9
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 
-LABEL maintainer OSG Software <support@osg-htc.org>
+LABEL maintainer="OSG Software <support@osg-htc.org>"
 
 # Create the frontend user with a fixed GID/UID
 # This is important so that we can use the same IDs in the persistent volume used for
@@ -24,7 +24,7 @@ RUN yum -y install \
       vim \
       vo-client && \
     if [[ $BASE_YUM_REPO = development ]]; then \
-      yum -y --enablerepo=osg-upcoming-testing upgrade glideinwms-vofrontend-standalone; \
+      yum -y --enablerepo=osg-upcoming-development upgrade glideinwms-vofrontend-standalone; \
     fi && \
     yum -y clean all
 
