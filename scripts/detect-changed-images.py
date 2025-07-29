@@ -49,7 +49,7 @@ def get_updated_images():
             base : str = 'origin/main'
             if GITHUB_EVENT_NAME == 'pull_request':
                 base = repo.merge_base(f'origin/{GITHUB_BASE_REF}', 'HEAD')[0].hexsha
-            elif GITHUB_REF == 'refs/head/main':
+            elif GITHUB_REF == 'refs/heads/main':
                 base = args.before
             current_commit = repo.commit(GITHUB_SHA)
 
