@@ -44,6 +44,7 @@ COPY condor_master_wrapper /usr/sbin/
 RUN chmod 755 /usr/sbin/condor_master_wrapper
 COPY 10-htcondor.conf /etc/supervisord.d/
 
+COPY 03-rrdcached.conf /etc/supervisord.d/
 COPY 05-gmetad.conf /etc/supervisord.d/
 COPY 05-gmond.conf /etc/supervisord.d/
 COPY 05-httpd.conf /etc/supervisord.d/

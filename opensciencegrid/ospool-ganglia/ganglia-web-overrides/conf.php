@@ -28,4 +28,8 @@ $conf['heatmaps_enabled'] = 0;
 # single cluster has been defined.
 $conf['always_display_grid_view'] = false;
 
+# use rrdcached
+# disabled as caching did not work with the ce dashboard
+#$conf['rrdcached_socket'] = "unix:/tmp/rrdcached.read.sock";
+
 ?>

@@ -19,7 +19,7 @@ for FILE in *; do
 done
 cd /etc/ospool-creds/idtokens.d
 for FILE in *; do
-    install -o condor -g condor -m 0600 $FILE /etc/condor/tokens.d/$FILE
+    install -o root -g root -m 0600 $FILE /etc/condor/tokens.d/$FILE
 done
 
 if [ "X$DEPLOYMENT_ENV" == "Xproduction" ]; then
