@@ -41,9 +41,6 @@ def main(image_dirs):
         osg_series_list = config['osg_series']
         base_repo_list = config['base_repo']
 
-        build_context = config.get('context', '')
-        tag_override = config.get('tag', '')
-
         combinations = product(
             base_os_list,
             osg_series_list,
@@ -59,12 +56,7 @@ def main(image_dirs):
         # 1. Simplicity: Using a single string to represent configurations is straightforward and easy to understand.
         # 2. Integration: A single string is easily passed to external tools and systems that manage builds.
             configuration_string = f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"
-            include_list.append({
-                "name": image_name, 
-                "config": configuration_string, 
-                "tag_override": tag_override,
-                "context": os.path.join(image_dir, build_context)
-            })
+            include_list.append({"name": image_name, "config": configuration_string})
 
     sys.stdout.flush()
     json_output = json.dumps({"include": include_list}, indent=4)
