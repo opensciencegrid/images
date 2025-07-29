@@ -84,8 +84,6 @@ def main(image_dirs):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        sys.exit(f"Usage: {sys.argv[0]} <image_dirs>")
-
+    # If run with zero arguments, output an empty list
     image_dirs = sys.argv[1:]
     main(image_dirs)
