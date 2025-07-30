@@ -75,6 +75,11 @@ def main(image_dirs):
             })
 
     sys.stdout.flush()
+
+    if not include_list:
+        # Add a dummy value to the matrix so later GHA steps don't auto-error
+        include_list.append('dummy')
+
     # Write the include list to GITHUB_OUTPUT
     with open(GITHUB_OUTPUT, 'a') as github_output:
         github_output.writelines([
