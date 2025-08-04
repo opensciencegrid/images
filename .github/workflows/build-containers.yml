@@ -113,8 +113,8 @@ jobs:
         if: >-
           github.ref == 'refs/heads/main' &&
           github.event_name != 'pull_request' &&
-          github.repository_owner == 'opensciencegrid' &&
           needs.build-image-list.outputs.image_list != '["dummy"]'
+        #github.repository_owner == 'opensciencegrid' &&
         uses: opensciencegrid/build-container-action@v0.7.1
         with:
           clean_before_build: false
@@ -133,8 +133,8 @@ jobs:
           startsWith(env.IMAGE_NAME, 'opensciencegrid') &&
           github.ref == 'refs/heads/main' &&
           github.event_name != 'pull_request' &&
-          github.repository_owner == 'opensciencegrid' &&
           needs.build-image-list.outputs.image_list != '["dummy"]' 
+        #github.repository_owner == 'opensciencegrid' &&
         uses: opensciencegrid/build-container-action@v0.7.1
         with:
           clean_before_build: false
