@@ -143,6 +143,7 @@ jobs:
           osg_repo: ${{ matrix.base_repo }}
           context: ${{ matrix.context }}
           base_os: ${{ matrix.base_os }}
+
           output_image: ${{ env.IMAGE_NAME }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
