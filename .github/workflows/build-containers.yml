@@ -87,7 +87,7 @@ jobs:
           if [ -n "${{ matrix.tag_override }}" ] ; then
             echo "IMAGE_NAME=${ORGANIZATION}/${{ matrix.name }}:${{ matrix.tag_override }}" >> $GITHUB_ENV
           else
-            echo "IMAGE_NAME=${ORGANIZATION}/${{ matrix.name }}:${OSG_SERIES}-${BASE_OS}-${BASE_REPO}" >> $GITHUB_ENV
+            echo "IMAGE_NAME=${ORGANIZATION}/${{ matrix.name }}:${OSG_SERIES}-${BASE_REPO}" >> $GITHUB_ENV
           fi
 
       - name: Pull External Repo
@@ -115,14 +115,15 @@ jobs:
           github.event_name != 'pull_request' &&
           github.repository_owner == 'opensciencegrid' &&
           needs.build-image-list.outputs.image_list != '["dummy"]'
-        uses: opensciencegrid/push-container-action@v0.8.1
+        uses: opensciencegrid/build-container-action@v0.7.1
         with:
           clean_before_build: false
-          repo: ${{ matrix.base_repo }}
+          push_image: true
           osg_series: ${{ matrix.osg_series }}
+          osg_repo: ${{ matrix.base_repo }}
           context: ${{ matrix.context }}
           base_os: ${{ matrix.base_os }}
-          image_name: ${{ env.IMAGE_NAME }}
+          output_image: ${{ env.IMAGE_NAME }}
           registry_url: hub.opensciencegrid.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
@@ -134,14 +135,15 @@ jobs:
           github.event_name != 'pull_request' &&
           github.repository_owner == 'opensciencegrid' &&
           needs.build-image-list.outputs.image_list != '["dummy"]' 
-        uses: opensciencegrid/push-container-action@v0.8.1
+        uses: opensciencegrid/build-container-action@v0.7.1
         with:
           clean_before_build: false
-          repo: ${{ matrix.base_repo }}
+          push_image: true
           osg_series: ${{ matrix.osg_series }}
+          osg_repo: ${{ matrix.base_repo }}
           context: ${{ matrix.context }}
           base_os: ${{ matrix.base_os }}
-          image_name: ${{ env.IMAGE_NAME }}
+          output_image: ${{ env.IMAGE_NAME }}
           registry_url: docker.io
           registry_user: ${{ secrets.DOCKER_USERNAME }}
           registry_pass: ${{ secrets.DOCKER_PASSWORD }}
