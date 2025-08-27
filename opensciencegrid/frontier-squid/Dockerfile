@@ -16,6 +16,7 @@ RUN groupadd -o -g 10941 squid && \
     useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid && \
     yum update -y && \
     if [[ $APP_YUM_REPO == upcoming* ]]; then \
+       : do not disable the repo which is enabled in the base image; \
        yumrepo=""; \
     elif [[ $APP_YUM_REPO = release ]]; then \
        yumrepo=osg-upcoming; else \
