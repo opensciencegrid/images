@@ -2,9 +2,9 @@ Frontier Squid Container Image [![Build Status](https://github.com/opensciencegr
 ==============================
 
 A [Docker](https://hub.docker.com/r/opensciencegrid/frontier-squid) container image for
-[Squid proxy server](http://www.squid-cache.org/) as packaged by [OSG](https://www.opensciencegrid.org/).
+[Squid proxy server](http://www.squid-cache.org/) as packaged by [OSG](https://osg-htc.org/).
 The image is built according to the
-[OSG installation instructions](http://opensciencegrid.org/docs/data/frontier-squid/).
+[OSG installation instructions](https://osg-htc.org/docs/data/frontier-squid/).
 
 Usage
 -----
@@ -13,7 +13,7 @@ To run with the defaults on docker or podman:
 
 ```bash
 docker run --rm --name frontier-squid \
-  -p 3128:3128 opensciencegrid/frontier-squid:3.6-release
+  -p 3128:3128 opensciencegrid/frontier-squid:24-release
 ```
 
 Running docker or podman with a `-u` option to start as a non-root user
@@ -25,20 +25,20 @@ To run with the default settings on apptainer:
 apptainer run --writable-tmpfs \
   -B /scratch/squid/cache:/var/cache/squid \
   -B /scratch/squid/log:/var/log/squid \
-  docker://opensciencegrid/frontier-squid:3.6-release
+  docker://opensciencegrid/frontier-squid:24-release
 ```
 
 Replace `/scratch/squid` with a path to wherever you have a filesystem
 large enough to hold the squid cache and logs.
 
-See [our documentation](https://opensciencegrid.org/technology/policy/container-release/#tags) for details of our docker
+See [our documentation](https://osg-htc.org/technology/policy/container-release/#tags) for details of our docker
 image tags.
 
 Configuring Squid
 -----------------
 
 The recommended way to configure the squid in the container is by means of environment variables.
-Three such variables are supported:
+Three such variables are supported for simple installations:
 
 Variable name       | Description                                                             | Defaults                                     |
 ---------------------|-------------------------------------------------------------------------|----------------------------------------------|
@@ -57,19 +57,33 @@ Mountpoint       | Description                                                  
 
 For production deployments, OSG recommends allocating at least 50 to 100 GB (50000 to 100000 MB) to SQUID_CACHE_DISK.
 
-For more details, see the [Frontier Squid documentation](https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Configuration).
+For more details, see the [Frontier Squid documentation](https://osg-htc.org/docs/data/frontier-squid/#configuring-frontier-squid).
 
+
+Multiple workers
+----------------
+
+If you define multiple workers in order to take advantage of multiple cores on a heavily loaded installation, be aware that for frontier-squid-6 (used in the 24-upcoming tag and in series 25 tags or later) you will need to configure rock cache.
+That depends on a lot of RAM defined in $SQUID_CACHE_MEM for efficient operation and it allocates out of `/dev/shm` which by default in docker is very small.
+To increase the size of `/dev/shm`, add the docker option `--shm-size`, for example `--shm-size=16g` for 16 Gigabytes.
+If $SQUID_CACHE_MEM is defined to be too large to fit in `/dev/shm`, frontier-squid will automatically reduce the size.
+
+If you want to avoid overriding the container's configuration environment variables which are used in `/etc/squid/customize.d/10-stdvars.awk`, there's no need to redefine `cache_mem` like the upstream documentation advises, and to set the cache type without the location and size you can use
+```
+  setoptionparameter("cache_dir", 1, "rock")
+```
+
+
+Cache mem without multiple workers
+----------------------------------
+
+frontier-squid-6, as discussed in the multiple workers section above, allocates cache memory out of `/dev/shm`.
+This happens even with the default one worker.
+The default size of `/dev/shm` in docker is only 64 Megabytes, so even the default $SQUID_CACHE_MEM of 128 Megabytes doesn't fit.
+This still works because frontier-squid reduces the size to fit, but especially if you choose to increase that size, pass a `--shm-size` option to docker that's at least 10% larger than $SQUID_CACHE_MEM.
 
 
 Validate
 --------
 
-To validate your installation:
-
-```bash
-> export http_proxy=http://localhost:3128
-> wget -qdO/dev/null http://frontier.cern.ch 2>&1 | grep X-Cache
-X-Cache: MISS from 797a56e426cf
-> wget -qdO/dev/null http://frontier.cern.ch 2>&1 | grep X-Cache
-X-Cache: HIT from 797a56e426cf
-```
+To validate your installation see the [OSG frontier-squid documentation](https://osg-htc.org/docs/data/frontier-squid/#validating-frontier-squid).

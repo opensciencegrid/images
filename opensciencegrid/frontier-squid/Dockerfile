@@ -1,10 +1,11 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=3.6
+ARG BASE_OSG_SERIES=23
 ARG BASE_YUM_REPO=testing
+# The following could be overriden to "upcoming" (for example) to 
+# install the application from upcoming instead of the base yum repo.
+ARG APP_YUM_REPO=$BASE_YUM_REPO
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
-
-ARG BASE_YUM_REPO=testing
 
 LABEL maintainer OSG Software <help@opensciencegrid.org>
 
@@ -14,9 +15,12 @@ LABEL maintainer OSG Software <help@opensciencegrid.org>
 RUN groupadd -o -g 10941 squid && \
     useradd -o -u 10941 -g 10941 -s /sbin/nologin -d /var/lib/squid squid && \
     yum update -y && \
-    if [[ $BASE_YUM_REPO = release ]]; then \
+    if [[ $APP_YUM_REPO == upcoming* ]]; then \
+       : do not disable the repo which is enabled in the base image; \
+       yumrepo=""; \
+    elif [[ $APP_YUM_REPO = release ]]; then \
        yumrepo=osg-upcoming; else \
-       yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
+       yumrepo=osg-upcoming-$APP_YUM_REPO; fi && \
     yum install -y \
                 --disablerepo=$yumrepo \
                 frontier-squid && \
@@ -34,12 +38,7 @@ RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
         "enabled=1" \
         "autorefresh=1" \
         "type=rpm-md" && \
-    if [[ $BASE_YUM_REPO = release ]]; then \
-       yumrepo=osg-upcoming; else \
-       yumrepo=osg-upcoming-$BASE_YUM_REPO; fi && \
-    yum install -y \
-                --disablerepo=$yumrepo \
-                filebeat && \
+    yum install -y filebeat && \
     rm -rf /var/cache/yum/*
 
 COPY start-frontier-squid.sh /usr/sbin/
