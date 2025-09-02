@@ -60,14 +60,14 @@ def main():
         factor = 1000
 
         # held jobs
-        held = ad_int(ad, "HeldJobs", 0)
+        held = ad_int(ad, "HeldJobs", 0) * 5
         factor += held
 
         if "daniel.morales" in ad["Name"]:
             factor -= 1500
 
         # upper/lower limits on the adjustments
-        factor = min(factor, 10000)
+        factor = min(factor, 20000)
         factor = max(factor, 500)
         factor = step(factor)
 
