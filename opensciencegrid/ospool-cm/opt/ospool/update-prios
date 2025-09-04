@@ -14,6 +14,11 @@ import classad2 as classad
 from htcondor2 import AdTypes
 
 
+MIN_PRIORITY_FACTOR = 500
+MAX_PRIORITY_FACTOR = 20000
+HELD_JOB_PENALTY_MULTIPLIER = 5
+
+
 def ad_int(ad, key, default=0):
     if key not in ad:
         return default
@@ -60,15 +65,15 @@ def main():
         factor = 1000
 
         # held jobs
-        held = ad_int(ad, "HeldJobs", 0)
+        held = ad_int(ad, "HeldJobs", 0) * HELD_JOB_PENALTY_MULTIPLIER
         factor += held
 
         if "daniel.morales" in ad["Name"]:
             factor -= 1500
 
         # upper/lower limits on the adjustments
-        factor = min(factor, 10000)
-        factor = max(factor, 500)
+        factor = min(factor, MAX_PRIORITY_FACTOR)
+        factor = max(factor, MIN_PRIORITY_FACTOR)
         factor = step(factor)
 
         if factor != current_factor:
