@@ -1,12 +1,9 @@
 #!/bin/bash
 
-if ! (supervisorctl status frontend | grep RUNNING) >/dev/null 2>&1; then
-    echo "gwms frontend is not running" >&2
-    exit 1
-fi
-
-if ! supervisorctl status >/dev/null 2>&1; then
-    echo "supervisord reports failure" >&2
+failures=$(supervisorctl status | grep -Ev 'container_cleanup|RUNNING')
+if [ -n "$failures" ]; then
+    echo "supervisord non-RUNNING service:" >&2
+    echo "$failures" >&2
     exit 2
 fi
 
