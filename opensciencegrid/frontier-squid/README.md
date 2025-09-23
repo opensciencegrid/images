@@ -68,9 +68,26 @@ That depends on a lot of RAM defined in $SQUID_CACHE_MEM for efficient operation
 To increase the size of `/dev/shm`, add the docker option `--shm-size`, for example `--shm-size=16g` for 16 Gigabytes.
 If $SQUID_CACHE_MEM is defined to be too large to fit in `/dev/shm`, frontier-squid will automatically reduce the size.
 
-If you want to avoid overriding the container's configuration environment variables which are used in `/etc/squid/customize.d/10-stdvars.awk`, there's no need to redefine `cache_mem` like the upstream documentation advises, and to set the cache type without the location and size you can use
+If you want to avoid overriding the container's configuration environment variables which are used in `/etc/squid/customize.d/10-stdvars.awk`, there's no need to redefine `cache_mem` like the upstream documentation advises, and to set the cache type with the predefined location and size you can use
 ```
-  setoptionparameter("cache_dir", 1, "rock")
+setoption("cache_dir", "rock '$SQUID_CACHE_DISK_LOCATION $SQUID_CACHE_DISK'")
+```
+
+Since at this point you need to pull together information from multiple sources to have a working configuration, here's an example configuration that puts it all together.  If you have a machine with 8 cores and 16G of RAM you could use a configuration like this, beginning with a file '20-frontier.awk' with these contents:
+```
+setoption("cache_dir", "rock '$SQUID_CACHE_DISK_LOCATION $SQUID_CACHE_DISK'")
+setoption("maximum_object_size_in_memory", "1 GB")
+setoption("workers", 6)
+setoption("cpu_affinity_map", "process_numbers=1,2,3,4,5,6 cores=2,3,4,5,6,7")
+```
+Then start it with: 
+```
+docker run --rm --name frontier-squid -p 3128:3128 \
+  -v ./20-frontier.awk:/etc/squid/customize.d/20-frontier.awk \
+  --shm-size=14g -e SQUID_CACHE_MEM="12 GB" \
+  -e SQUID_CACHE_DISK=50000 \
+  --ulimit nofile=16384:16384 \
+  opensciencegrid/frontier-squid:24-upcoming
 ```
 
 
