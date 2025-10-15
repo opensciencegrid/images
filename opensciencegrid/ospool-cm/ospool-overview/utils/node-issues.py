@@ -2,7 +2,7 @@
 
 from pprint import pprint
 
-import htcondor
+import htcondor2 as htcondor
 import classad
 
 
