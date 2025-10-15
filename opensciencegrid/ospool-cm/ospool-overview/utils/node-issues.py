@@ -2,8 +2,8 @@
 
 from pprint import pprint
 
-import htcondor
-import classad
+import htcondor2 as htcondor
+import classad2 as classad
 
 
 def bool_stats(data, key, threshold):
