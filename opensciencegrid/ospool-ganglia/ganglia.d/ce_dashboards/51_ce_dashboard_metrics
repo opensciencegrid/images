@@ -142,28 +142,37 @@
 ]
 [
   Aggregate = "SUM";
-  Name   = "GlideinsCpuLimited";
-  Desc   = "Number of Glideins using 90%+ of available CPU cores";
+  Name   = "EPsCpuLimited";
+  Desc   = "Number of EPs using 90%+ of available CPU cores";
   Value  = 1.0 * (TotalInUseCPUs/(1.0 * TotalCPUs) > 0.9);
-  Units  = "glideins";
+  Units  = "EPs";
   Requirements = true;
   TargetType = "Startd";
 ]
 [
   Aggregate = "SUM";
-  Name   = "GlideinsMemoryLimited";
-  Desc   = "Number of Glideins using 90%+ of available memory";
+  Name   = "EPsMemoryLimited";
+  Desc   = "Number of EPs using 90%+ of available memory";
   Value  = 1.0 * (TotalInUseMemory/(1.0 * TotalMemory) > 0.9);
-  Units  = "glideins";
+  Units  = "EPs";
   Requirements = true;
   TargetType = "Startd";
 ]
 [
   Aggregate = "SUM";
-  Name   = "GlideinsDiskLimited";
-  Desc   = "Number of Glideins using 90%+ of available disk";
+  Name   = "EPsDiskLimited";
+  Desc   = "Number of EPs using 90%+ of available disk";
   Value  = 1.0 * (TotalInUseDisk/(1.0 * TotalDisk) > 0.9);
-  Units  = "glideins";
+  Units  = "EPs";
+  Requirements = true;
+  TargetType = "Startd";
+]
+[
+  Aggregate = "SUM";
+  Name   = "EPsRunning";
+  Desc   = "Number of Running EPs";
+  Value  = 1.0;
+  Units  = "EPs";
   Requirements = true;
   TargetType = "Startd";
 ]
