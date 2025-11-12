@@ -1,0 +1,30 @@
+
+# targets `linux/amd64/v2` - not sure how to map that to apptainer arch
+#- name: htc__almalinux__10
+#  docker_image: hub.opensciencegrid.org/htc/almalinux:10
+
+- name: htc__debian__12
+  docker_image: hub.opensciencegrid.org/htc/debian:12
+
+- name: htc__debian__13
+  docker_image: hub.opensciencegrid.org/htc/debian:13
+
+- name: htc__rocky__8
+  docker_image: hub.opensciencegrid.org/htc/rocky:8
+
+- name: htc__rocky__8-cuda-11.0.3
+  docker_image: hub.opensciencegrid.org/htc/rocky:8-cuda-11.0.3
+  
+- name: htc__rocky__9
+  arch: [aarch64, x86_64]
+  docker_image: hub.opensciencegrid.org/htc/rocky:9
+
+- name: htc__rocky__9-cuda-12.6.0
+  docker_image: hub.opensciencegrid.org/htc/rocky:9-cuda-12.6.0
+
+- name: htc__ubuntu__22.04
+  docker_image: hub.opensciencegrid.org/htc/ubuntu:22.04
+
+- name: htc__ubuntu__24.04
+  docker_image: hub.opensciencegrid.org/htc/ubuntu:24.04
+

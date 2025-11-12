@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import yaml
+import datetime
+import subprocess
+
+start_dir = os.getcwd()
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: update.py <target_dir>")
+        sys.exit(1)
+
+    target_dir = sys.argv[1]
+
+    with open("images.yaml") as file:
+        conf = yaml.safe_load(file)
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    ts = now.strftime("%Y%m%dT%H%M%SZ")
+
+    for img in conf:
+
+        subprocess.run("apptainer cache clean -f", shell=True)
+
+        archs = img.get("arch", ["x86_64"])
+        for arch in archs:
+            final_sif = f"{ts}.sif"
+            sing_arch = "arm64" if arch == "aarch64" else "amd64"
+
+            os.chdir(start_dir)
+            os.makedirs(os.path.join(target_dir, arch, img["name"]), exist_ok=True)
+            os.chdir(os.path.join(target_dir, arch, img["name"]))
+
+            print(f"Working in {os.getcwd()}")
+
+            # log the build to a file in the same structure under logs/
+            log_dir = os.path.join("../../..", target_dir, "logs", arch)
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = os.path.join(log_dir, f"{img['name']}.txt")
+
+            cmd = f"apptainer pull --arch {sing_arch} --force --name {final_sif} docker://{img['docker_image']}"
+            print(f"Running: {cmd}")
+            try:
+                with open(log_file, 'w') as f:
+                    result = subprocess.run(
+                        cmd.split(),
+                        stdout=f,
+                        stderr=subprocess.STDOUT,
+                        text=True,
+                        check=True
+                    )
+            except subprocess.CalledProcessError as e:
+                print(f"✗ Failed to pull {img['name']} for {arch} (exit code: {e.returncode}) - check logs")
+                continue
+
+            # update latest
+            subprocess.run("ls *.sif | sort | tail -n 1 > latest.txt", shell=True)
+
+            # cleanup old images, keep only latest N
+            subprocess.run("find . -maxdepth 1 -name \\*.sif -mtime +10 -exec rm -f {} \\;", shell=True)
+
+if __name__ == "__main__":
+    main()
+
