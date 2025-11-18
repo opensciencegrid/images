@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 import yaml
 import datetime
 import subprocess
@@ -19,8 +20,12 @@ def main():
         conf = yaml.safe_load(file)
 
     now = datetime.datetime.now(datetime.timezone.utc)
+    now_human = now.strftime("%Y-%m-%d %H:%M:%S %Z")
     ts = now.strftime("%Y%m%dT%H%M%SZ")
 
+    print(f"\n[{now_human}]: Starting run for {len(conf)} images\n")
+
+    starttime = time.monotonic()
     for img in conf:
 
         subprocess.run("apptainer cache clean -f", shell=True)
@@ -61,6 +66,13 @@ def main():
 
             # cleanup old images, keep only latest N
             subprocess.run("find . -maxdepth 1 -name \\*.sif -mtime +10 -exec rm -f {} \\;", shell=True)
+
+    now2 = datetime.datetime.now(datetime.timezone.utc)
+    now2_human = now2.strftime("%Y-%m-%d %H:%M:%S %Z")
+    endtime = time.monotonic()
+
+    print(f"\n[{now2_human}]: Finished run (elapsed: {datetime.timedelta(seconds=endtime-starttime)!s})\n")
+
 
 if __name__ == "__main__":
     main()
