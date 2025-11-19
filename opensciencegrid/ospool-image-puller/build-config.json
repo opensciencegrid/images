@@ -4,4 +4,4 @@
     "base_os": ["el9"],
     "osg_series": ["25"],
     "base_repo": ["release"]
-  }
+}
