@@ -140,3 +140,21 @@
   Requirements = ( ( ( State == "Claimed" || State=="Preempting" ) && Activity != "Idle" && Activity != "Suspended" ) == false);
   TargetType = "Machine";
 ]
+[
+  Aggregate = "SUM";
+  Name   = "TotalTransferInputMB";
+  Desc   = "Total bytes of job input transferred across the network";
+  Value  = TotalTransferInputMB?:0;
+  Units  = "megabytes";
+  Requirements = true;
+  TargetType = "Startd";
+]
+[
+  Aggregate = "SUM";
+  Name   = "TotalTransferOutputMB";
+  Desc   = "Total bytes of job output transferred across the network";
+  Value  = TotalTransferOutputMB?:0;
+  Units  = "megabytes";
+  Requirements = true;
+  TargetType = "Startd";
+]
