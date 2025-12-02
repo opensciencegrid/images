@@ -290,6 +290,7 @@ def main():
     comanage_apply_tag(users, 'PATh-Facility', 'ap1-login')
     comanage_apply_tag(users, 'OSPool-Wisc',   'ap40-login')
     comanage_apply_tag(users, 'OSPool-Wisc',   'ap41-login')
+    comanage_apply_tag(users, 'OSPool-IGWN',   'ap42-login')
     comanage_apply_tag(users, 'Collab',        'ap43-login')
 
     # OSPool is a meta tag spanning our OSPool APs
