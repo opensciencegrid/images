@@ -25,10 +25,11 @@ RUN    yum module enable -y mod_auth_openidc \
 # Create home directory for registry user
 RUN mkdir /var/lib/condor-ce/webapp
 
-COPY etc/supervisord.d/*      /etc/supervisord.d/
-COPY etc/condor-ce/config.d/* /etc/condor-ce/config.d/
-COPY etc/httpd/conf.d/*       /etc/httpd/conf.d/
-COPY etc/osg/image-init.d/*   /etc/osg/image-init.d/
-COPY auto-reload.sh           /usr/local/sbin/
+COPY etc/supervisord.d/*        /etc/supervisord.d/
+COPY etc/condor-ce/config.d/*   /etc/condor-ce/config.d/
+COPY etc/condor-ce/mapfiles.d/* /etc/condor-ce/mapfiles.d/
+COPY etc/httpd/conf.d/*         /etc/httpd/conf.d/
+COPY etc/osg/image-init.d/*     /etc/osg/image-init.d/
+COPY auto-reload.sh             /usr/local/sbin/
 
 RUN  chmod a+x /usr/local/sbin/auto-reload.sh
