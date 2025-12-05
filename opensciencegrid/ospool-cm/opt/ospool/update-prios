@@ -68,8 +68,9 @@ def main():
         held = ad_int(ad, "HeldJobs", 0) * HELD_JOB_PENALTY_MULTIPLIER
         factor += held
 
-        if "daniel.morales" in ad["Name"]:
-            factor -= 1500
+        # make sure we finish jobs on ap2X before migration
+        if ".uc.osg-htc.org" in ad["Name"]:
+            factor -= 1000
 
         # upper/lower limits on the adjustments
         factor = min(factor, MAX_PRIORITY_FACTOR)
