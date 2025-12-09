@@ -1,22 +1,37 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import time
 import yaml
 import datetime
 import subprocess
+import argparse
 
 start_dir = os.getcwd()
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: update.py <target_dir>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description='Pull and update container images from Docker to Apptainer/Singularity format'
+    )
+    parser.add_argument(
+        'target_dir',
+        help='Target directory where images will be stored'
+    )
+    parser.add_argument(
+        '--config',
+        default='images.yaml',
+        help='Path to the configuration YAML file (default: images.yaml)'
+    )
+    parser.add_argument(
+        '--keep-days',
+        type=int,
+        default=10,
+        help='Number of days to keep old images (default: 10)'
+    )
 
-    target_dir = sys.argv[1]
+    args = parser.parse_args()
 
-    with open("images.yaml") as file:
+    with open(args.config) as file:
         conf = yaml.safe_load(file)
 
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -36,13 +51,13 @@ def main():
             sing_arch = "arm64" if arch == "aarch64" else "amd64"
 
             os.chdir(start_dir)
-            os.makedirs(os.path.join(target_dir, arch, img["name"]), exist_ok=True)
-            os.chdir(os.path.join(target_dir, arch, img["name"]))
+            os.makedirs(os.path.join(args.target_dir, arch, img["name"]), exist_ok=True)
+            os.chdir(os.path.join(args.target_dir, arch, img["name"]))
 
             print(f"Working in {os.getcwd()}")
 
             # log the build to a file in the same structure under logs/
-            log_dir = os.path.join("../../..", target_dir, "logs", arch)
+            log_dir = os.path.join("../../..", args.target_dir, "logs", arch)
             os.makedirs(log_dir, exist_ok=True)
             log_file = os.path.join(log_dir, f"{img['name']}.txt")
 
@@ -65,7 +80,7 @@ def main():
             subprocess.run("ls *.sif | sort | tail -n 1 > latest.txt", shell=True)
 
             # cleanup old images, keep only latest N
-            subprocess.run("find . -maxdepth 1 -name \\*.sif -mtime +10 -exec rm -f {} \\;", shell=True)
+            subprocess.run(f"find . -maxdepth 1 -name \\*.sif -mtime +{args.keep_days} -exec rm -f {{}} \\;", shell=True)
 
     now2 = datetime.datetime.now(datetime.timezone.utc)
     now2_human = now2.strftime("%Y-%m-%d %H:%M:%S %Z")
@@ -76,4 +91,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
