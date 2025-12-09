@@ -16,7 +16,7 @@ install -o images -d "${TARGET_DIR}"
 # the container's stdout/err, but then drop privileges to run the
 # actual script.
 
-echo "${CRON_EXPR?} root cd /ospool/images-scripts && /usr/sbin/runuser -u images -- timeout -k 60s ${TIMEOUT?} ./update.py ${TARGET_DIR}" '> /proc/1/fd/1 2>&1' > /etc/cron.d/update.cron
+echo "${CRON_EXPR?} root cd /ospool/images-scripts && /usr/sbin/runuser -u images -- timeout -k 60s ${TIMEOUT?} ./update.py --keep-days=${KEEP_DAYS:-10} ${TARGET_DIR}" '> /proc/1/fd/1 2>&1' > /etc/cron.d/update.cron
 
 # Start cron in non-daemon (foreground) mode
 echo >&2 "Starting cron"

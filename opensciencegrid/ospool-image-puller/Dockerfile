@@ -18,8 +18,8 @@ COPY --chmod=0755 startup.sh /bin/startup.sh
 ENV CRON_EXPR="30 5 * * *"
 ENV TIMEOUT="23h"
 ENV IMAGES_UID="1000"
+ENV KEEP_DAYS=10
 
 VOLUME ["/ospool/images"]
 
 CMD ["/bin/startup.sh"]
-
