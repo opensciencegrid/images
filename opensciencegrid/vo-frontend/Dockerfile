@@ -13,7 +13,7 @@ RUN groupadd -o -g 993 frontend
 RUN useradd -o -u 996 -g 993 -s /bin/sh frontend
 
 # for developement, grab gwms from upcoming
-RUN yum -y install \
+RUN yum --disablerepo=osg-upcoming -y install \
       git \
       glideinwms-vofrontend-standalone \
       jq \
