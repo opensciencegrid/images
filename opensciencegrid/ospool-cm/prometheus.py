@@ -28,6 +28,16 @@ ospool_total_gpus_count = Gauge("ospool_total_gpus_count", "Total GPUs", ["resou
 ospool_claimed_gpus_count = Gauge("ospool_claimed_gpus_count", "Claimed GPUs", ["resource_name"])
 ospool_idle_gpus_count = Gauge("ospool_idle_gpus_count", "Idle GPUs", ["resource_name"])
 
+# gpus - capability
+ospool_total_gpus_capability = Gauge("ospool_total_gpus_capability", "Total GPUs", ["capability"])
+ospool_claimed_gpus_capability = Gauge("ospool_claimed_gpus_capability", "Claimed GPUs", ["capability"])
+ospool_idle_gpus_capability = Gauge("ospool_idle_gpus_capability", "Idle GPUs", ["capability"])
+
+# gpus - memory
+ospool_total_gpus_memory = Gauge("ospool_total_gpus_memory", "Total GPUs", ["memory"])
+ospool_claimed_gpus_memory = Gauge("ospool_claimed_gpus_memory", "Claimed GPUs", ["memory"])
+ospool_idle_gpus_memory = Gauge("ospool_idle_gpus_memory", "Idle GPUs", ["memory"])
+
 # pool wide attributes
 ospool_machine_ads = Gauge("ospool_machine_ads", "HTCondor machine ads")
 ospool_kernel_version = Gauge("ospool_kernel_versions", "Kernel versions in the pool", ["kernel_version"])
@@ -60,6 +70,18 @@ def entry_factory():
         "idle_diskstarvation_cpus": 0,
         "idle_blackhole_cpus": 0,
         "idle_other_cpus": 0,
+        "total_gpus": 0,
+        "claimed_gpus": 0,
+        "idle_gpus": 0,
+    }
+    return entry
+
+
+def entry_gpus():
+    '''
+    Make sure we have a base entry for given gpu capability
+    '''
+    entry = {
         "total_gpus": 0,
         "claimed_gpus": 0,
         "idle_gpus": 0,
@@ -137,6 +159,65 @@ def cm_resources_info(collector):
         ospool_claimed_gpus_count.labels(resource).set(data["claimed_gpus"])
         ospool_idle_gpus_count.labels(resource).set(data["idle_gpus"])
 
+
+def cm_gpus(collector):
+    '''
+    Collect details on GPUs
+    '''
+
+    data = defaultdict(entry_gpus)
+
+    # capability iterate over all GPUs
+    ads = collector.query(ad_type=htcondor2.AdTypes.Startd,
+                          constraint="!isUndefined(GLIDEIN_ResourceName) && GPUs >= 1",
+                          projection=["GLIDEIN_ResourceName", "GPUs", "GPUs_Capability", "State"])
+    for ad in ads:
+        if "GPUs_Capability" not in ad:
+            ad["GPUs_Capability"] = "unknown"
+
+        d = data[ad["GPUs_Capability"]]
+
+        d["total_gpus"] += int(ad["GPUs"])
+        if ad["State"] != "Unclaimed":
+            d["claimed_gpus"] += int(ad["GPUs"])
+        d["idle_gpus"] = d["total_gpus"] - d["claimed_gpus"]
+
+    # done collecting data, update Prometheus
+    for capability, d in data.items():
+        ospool_total_gpus_capability.labels(capability).set(d["total_gpus"])
+        ospool_claimed_gpus_capability.labels(capability).set(d["claimed_gpus"])
+        ospool_idle_gpus_capability.labels(capability).set(d["idle_gpus"])
+
+    # now do the same iterating, but over memory
+    data = defaultdict(entry_gpus)
+    ads = collector.query(ad_type=htcondor2.AdTypes.Startd,
+                          constraint="!isUndefined(GLIDEIN_ResourceName) && GPUs >= 1",
+                          projection=["GLIDEIN_ResourceName", "GPUs", "GPUs_GlobalMemoryMb", "State"])
+    for ad in ads:
+        if "GPUs_GlobalMemoryMb" not in ad:
+            ad["GPUs_GlobalMemoryMb"] = 0
+
+        # convert to GB, value in to buckets
+        m = round((int(ad["GPUs_GlobalMemoryMb"]) / 1024))
+        for bucket in [0, 4, 8, 12, 16, 24, 32, 36, 40, 48, 64, 96, 128, 140, 192, 256, 512]:
+            if m <= bucket:
+                m = bucket
+                break
+
+        ad["GPUs_GlobalMemoryMb"] = str(m)
+
+        d = data[ad["GPUs_GlobalMemoryMb"]]
+
+        d["total_gpus"] += int(ad["GPUs"])
+        if ad["State"] != "Unclaimed":
+            d["claimed_gpus"] += int(ad["GPUs"])
+        d["idle_gpus"] = d["total_gpus"] - d["claimed_gpus"]
+
+    # done collecting data, update Prometheus
+    for memory, d in data.items():
+        ospool_total_gpus_memory.labels(memory).set(d["total_gpus"])
+        ospool_claimed_gpus_memory.labels(memory).set(d["claimed_gpus"])
+        ospool_idle_gpus_memory.labels(memory).set(d["idle_gpus"])
 
 def cm_pool_attributes(collector):
     '''
@@ -284,6 +365,7 @@ if __name__ == '__main__':
     while True:
         # can we determine if we are in ccb or cm mode?
         cm_resources_info(collector)
+        cm_gpus(collector)
         cm_pool_attributes(collector)
         cm_submitters_info(collector)
         time.sleep(20)
