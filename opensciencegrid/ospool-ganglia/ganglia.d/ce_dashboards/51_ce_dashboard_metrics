@@ -18,19 +18,19 @@
   Aggregate = "SUM";
   Name   = "BcusInUse";
   Desc   = "Number of 1core-4GB-4GB Basic Computing Units provisioned";
-  Value  = floor(min({totalslotcpus,totalslotmemory/1024/4,totalslotdisk/1024/1024/4}))-(PartitionableSlot=?=True * floor(min({cpus,Memory/1024/4,Disk/1024/1024/4})));
+  Value  = min({TotalInUseCpus,TotalInUseMemory/1024/4,TotalInUseDisk/1024/1024/4});
   Units  = "Basic Computing Units";
-  Requirements = PartitionableSlot=?=True || (SlotType=?="Static" && State=?="Claimed");
-  TargetType = "Machine";
+  Requirements = true;
+  TargetType = "Startd";
 ]
 [
   Aggregate = "SUM";
   Name   = "BcusNotInUse";
   Desc   = "Number of 1core-4GB-4GB Basic Computing Units not provisioned";
-  Value  = floor(min({cpus,Memory/1024/4,Disk/1024/1024/4}));
+  Value  = min({TotalCpus,TotalMemory/1024/4,TotalDisk/1024/1024/4}) - min({TotalInUseCpus,TotalInUseMemory/1024/4,TotalInUseDisk/1024/1024/4});
   Units  = "Basic Computing Units";
-  Requirements = PartitionableSlot=?=True || (SlotType=?="Static" && State=!="Claimed");
-  TargetType = "Machine";
+  Requirements = true;
+  TargetType = "Startd";
 ]
 [
   Aggregate = "SUM";
