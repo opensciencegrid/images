@@ -1,7 +1,7 @@
 
-# targets `linux/amd64/v2` - not sure how to map that to apptainer arch
-#- name: htc__almalinux__10
-#  docker_image: hub.opensciencegrid.org/htc/almalinux:10
+- name: htc__almalinux__10
+  arch: [aarch64, x86_64]
+  docker_image: hub.opensciencegrid.org/htc/almalinux:10
 
 - name: htc__debian__12
   docker_image: hub.opensciencegrid.org/htc/debian:12
