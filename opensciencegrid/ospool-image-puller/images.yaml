@@ -14,7 +14,7 @@
 
 - name: htc__rocky__8-cuda-11.0.3
   docker_image: hub.opensciencegrid.org/htc/rocky:8-cuda-11.0.3
-  
+
 - name: htc__rocky__9
   arch: [aarch64, x86_64]
   docker_image: hub.opensciencegrid.org/htc/rocky:9
@@ -28,3 +28,5 @@
 - name: htc__ubuntu__24.04
   docker_image: hub.opensciencegrid.org/htc/ubuntu:24.04
 
+- name: htc__minimal__0
+  docker_image: hub.opensciencegrid.org/htc/minimal:0
