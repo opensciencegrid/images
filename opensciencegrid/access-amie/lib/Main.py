@@ -53,7 +53,6 @@ log = logging.getLogger('accessamie')
 class Main():
     config = None
     amie = None
-    connect = None
     freshdesk = None
 
     def __init__(self):
@@ -93,23 +92,22 @@ class Main():
 
         subject = f'OSG/ACCESS - create PI account to activate your allocation TG-{grant_number}'
         body = f'''<p>Thank you for your interest in using OSPool resources via an ACCESS allocation.
-When you are ready to use your OSPool allocation, you (the allocation PI) need an account
-with the OSG Connect service.</p>
+When you are ready to use your OSPool allocation, you (the allocation PI) need an OSPool account.</p>
 
 <br>
 <p>
-<b>If you already have an OSG Connect user profile:</b><br>
-You can check by trying to ‘Log In’ via the osgconnect.net website using your institutional
-identity. If you are able to view your user Profile and are ready to charge OSPool usage against
-your ACCESS allocation, please send an email to support@osg-htc.org, to request that your
+<b>If you already have an OSPool account:</b><br>
+You can check by trying to ‘Log In’ to  https://registry.cilogon.org/registry/co_dashboards/dashboard/co:7
+using your institutional identity. If you are able to view your user Profile and are ready to charge
+OSPool usage against your ACCESS allocation, please send an email to support@osg-htc.org, to request that your
 user account be associated with the appropriate allocation charge code (e.g. TG-{grant_number}).
 </p>
 
 <br>
 <p>
-<b>If you do not yet have an OSG Connect user profile:</b><br>
-Please ‘Sign Up’ for an account at https://connect.osg-htc.org/signup using your institutional
-identity, and copy the below into the Comments field before submitting your Sign Up request.
+<b>If you do not yet have an OSPool account:</b><br>
+Please ‘Sign Up’ for an account at https://portal.osg-htc.org/application , and copy the below into
+the additional information field before submitting your request.
 </p>
 
 <br>
@@ -187,41 +185,41 @@ OSG User Facilitation
         project_id = packet.ProjectID
 
         # RACs are also used to reactivate accounts, so if the account already exists, just set it active
-        if user_person_id and len(user_person_id) > 1:
-            try:
-                user = self.connect.user(user_person_id)
+        #if user_person_id and len(user_person_id) > 1:
+        #    try:
+        #        user = self.connect.user(user_person_id)
+        #
+        #        # ensure emails match
+        #        if user_email == user['email']:
+        #            # construct a NotifyAccountCreate(NAC) packet.
+        #            nac = packet.reply_packet()
+        #            nac.UserRemoteSiteLogin = user['unix_name']  # local login for the User on the resource
+        #            nac.UserPersonID = user_person_id  # local person ID for the User
+        #            self.amie.send_packet(nac)
+        #            return
+        #    except Exception:
+        #        # unable to find/process the user - fall back to facilitators
+        #        pass
 
-                # ensure emails match
-                if user_email == user['email']:
-                    # construct a NotifyAccountCreate(NAC) packet.
-                    nac = packet.reply_packet()
-                    nac.UserRemoteSiteLogin = user['unix_name']  # local login for the User on the resource
-                    nac.UserPersonID = user_person_id  # local person ID for the User
-                    self.amie.send_packet(nac)
-                    return
-            except Exception:
-                # unable to find/process the user - fall back to facilitators
-                pass
-
-        subject = f'OSG/ACCESS - create an account on OSG Connect'
+        subject = f'OSG/ACCESS - create an OSPool account'
         body = f'''<p>Thank you for your application for an OSG account via an ACCESS allocation. When you
-are ready to use your allocation, you will need an account with the OSG Connect service.
+are ready to use your allocation, you will need an OSPool account.
 </p>
 
 <br>
 <p>
-<b>If you already have an OSG Connect user profile:</b><br>
-You can double check by trying to ‘Log In’ via the https://connect.osg-htc.org/ website using your institutional identity.
-If you are able to view your user Profile without needing to ‘Sign Up’ and are ready to charge OSPool usage
-against your ACCESS allocation, please send an email to support@osg-htc.org, to request that your
-user account be associated with the appropriate allocation charge code (e.g. {project_id}).
+<b>If you already have an OSPool account:</b><br>
+You can double check by trying to ‘Log In’ to https://registry.cilogon.org/registry/co_dashboards/dashboard/co:7
+using your institutional identity. If you are able to view your user Profile without needing to ‘Sign Up’ and
+are ready to charge OSPool usage against your ACCESS allocation, please send an email to support@osg-htc.org,
+to request that your user account be associated with the appropriate allocation charge code (e.g. {project_id}).
 </p>
 
 <br>
 <p>
-<b>If you do not yet have an OSG Connect user profile:</b><br>
-Please ‘Sign Up’ for an account at https://connect.osg-htc.org/signup using your institutional identity, and
-copy the below into the Comments field before submitting your ‘Sign Up’ request:
+<b>If you do not yet have an OSPool account:</b><br>
+Please ‘Sign Up’ for an account at https://portal.osg-htc.org/application , and copy the below into
+the additional information field before submitting your request.
 </p>
 
 <br>
@@ -309,12 +307,12 @@ OSG User Facilitation
         resource = packet.ResourceList[0]
         project_id = packet.ProjectID
 
-        log.info('Deactivating {}'.format(project_id))
-        try:
-            self.connect.remove_all_users(project_id)
-        except:
-            # project might not exist
-            pass
+        #log.info('Deactivating {}'.format(project_id))
+        #try:
+        #    self.connect.remove_all_users(project_id)
+        #except:
+        #    # project might not exist
+        #    pass
 
         nai = packet.reply_packet()
         self.amie.send_packet(nai)
