@@ -18,6 +18,7 @@ RUN yum --disablerepo=osg-upcoming -y install \
       glideinwms-vofrontend-standalone \
       jq \
       patch \
+      python3-m2crypto \
       python3-scitokens \
       rsyslog \
       rsyslog-gnutls \
