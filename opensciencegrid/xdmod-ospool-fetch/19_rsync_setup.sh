@@ -32,7 +32,7 @@ EOF
     cat >/etc/cron.d/rsync-ospool-logs.cron <<EOF
 SHELL=/bin/bash
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
-${RSYNC_CRON_MINUTE:-30} ${RSYNC_CRON_HOUR:-8} * * * root rsync -ave ssh ${RSYNC_SOURCE} ${RSYNC_TARGET} >>/var/log/rsync-ospool-logs.log 2>&1
+${RSYNC_CRON_MINUTE:-30} ${RSYNC_CRON_HOUR:-8} * * * root rsync -ave --delete ssh ${RSYNC_SOURCE} ${RSYNC_TARGET} >>/var/log/rsync-ospool-logs.log 2>&1
 EOF
 
     # Run the rsync now if RUN_RSYNC_NOW is defined
