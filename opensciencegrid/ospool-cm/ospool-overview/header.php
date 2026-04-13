@@ -6,6 +6,9 @@
     <meta http-equiv="refresh" content="120">
   </head>
   <body>
+    <div id="banner">
+      <b>Notice:</b> These pages are deprecated. Please use the <a href="https://display.ospool.osg-htc.org/">OSPool Display</a> and <a href="https://ospool-lifeguard.osg.chtc.io/">OSPool Lifeguard</a> instead.
+    </div>
     <div id="page">
       <div id="left_column">
         <p>

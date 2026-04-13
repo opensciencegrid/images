@@ -6,6 +6,12 @@ html, body {
     width: 100%;
 }
 
+#banner {
+￼    background: orange;
+￼    text-align: center;
+￼    padding: 10px;
+}
+
 #page {
     display: table;
     padding: 0px 0px 0px 0px;
