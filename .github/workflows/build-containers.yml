@@ -30,7 +30,7 @@ jobs:
 
       - id: image-list
         run: |
-          ORG_DIR=opensciencegrid
+          ORG_DIR_REGEX="^(opensciencegrid|osg-htc)/"
           # Get the list of files changed based on the type of event
           # kicking off the GHA:
           # 1. For the main branch, diff the previous state of main vs
@@ -54,7 +54,7 @@ jobs:
                images=$(git diff --name-only \
                                  "$BASE" \
                                  "$GITHUB_SHA" |
-                        egrep "^$ORG_DIR/" |
+                        grep -E "$ORG_DIR_REGEX" |
                         cut -d/ -f -2 |
                         sort |
                         uniq |
@@ -64,10 +64,11 @@ jobs:
           else
                # List all image root dirs. Example value:
                # "opensciencegrid/vo-frontend opensciencegrid/ospool-cm"
-               images=$(find $ORG_DIR -mindepth 1 \
-                                      -maxdepth 1 \
-                                      -type d \
-                                      -printf "$ORG_DIR/%P\n")
+               images=$(find -mindepth 2 \
+                             -maxdepth 2 \
+                             -type d \
+                             -printf "%P\n" |
+                        grep -E "${ORG_DIR_REGEX}")
           fi
 
             image_json=$(echo -n "${images:-dummy}" | jq -Rcs '.|split("\n") | map(select(. != ""))')
