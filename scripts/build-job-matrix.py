@@ -35,8 +35,6 @@ def main(image_dirs):
 
         config = load_config(build_config_path, default_config)
 
-        image_name = os.path.basename(image_dir)
-
         base_os_list = config['base_os']
         osg_series_list = config['osg_series']
         base_repo_list = config['base_repo']
@@ -56,7 +54,7 @@ def main(image_dirs):
         # 1. Simplicity: Using a single string to represent configurations is straightforward and easy to understand.
         # 2. Integration: A single string is easily passed to external tools and systems that manage builds.
             configuration_string = f"{base_os}-{osg_series}-{base_repo}-{config['standard_build']}-{config['repo_build']}"
-            include_list.append({"name": image_name, "config": configuration_string})
+            include_list.append({"name": image_dir, "config": configuration_string})
 
     sys.stdout.flush()
     json_output = json.dumps({"include": include_list}, indent=4)
