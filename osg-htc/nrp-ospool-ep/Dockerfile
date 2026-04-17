@@ -1,4 +1,11 @@
-FROM hub.opensciencegrid.org/osg-htc/ospool-ep:24-release
+ARG BASE_OSG_SERIES=25
+ARG BASE_YUM_REPO=release
+
+FROM hub.osg-htc.org/osg-htc/ospool-ep:${BASE_OSG_SERIES}-${BASE_YUM_REPO}
+
+# Previous args have gone out of scope
+ARG BASE_OSG_SERIES=25
+ARG BASE_YUM_REPO=release
 
 # Enable OpenCL
 # As suggested by https://github.com/WIPACrepo/pyglidein/blob/master/Dockerfile
