@@ -41,6 +41,12 @@ RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
     yum install -y filebeat && \
     rm -rf /var/cache/yum/*
 
+# Use a modified supervisord startup script that removes the cleanup
+# program from the supervisord config so `supervisorctl status`
+# doesn't exit nonzero.
+# TODO: Remove when https://github.com/opensciencegrid/docker-software-base/pull/105 is merged.
+COPY supervisord_startup.sh /usr/local/sbin/supervisord_startup.sh
+
 COPY start-frontier-squid.sh /usr/sbin/
 COPY squid-customize.sh /etc/squid/customize.sh
 COPY customize.d/* /etc/squid/customize.d/
