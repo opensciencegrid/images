@@ -22,8 +22,6 @@ def load_config(config_path, default_config=None):
 
 
 def main(image_dirs):
-    print("Image directories:", image_dirs)
-
     default_config = load_config(DEFAULT_CONFIG_PATH)
 
     include_list = []
