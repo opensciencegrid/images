@@ -17,9 +17,9 @@ rejects anything else.
 Example usage:
 
 ```
-docker run --detach --name rsync-ssh \
+docker run --detach --name rrsync \
     -v ~/authorized_keys:/root/.ssh/authorized_keys \
     -v ~/mydata:/data \
-    -p2222:22 rsync-ssh
+    -p2222:22 rrsync
 rsync -e "ssh -p 2222" myfile.txt root@localhost:/
 ```
