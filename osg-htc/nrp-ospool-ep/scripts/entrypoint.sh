@@ -10,7 +10,7 @@ export HOME=/pilot
 su osg -p -c "/usr/local/sbin/entrypoint.osg.sh $@" &
 myproc=$!
 
-# protection in case it does not terminate oby itself when condor dies or restarts
+# protection in case it does not terminate by itself when condor dies or restarts
 (/bin/check_master.sh 300 1; kill ${myproc}; echo "`date` Sending kill") &
 
 
