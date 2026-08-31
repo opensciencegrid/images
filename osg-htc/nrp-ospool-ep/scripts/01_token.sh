@@ -10,4 +10,5 @@ if [ ! -r "$token_file" ]; then
     exit 1
 fi
 
-export TOKEN=$(cat "$token_file")
+read TOKEN < "$token_file"
+export TOKEN
