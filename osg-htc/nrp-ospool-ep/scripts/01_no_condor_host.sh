@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# osgvo pilot does not like is CONDOR_HOST is set
+# osgvo pilot does not like it if CONDOR_HOST is set
 #
 
 export CONDOR_HOST=
