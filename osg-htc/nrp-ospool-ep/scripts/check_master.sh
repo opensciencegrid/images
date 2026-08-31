@@ -58,7 +58,7 @@ echo "=== tail /pilot/log/MasterLog"
 tail -100 /pilot/log/MasterLog
 
 echo "=== tail /pilot/log/StartLog"
-tail -100 /pilotl/log/StartLog
+tail -100 /pilot/log/StartLog
 
 echo "========= startd_history ============="
 cat /pilot/log/startd_history
