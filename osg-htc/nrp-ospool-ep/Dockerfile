@@ -59,11 +59,11 @@ COPY scripts/21_advertise_k8s_provisioner.sh  /etc/osg/image-init.d/21_advertise
 COPY scripts/22_set_requirements.sh /etc/osg/image-init.d/22_set_requirements.sh
 
 # keep default low, as we expect to be running in opportunistic mode
-env ACCEPT_JOBS_FOR_HOURS=24
+ENV ACCEPT_JOBS_FOR_HOURS=24
 
 # keep default idle time low, as we may over-provision certain kinds of resources
 # but others may be waiting
-env ACCEPT_IDLE_MINUTES=20
+ENV ACCEPT_IDLE_MINUTES=20
 
 #
 # In addition to osgvo-docker-pilot envs,
