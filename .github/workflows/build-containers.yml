@@ -210,7 +210,7 @@ jobs:
           osg_series: ${{ env.OSG_SERIES }}
           context: ${{ env.CONTEXT }}
           base_os: ${{ env.BASE_OS }}
-          registry_url: hub.opensciencegrid.org
+          registry_url: hub.osg-htc.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
         
