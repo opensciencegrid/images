@@ -1,5 +1,5 @@
 ARG BASE_YUM_REPO=release
-ARG BASE_OSG_SERIES=24
+ARG BASE_OSG_SERIES=25
 ARG BASE_OS=el9
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
@@ -53,5 +53,3 @@ ADD image-config.d/*    /etc/osg/image-config.d/
 ADD cron.d/*            /etc/cron.d/
 ADD supervisor.d/*      /etc/supervisord.d/
 ADD condor.d/*          /etc/condor/config.d/
-
-
