@@ -204,7 +204,7 @@ jobs:
           fi
           
       - name: Push to Harbor (${OSG_SERIES}-${BASE_REPO})
-        uses: opensciencegrid/push-container-action@main
+        uses: opensciencegrid/push-container-action@v0.9.0
         with:
           repo: ${{ env.BASE_REPO }}
           osg_series: ${{ env.OSG_SERIES }}
@@ -216,7 +216,7 @@ jobs:
         
       - name: Push to Docker Hub (${OSG_SERIES}-${BASE_REPO})
         if: startsWith(matrix.name, 'opensciencegrid/')
-        uses: opensciencegrid/push-container-action@main
+        uses: opensciencegrid/push-container-action@v0.9.0
         with:
           repo: ${{ env.BASE_REPO }}
           osg_series: ${{ env.OSG_SERIES }}
