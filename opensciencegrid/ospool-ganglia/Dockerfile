@@ -1,9 +1,10 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=23
+ARG BASE_OS=el9
+ARG BASE_OSG_SERIES=25
 ARG BASE_YUM_REPO=release
 
 # has to be el8 for a working ganglia/php combination
-FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
+FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
