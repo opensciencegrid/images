@@ -381,13 +381,13 @@ class ProvisionerK8S:
                   'restartPolicy': 'Never',
                   'tolerations' : tolerations,
                   'nodeSelector' : node_selectors,
-                  "affinity": {
+                  **({"affinity": {
                    "nodeAffinity": {
                     "requiredDuringSchedulingIgnoredDuringExecution": {
                      "nodeSelectorTerms": [ { "matchExpressions": node_affinity_selectors } ]
                     }
                    }
-                  },
+                  }} if node_affinity_selectors else {}),
                   'containers': [{
                      'name': 'htcondor',
                      'image': k8s_image,
