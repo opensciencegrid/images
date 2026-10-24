@@ -268,8 +268,8 @@ class ProvisionerK8S:
          if eph_storage<min_disk:
             eph_storage = min_disk
 
-      req['ephemeral-storage'] = '%ik'%eph_storage
-      lim['ephemeral-storage'] = '%ik'%eph_storage
+      req['ephemeral-storage'] = '%iKi'%eph_storage
+      lim['ephemeral-storage'] = '%iKi'%eph_storage
 
       for k in self.additional_resources.keys():
          req[k] = copy.copy(self.additional_resources[k])
