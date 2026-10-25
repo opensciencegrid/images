@@ -36,6 +36,10 @@ class ProvisionerClusteringAttributes:
       self.attributes['GPUs']=0
       self.attributes['GPUTypes']=''
       self.attributes['Labels']=''
+      # Pods are only created with these (ProvisionerK8S.submit). DiskVolumes, GPUTypes and
+      # Labels are not implemented there, so pods never carry them: jobs that request them
+      # are grouped as if they didn't, or their group would never see its own pods.
+      self.supported_job_attributes=('CPUs','Memory','Disk','GPUs')
 
    def expand_schedd_attr(self, attr):
       return "Request%s"%attr
@@ -178,7 +182,7 @@ class ProvisionerClustering:
          key_attrs={}
          for k in self.attrs.attributes.keys():
             jobk = self.attrs.expand_schedd_attr(k)
-            if jobk in job.keys():
+            if jobk in job.keys() and k in self.attrs.supported_job_attributes:
                val = job[jobk]
             else:
                val = self.attrs.attributes[k]

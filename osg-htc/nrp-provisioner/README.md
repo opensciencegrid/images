@@ -278,6 +278,7 @@ nothing is.
 | File | What it covers |
 |---|---|
 | `test_backoff.py` | the back-off state machine, trial pods, and the event loop skipping paused groups |
+| `test_clustering.py` | grouping with plain dictionaries: jobs that request GPU types, disk volumes or labels group with the pods made for them |
 | `test_htcondor_ads.py` | job/startd ad conversion (rounding, "too small" means unset, expressions, stringified values) and job grouping |
 | `test_schedd_query.py` | the schedd list (whitelist, identity filter, the location attributes `htcondor2.Schedd` needs), the query constraint (apptainer, namespace matching), failure handling, every config |
 | `test_k8s_submit.py` | Job submission through the **real** `kubernetes` client (only the network send is intercepted), for every config |
