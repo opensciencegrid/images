@@ -76,5 +76,12 @@ class TestSubmit(unittest.TestCase):
       self.assertEqual(res['requests']['cpu'], "3")
       self.assertNotIn('nvidia.com/gpu', res['requests'])
 
+   def test_preemption_does_not_fail_the_job(self):
+      body = self.submit(self.make_k8s('sample', 'no'), "1", "0")
+      self.assertEqual(body['spec']['backoffLimit'], 0)
+      self.assertEqual(body['spec']['template']['spec']['restartPolicy'], 'Never')  # required by podFailurePolicy
+      self.assertEqual(body['spec']['podFailurePolicy']['rules'],
+                       [{'action': 'Ignore', 'onPodConditions': [{'type': 'DisruptionTarget'}]}])
+
 if __name__ == '__main__':
    unittest.main()

@@ -372,6 +372,16 @@ class ProvisionerK8S:
             'parallelism': n_pods,
             'completions': n_pods,
             'backoffLimit': 0,
+            # With backoffLimit 0, one failed pod fails the whole Job and the Job controller
+            # deletes its other pods, claimed ones included. Preemption (common at the
+            # opportunistic priority) isn't a worker failure: ignore it, and the Job
+            # controller just replaces the preempted pod.
+            'podFailurePolicy': {
+               'rules': [{
+                  'action': 'Ignore',
+                  'onPodConditions': [{'type': 'DisruptionTarget'}]
+               }]
+            },
             'ttlSecondsAfterFinished': self.k8s_job_ttl,
             'template': {
                'metadata': {
