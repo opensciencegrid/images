@@ -1,4 +1,4 @@
-FROM grafana/grafana:main-ubuntu
+FROM grafana/grafana:latest-ubuntu
 
 USER root
 RUN apt-get update \
