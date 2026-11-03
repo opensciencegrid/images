@@ -204,18 +204,19 @@ jobs:
           fi
           
       - name: Push to Harbor (${OSG_SERIES}-${BASE_REPO})
-        uses: opensciencegrid/push-container-action@main
+        uses: opensciencegrid/push-container-action@v0.9.0
         with:
           repo: ${{ env.BASE_REPO }}
           osg_series: ${{ env.OSG_SERIES }}
           context: ${{ env.CONTEXT }}
           base_os: ${{ env.BASE_OS }}
-          registry_url: hub.opensciencegrid.org
+          registry_url: hub.osg-htc.org
           registry_user: ${{ secrets.OSG_HARBOR_ROBOT_USER }}
           registry_pass: ${{ secrets.OSG_HARBOR_ROBOT_PASSWORD }}
         
       - name: Push to Docker Hub (${OSG_SERIES}-${BASE_REPO})
-        uses: opensciencegrid/push-container-action@main
+        if: startsWith(matrix.name, 'opensciencegrid/')
+        uses: opensciencegrid/push-container-action@v0.9.0
         with:
           repo: ${{ env.BASE_REPO }}
           osg_series: ${{ env.OSG_SERIES }}
