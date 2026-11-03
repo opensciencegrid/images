@@ -1,5 +1,5 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=23
+ARG BASE_OSG_SERIES=25
 ARG BASE_YUM_REPO=testing
 # The following could be overriden to "upcoming" (for example) to 
 # install the application from upcoming instead of the base yum repo.

@@ -1,5 +1,5 @@
 ARG BASE_YUM_REPO=release
-ARG BASE_OSG_SERIES=23
+ARG BASE_OSG_SERIES=25
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el9-$BASE_YUM_REPO
 
@@ -25,4 +25,3 @@ COPY . .
 
 # run the app
 CMD ["python3", "/opt/access-amie/lib/Main.py"]
-

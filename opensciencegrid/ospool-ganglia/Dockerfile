@@ -1,5 +1,5 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=23
+ARG BASE_OSG_SERIES=25
 ARG BASE_YUM_REPO=release
 
 # has to be el8 for a working ganglia/php combination
@@ -73,5 +73,3 @@ COPY httpd-ganglia.conf /etc/httpd/conf.d/ganglia.conf
 COPY index.php /var/www/html/
 
 ADD ganglia-web-overrides /usr/share/ganglia
-
-
