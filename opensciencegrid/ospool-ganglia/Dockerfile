@@ -74,5 +74,3 @@ COPY httpd-ganglia.conf /etc/httpd/conf.d/ganglia.conf
 COPY index.php /var/www/html/
 
 ADD ganglia-web-overrides /usr/share/ganglia
-
-

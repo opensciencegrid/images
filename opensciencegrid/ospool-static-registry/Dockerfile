@@ -1,5 +1,5 @@
 # Specify the opensciencegrid/software-base image tag
-ARG BASE_OSG_SERIES=24
+ARG BASE_OSG_SERIES=25
 ARG BASE_YUM_REPO=release
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO AS builder
