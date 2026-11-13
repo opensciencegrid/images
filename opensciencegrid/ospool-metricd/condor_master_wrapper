@@ -1,0 +1,6 @@
+#!/bin/bash
+
+tail -F `condor_config_val LOG`/MasterLog 2>/dev/null &
+
+exec /usr/sbin/condor_master -f
+
