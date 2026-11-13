@@ -9,13 +9,7 @@ FROM opensciencegrid/software-base:$BASE_OSG_SERIES-$BASE_OS-$BASE_YUM_REPO
 # has to be redefined for use in the RUN stages
 ARG BASE_YUM_REPO
 
-# has to be redefined for use in the RUN stages
-ARG BASE_YUM_REPO
-
-RUN dnf -y distro-sync && \
-    dnf -y install \
-      epel-release && \
-    dnf -y install \
+RUN dnf -y install \
       bc \
       git \
       vim \
