@@ -7,7 +7,10 @@ ARG APP_YUM_REPO=$BASE_YUM_REPO
 
 FROM opensciencegrid/software-base:$BASE_OSG_SERIES-el8-$BASE_YUM_REPO
 
-LABEL maintainer OSG Software <help@opensciencegrid.org>
+# Previous instance has gone out of scope
+ARG APP_YUM_REPO
+
+LABEL maintainer="OSG Software <help@osg-htc.org>"
 
 # Create the squid user with a fixed GID/UID; do this first, so that the Squid
 # install does not do it.  Then do the installs.  All one instruction to reduce
